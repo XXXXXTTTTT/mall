@@ -1,0 +1,91 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  ADMIN_ROLE_CODES,
+  ORDER_STATUS,
+  STORAGE_KEYS,
+  authService,
+  cartService,
+  databaseService,
+  orderService,
+  permissionService,
+  productService,
+} from './mockService.js';
+
+beforeEach(() => {
+  localStorage.clear();
+  databaseService.initializeDatabase({ force: true });
+});
+
+describe('mockService database foundation', () => {
+  it('initializes products and repairs damaged JSON', async () => {
+    expect(productService.listProductsSync()).toHaveLength(30);
+    localStorage.setItem(STORAGE_KEYS.products, '{bad-json');
+
+    const result = await productService.listProducts();
+
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(30);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.products))).toHaveLength(30);
+  });
+
+  it('calculates selected cart totals', async () => {
+    await cartService.addItem({
+      userId: 'user-001',
+      productId: 'p-001',
+      skuId: 'p-001-standard',
+      quantity: 2,
+      selected: true,
+    });
+    await cartService.addItem({
+      userId: 'user-001',
+      productId: 'p-002',
+      skuId: 'p-002-standard',
+      quantity: 1,
+      selected: false,
+    });
+
+    const total = cartService.calculateSelectedTotal('user-001');
+
+    expect(total.totalQuantity).toBe(2);
+    expect(total.totalAmount).toBe(1398);
+  });
+
+  it('checks admin permissions by role', () => {
+    expect(permissionService.canAccess(ADMIN_ROLE_CODES.admin, 'products')).toBe(true);
+    expect(permissionService.canAccess(ADMIN_ROLE_CODES.operator, 'products')).toBe(false);
+    expect(permissionService.canAccess(ADMIN_ROLE_CODES.operator, 'orders')).toBe(true);
+  });
+
+  it('moves order from pending payment to paid', async () => {
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [
+        {
+          productId: 'p-001',
+          skuId: 'p-001-standard',
+          quantity: 1,
+        },
+      ],
+      addressId: 'addr-001',
+      remark: '请尽快发货',
+    });
+
+    expect(created.success).toBe(true);
+    expect(created.data.status).toBe(ORDER_STATUS.pendingPayment);
+
+    const paid = await orderService.payOrder(created.data.id);
+
+    expect(paid.success).toBe(true);
+    expect(paid.data.status).toBe(ORDER_STATUS.paid);
+  });
+
+  it('logs in frontend and admin users separately', async () => {
+    const userResult = await authService.loginUser('member', '123456');
+    const adminResult = await authService.loginAdmin('admin', 'admin123');
+
+    expect(userResult.success).toBe(true);
+    expect(adminResult.success).toBe(true);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.session)).username).toBe('member');
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.adminSession)).roleCode).toBe(ADMIN_ROLE_CODES.admin);
+  });
+});
