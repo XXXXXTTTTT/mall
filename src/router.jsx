@@ -1,53 +1,17 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-import App from './App';
-import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
-import DetailPage from "./pages/DetailPage";
-import CreateOrderPage from "./pages/CreateOrderPage";
-import PayPage from './pages/PayPage';
-import OrderListPage from "./pages/OrderListPage";
-import OrderDetailPage from "./pages/OrderDetailPage";
+function TemporaryHome() {
+  return (
+    <main className="min-h-screen p-6 text-slate-900">
+      <h1 className="text-3xl font-bold">云仓优品</h1>
+      <p className="mt-3 text-slate-600">商城系统基础路由已启动。</p>
+    </main>
+  );
+}
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    Component: App,
-    children: [
-      {
-        path: "/",
-        Component: HomePage,
-      },
-      {
-        path: "/login",
-        Component: LoginPage,
-      },
-      {
-        path: "/home",
-        Component: HomePage,
-      },
-      {
-        path: "/detail/:goodId",
-        Component: DetailPage,
-      },
-      {
-        path: "/createOrder/:goodId",
-        Component: CreateOrderPage,
-      },
-      {
-        path: "/pay/:orderId",
-        Component: PayPage,
-      },
-      {
-        path: "/orderList",
-        Component: OrderListPage,
-      },
-      {
-        path: "/orderDetail/:orderId",
-        Component: OrderDetailPage,
-      },
-    ]
-  }
+export const router = createBrowserRouter([
+  { path: '/', element: <Navigate to="/shop" replace /> },
+  { path: '/shop', element: <TemporaryHome /> },
 ]);
 
 export default router;
