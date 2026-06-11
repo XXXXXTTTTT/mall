@@ -8,6 +8,8 @@ import {
   favoriteService,
   orderService,
   productService,
+  roleService,
+  userService,
 } from './mockService.js';
 
 beforeEach(() => {
@@ -327,5 +329,10 @@ describe('C3 mock service chain', () => {
       success: false,
       message: '物流单号不能为空',
     });
+  });
+
+  it('reads roles and users through service APIs', () => {
+    expect(roleService.listRolesSync()).toHaveLength(2);
+    expect(userService.listUsersSync()).toHaveLength(1);
   });
 });

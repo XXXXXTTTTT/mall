@@ -23,7 +23,7 @@ export const STORAGE_KEYS = {
 };
 
 const SCHEMA_VERSION = '2026-06-11-foundation-v1';
-const NETWORK_DELAY_MS = 200;
+const NETWORK_DELAY_MS = 0;
 
 function ok(data, message = '') {
   return { success: true, data, message };
@@ -274,6 +274,18 @@ export const permissionService = {
     };
     const permission = routePermissionMap[pathname] || 'dashboard';
     return permissionService.canAccess(session.roleCode, permission);
+  },
+};
+
+export const roleService = {
+  listRolesSync() {
+    return readJson(STORAGE_KEYS.roles, initialDatabase.roles);
+  },
+};
+
+export const userService = {
+  listUsersSync() {
+    return readJson(STORAGE_KEYS.users, initialDatabase.users);
   },
 };
 
