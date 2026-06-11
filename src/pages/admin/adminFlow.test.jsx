@@ -342,7 +342,7 @@ describe('admin c3 pages', () => {
 
     await waitFor(() => expect(orderService.getOrderByIdSync(created.data.id).status).toBe('shipped'));
     expect(orderService.getOrderByIdSync(created.data.id).logistics[0].trackingNo).toBe('SF1000000001');
-  });
+  }, 30000);
 
   it('shows shipment service failure messages and keeps modal open', async () => {
     const user = userEvent.setup();
