@@ -1,4 +1,5 @@
-import { Drawer, Form, Input, InputNumber, Select, Space } from 'antd';
+import { useEffect } from 'react';
+import { Button, Drawer, Form, Input, InputNumber, Select, Space } from 'antd';
 
 const statusOptions = [
   { label: '上架', value: 'online' },
@@ -19,9 +20,35 @@ function buildInitialValues(product) {
   };
 }
 
+function buildSkuOptions({ id, mode, price, product, stock }) {
+  if (mode === 'create' || !product?.skuOptions?.length) {
+    return [
+      {
+        id: `${id || 'new'}-standard`,
+        name: '标准版',
+        stock,
+        price,
+      },
+    ];
+  }
+
+  return product.skuOptions.map((skuOption) => ({
+    ...skuOption,
+    stock,
+    price,
+  }));
+}
+
 export function ProductFormDrawer({ open, mode, product, categories, onClose, onSubmit }) {
   const [form] = Form.useForm();
   const title = mode === 'edit' ? '编辑商品' : '新增商品';
+
+  useEffect(() => {
+    form.resetFields();
+    if (open) {
+      form.setFieldsValue(buildInitialValues(product));
+    }
+  }, [form, mode, open, product]);
 
   function handleFinish(values) {
     const id = product?.id || values.id;
@@ -34,17 +61,13 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
       image: values.image,
       status: values.status,
       tags: values.tags || [],
-      skuOptions:
-        mode === 'create'
-          ? [
-              {
-                id: `${id || 'new'}-standard`,
-                name: '标准版',
-                stock: values.stock,
-                price: values.price,
-              },
-            ]
-          : product?.skuOptions || [],
+      skuOptions: buildSkuOptions({
+        id,
+        mode,
+        price: values.price,
+        product,
+        stock: values.stock,
+      }),
       description: values.description || '',
     };
 
@@ -56,12 +79,12 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
       destroyOnHidden
       extra={
         <Space>
-          <button className="ant-btn" onClick={onClose} type="button">
+          <Button onClick={onClose} type="default">
             取消
-          </button>
-          <button className="ant-btn ant-btn-primary" form="admin-product-form" type="submit">
+          </Button>
+          <Button form="admin-product-form" htmlType="submit" type="primary">
             保存商品
-          </button>
+          </Button>
         </Space>
       }
       getContainer={false}
