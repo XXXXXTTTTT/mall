@@ -37,6 +37,10 @@ describe('admin shared components', () => {
     await user.click(screen.getByRole('button', { name: '保存商品' }));
 
     expect(await screen.findByText('请输入商品名称')).toBeInTheDocument();
+    expect(screen.getAllByText('请选择商品分类').length).toBeGreaterThan(0);
+    expect(screen.getByText('请输入商品图片地址')).toBeInTheDocument();
+    expect(screen.getByText('价格不能小于 0')).toBeInTheDocument();
+    expect(screen.getByText('库存不能小于 0')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

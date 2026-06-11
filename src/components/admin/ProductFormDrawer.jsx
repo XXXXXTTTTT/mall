@@ -10,8 +10,8 @@ function buildInitialValues(product) {
     id: product?.id,
     name: product?.name,
     categoryId: product?.categoryId,
-    price: product?.price ?? 0,
-    stock: product?.stock ?? 0,
+    price: product?.price,
+    stock: product?.stock,
     image: product?.image,
     status: product?.status ?? 'online',
     tags: product?.tags || [],
@@ -92,10 +92,24 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
         <Form.Item label="商品图片" name="image" rules={[{ required: true, message: '请输入商品图片地址' }]}>
           <Input placeholder="请输入商品图片地址" />
         </Form.Item>
-        <Form.Item label="商品价格" name="price" rules={[{ type: 'number', min: 0, message: '价格不能小于 0' }]}>
+        <Form.Item
+          label="商品价格"
+          name="price"
+          rules={[
+            { required: true, message: '价格不能小于 0' },
+            { type: 'number', min: 0, message: '价格不能小于 0' },
+          ]}
+        >
           <InputNumber min={0} precision={2} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="商品库存" name="stock" rules={[{ type: 'number', min: 0, message: '库存不能小于 0' }]}>
+        <Form.Item
+          label="商品库存"
+          name="stock"
+          rules={[
+            { required: true, message: '库存不能小于 0' },
+            { type: 'number', min: 0, message: '库存不能小于 0' },
+          ]}
+        >
           <InputNumber min={0} precision={0} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="商品状态" name="status">
