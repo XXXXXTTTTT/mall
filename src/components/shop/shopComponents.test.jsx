@@ -37,6 +37,7 @@ describe('shop shared components', () => {
 
     const bar = screen.getByTestId('shop-navigation-bar');
     expect(bar).toHaveTextContent('订单详情');
+    expect(screen.queryByRole('heading', { level: 1, name: '订单详情' })).not.toBeInTheDocument();
     expect(bar.className).toContain('backdrop-blur-md');
     expect(bar.className).toContain('bg-white/85');
     expect(bar.className).toContain('border-b');

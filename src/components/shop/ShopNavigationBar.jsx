@@ -19,7 +19,7 @@ export function ShopNavigationBar({ title, onBack }) {
       >
         <ShopIcon name="chevronLeft" className="h-6 w-6" />
       </button>
-      <h1 className="max-w-[14rem] truncate text-base font-bold tracking-wide text-slate-950">{title}</h1>
+      <p className="max-w-[14rem] truncate text-base font-bold tracking-wide text-slate-950">{title}</p>
     </header>
   );
 }
