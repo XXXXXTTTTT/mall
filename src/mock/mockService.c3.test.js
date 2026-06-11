@@ -90,7 +90,7 @@ describe('C3 mock service chain', () => {
     });
   });
 
-  it('updates cart selection and clears selected items after order creation', async () => {
+  it('updates cart selection, preserves cart after order creation, and clears selected items explicitly', async () => {
     await cartService.addItem({
       userId: 'user-001',
       productId: 'p-001',
@@ -117,6 +117,21 @@ describe('C3 mock service chain', () => {
     expect(cartService.calculateSelectedTotal('user-001')).toEqual({
       totalQuantity: 3,
       totalAmount: 2097,
+    });
+
+    const createdOrder = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 3 }],
+      addressId: 'addr-001',
+      remark: '购物车副作用检查',
+    });
+
+    expect(createdOrder.success).toBe(true);
+    expect(cartService.listCartSync('user-001')).toHaveLength(2);
+    expect(cartService.listCartSync('user-001').find((item) => item.id === firstItem.id)).toMatchObject({
+      productId: 'p-001',
+      quantity: 3,
+      selected: true,
     });
 
     await cartService.clearSelectedItems('user-001');
@@ -188,6 +203,11 @@ describe('C3 mock service chain', () => {
     expect(paged.success).toBe(true);
     expect(paged.data.list.some((order) => order.id === created.data.id)).toBe(true);
 
+    const keywordPaged = await orderService.listPagedOrders({ page: 1, pageSize: 10, keyword: 'C3 演示订单' });
+
+    expect(keywordPaged.success).toBe(true);
+    expect(keywordPaged.data.list.map((order) => order.id)).toEqual([created.data.id]);
+
     const shipped = await orderService.shipOrder(created.data.id, {
       company: '顺丰速运',
       trackingNo: 'SF1000000001',
@@ -223,5 +243,89 @@ describe('C3 mock service chain', () => {
     expect(summary.data.paidOrderTotal).toBe(1);
     expect(summary.data.pendingShipmentTotal).toBe(1);
     expect(summary.data.recentOrders).toHaveLength(1);
+  });
+
+  it('returns required product and cart error messages', async () => {
+    await expect(productService.deleteProduct('p-missing')).resolves.toMatchObject({
+      success: false,
+      message: '商品不存在',
+    });
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-008', skuId: 'p-008-standard', quantity: 1 })).resolves.toMatchObject({
+      success: false,
+      message: '商品已下架',
+    });
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'sku-missing', quantity: 1 })).resolves.toMatchObject({
+      success: false,
+      message: '商品规格不存在',
+    });
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 0 })).resolves.toMatchObject({
+      success: false,
+      message: '商品数量必须大于 0',
+    });
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 94 })).resolves.toMatchObject({
+      success: false,
+      message: '库存不足',
+    });
+
+    await cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 90 });
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 4 })).resolves.toMatchObject({
+      success: false,
+      message: '库存不足',
+    });
+    expect(cartService.listCartSync('user-001')[0].quantity).toBe(90);
+
+    await expect(cartService.removeItem('cart-missing')).resolves.toMatchObject({
+      success: false,
+      message: '购物车商品不存在',
+    });
+  });
+
+  it('returns required address and order error messages', async () => {
+    await expect(addressService.updateAddress('addr-missing', { userId: 'user-001' })).resolves.toMatchObject({
+      success: false,
+      message: '收货地址不存在',
+    });
+    await expect(orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-missing',
+    })).resolves.toMatchObject({
+      success: false,
+      message: '收货地址不存在',
+    });
+    await expect(orderService.payOrder('order-missing')).resolves.toMatchObject({
+      success: false,
+      message: '订单不存在',
+    });
+    await expect(orderService.payOrder('ORD_202606010001')).resolves.toMatchObject({
+      success: false,
+      message: '订单状态不允许支付',
+    });
+    await expect(orderService.shipOrder('order-missing', { company: '顺丰速运', trackingNo: 'SF1000000001' })).resolves.toMatchObject({
+      success: false,
+      message: '订单不存在',
+    });
+
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-001',
+    });
+
+    await expect(orderService.shipOrder(created.data.id, { company: '顺丰速运', trackingNo: 'SF1000000001' })).resolves.toMatchObject({
+      success: false,
+      message: '订单状态不允许发货',
+    });
+
+    await orderService.payOrder(created.data.id);
+
+    await expect(orderService.shipOrder(created.data.id, { company: '', trackingNo: 'SF1000000001' })).resolves.toMatchObject({
+      success: false,
+      message: '物流公司不能为空',
+    });
+    await expect(orderService.shipOrder(created.data.id, { company: '顺丰速运', trackingNo: '' })).resolves.toMatchObject({
+      success: false,
+      message: '物流单号不能为空',
+    });
   });
 });

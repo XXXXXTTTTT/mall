@@ -293,6 +293,7 @@ export const cartService = {
     const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
     const existing = cart.find((item) => item.userId === userId && item.productId === productId && item.skuId === skuId);
     if (existing) {
+      if (sku.stock < existing.quantity + quantity) return delay(fail('库存不足'));
       existing.quantity += quantity;
       existing.selected = selected;
     } else {
@@ -516,9 +517,10 @@ export const orderService = {
     return delay(ok(order));
   },
   async listPagedOrders(params = {}) {
-    const { page = 1, pageSize = 10, status, userId } = params;
+    const { page = 1, pageSize = 10, status, userId, keyword } = params;
     const orders = orderService.listOrdersSync(userId).filter((order) => {
       if (status && order.status !== status) return false;
+      if (keyword && !order.id.includes(keyword) && !order.remark.includes(keyword)) return false;
       return true;
     });
     return delay(ok(paginate(orders, page, pageSize)));
