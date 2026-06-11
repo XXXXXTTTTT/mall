@@ -95,7 +95,7 @@ export function Detail() {
             />
           </div>
           {!isOnline ? (
-            <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-slate-950/88 px-4 py-3 text-center text-sm font-semibold text-white">
+            <div className="absolute inset-x-4 top-24 rounded-2xl bg-slate-950/88 px-4 py-3 text-center text-sm font-semibold text-white">
               商品已下架
             </div>
           ) : null}
