@@ -149,6 +149,7 @@ describe('shop transaction flow pages', () => {
     await user.click(screen.getByRole('button', { name: '保存地址' }));
 
     await waitFor(() => expect(screen.getByText('新收货人')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: '设置默认 新收货人' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '编辑地址 新收货人' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '删除 新收货人' })).toBeInTheDocument();
 
