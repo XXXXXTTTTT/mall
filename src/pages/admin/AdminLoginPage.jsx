@@ -13,7 +13,8 @@ export function AdminLoginPage() {
   }
 
   async function handleQuickLogin(username, password) {
-    await authService.loginAdmin(username, password);
+    const result = await authService.loginAdmin(username, password);
+    if (result.success) navigate(redirectTo, { replace: true });
   }
 
   return (

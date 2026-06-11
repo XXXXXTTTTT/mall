@@ -4,28 +4,11 @@ import { OrderShipModal } from '../../components/admin/OrderShipModal.jsx';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { ORDER_STATUS, orderService } from '../../mock/mockService.js';
 
-function buildOrderPageData({ page, pageSize, status, keyword }) {
-  const orders = orderService.listOrdersSync().filter((order) => {
-    if (status && order.status !== status) return false;
-    if (keyword && !order.id.includes(keyword) && !order.remark.includes(keyword)) return false;
-    return true;
-  });
-
-  const start = (page - 1) * pageSize;
-  return {
-    list: orders.slice(start, start + pageSize),
-    total: orders.length,
-    page,
-    pageSize,
-  };
-}
-
 export function AdminOrderPage() {
-  const initialPageData = buildOrderPageData({ page: 1, pageSize: 10, status: undefined, keyword: '' });
-  const [orders, setOrders] = useState(initialPageData.list);
-  const [page, setPage] = useState(initialPageData.page);
-  const [pageSize, setPageSize] = useState(initialPageData.pageSize);
-  const [total, setTotal] = useState(initialPageData.total);
+  const [orders, setOrders] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
   const [status, setStatus] = useState(undefined);
   const [keyword, setKeyword] = useState('');
   const [detailOrderId, setDetailOrderId] = useState(null);
