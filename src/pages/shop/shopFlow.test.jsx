@@ -65,7 +65,7 @@ describe('shop transaction flow pages', () => {
     await user.click(screen.getByRole('button', { name: '提交订单' }));
 
     await waitFor(() => expect(screen.getByText('模拟支付')).toBeInTheDocument());
-    expect(cartService.listCartSync('user-001')).toHaveLength(1);
+    expect(cartService.listCartSync('user-001')).toHaveLength(0);
     await user.click(screen.getByRole('button', { name: '确认已支付' }));
 
     await waitFor(() => expect(screen.getByText('支付成功')).toBeInTheDocument());

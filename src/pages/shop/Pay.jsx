@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ORDER_STATUS, authService, cartService, orderService } from '../../mock/mockService.js';
+import { ORDER_STATUS, orderService } from '../../mock/mockService.js';
 
 const PAID_STATUS_MESSAGES = {
   [ORDER_STATUS.paid]: '订单已支付，无需重复支付',
@@ -31,10 +31,6 @@ export function Pay() {
     if (!result.success) {
       setMessage(result.message);
       return;
-    }
-    const user = authService.getUserSession();
-    if (user) {
-      await cartService.clearSelectedItems(user.id);
     }
     navigate(`/shop/pay-success/${orderId}`);
   }
