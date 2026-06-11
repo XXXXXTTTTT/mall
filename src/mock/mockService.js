@@ -139,12 +139,13 @@ export const productService = {
     if (validationResult) return delay(validationResult);
 
     const now = new Date().toISOString();
+    const productId = `p-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const product = {
       ...productPayload,
-      id: `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      id: productId,
       sales: productPayload.sales || 0,
       tags: productPayload.tags || [],
-      skuOptions: productPayload.skuOptions || [],
+      skuOptions: normalizeCreatedSkuOptions(productId, productPayload.skuOptions || []),
       description: productPayload.description || '',
       createdAt: now,
       updatedAt: now,
@@ -196,6 +197,13 @@ export const productService = {
     return delay(ok(paginate(productsResult.data, page, pageSize)));
   },
 };
+
+function normalizeCreatedSkuOptions(productId, skuOptions) {
+  return skuOptions.map((skuOption) => ({
+    ...skuOption,
+    id: skuOption.id === 'new-standard' ? `${productId}-standard` : skuOption.id,
+  }));
+}
 
 function validateProductPayload(product) {
   if (!product.name?.trim()) return fail('商品名称不能为空');

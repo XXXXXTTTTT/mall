@@ -121,6 +121,54 @@ describe('admin c3 pages', () => {
     expect(screen.getByText('Outlet 子元素')).toBeInTheDocument();
   });
 
+  it('filters admin layout navigation by operator permissions', async () => {
+    await authService.loginAdmin('operator', 'op123456');
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/admin',
+          element: <AdminLayout />,
+          children: [{ path: 'orders', element: <div>运营订单页</div> }],
+        },
+      ],
+      { initialEntries: ['/admin/orders'] },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText('数据看板')).toBeInTheDocument();
+    expect(screen.getByText('订单管理')).toBeInTheDocument();
+    expect(screen.getByText('账号设置')).toBeInTheDocument();
+    expect(screen.queryByText('商品管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('分类管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('权限角色')).not.toBeInTheDocument();
+    expect(screen.queryByText('用户管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('操作日志')).not.toBeInTheDocument();
+    expect(screen.getByText('运营订单页')).toBeInTheDocument();
+  });
+
+  it('logs out admin account and returns to login', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('operator', 'op123456');
+    const router = createMemoryRouter(
+      [
+        { path: '/admin/account', element: <AdminAccountPage /> },
+        { path: '/admin/login', element: <div>后台登录已显示</div> },
+      ],
+      { initialEntries: ['/admin/account'] },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText('账号设置')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '退出登录' }));
+
+    await waitFor(() => expect(authService.getAdminSession()).toBeNull());
+    await waitFor(() => expect(router.state.location.pathname).toBe('/admin/login'));
+    expect(router.state.historyAction).toBe('REPLACE');
+    expect(screen.getByText('后台登录已显示')).toBeInTheDocument();
+  });
+
   it('creates edits toggles and deletes a product', async () => {
     const user = userEvent.setup();
     await authService.loginAdmin('admin', 'admin123');
@@ -160,13 +208,30 @@ describe('admin c3 pages', () => {
 
     await waitFor(() => expect(productService.getProductByIdSync(created.id).name).toBe('后台 C3 商品已编辑'));
     expect(productService.getProductByIdSync(created.id).price).toBe(299);
+    await waitFor(() => expect(screen.getByText('后台 C3 商品已编辑')).toBeInTheDocument());
 
-    await user.click(screen.getByRole('button', { name: `下架 ${created.name}` }));
+    await user.click(screen.getByRole('button', { name: '下架 后台 C3 商品已编辑' }));
     await waitFor(() => expect(productService.getProductByIdSync(created.id).status).toBe('offline'));
 
-    await user.click(screen.getByRole('button', { name: `删除 ${created.name}` }));
+    await user.click(screen.getByRole('button', { name: '删除 后台 C3 商品已编辑' }));
     await waitFor(() => expect(productService.getProductByIdSync(created.id)).toBeNull());
   }, 30000);
+
+  it('shows product service failure messages', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    const product = productService.getProductByIdSync('p-001');
+    vi.spyOn(productService, 'deleteProduct').mockResolvedValue({
+      success: false,
+      data: null,
+      message: '商品不存在',
+    });
+
+    renderAdmin(['/admin/products'], <AdminProductPage />);
+
+    await user.click(await screen.findByRole('button', { name: `删除 ${product.name}` }));
+    expect(await screen.findByText('商品不存在')).toBeInTheDocument();
+  });
 
   it('loads order page data through paged order service on first render', async () => {
     await authService.loginAdmin('admin', 'admin123');
@@ -225,6 +290,33 @@ describe('admin c3 pages', () => {
 
     await waitFor(() => expect(orderService.getOrderByIdSync(created.data.id).status).toBe('shipped'));
     expect(orderService.getOrderByIdSync(created.data.id).logistics[0].trackingNo).toBe('SF1000000001');
+  });
+
+  it('shows shipment service failure messages and keeps modal open', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-001',
+      remark: '后台发货失败测试',
+    });
+    await orderService.payOrder(created.data.id);
+    vi.spyOn(orderService, 'shipOrder').mockResolvedValue({
+      success: false,
+      data: null,
+      message: '物流公司不能为空',
+    });
+
+    renderAdmin(['/admin/orders'], <AdminOrderPage />);
+
+    await user.click(await screen.findByRole('button', { name: `发货 ${created.data.id}` }));
+    await user.type(screen.getByLabelText('物流公司'), '顺丰速运');
+    await user.type(screen.getByLabelText('物流单号'), 'SF1000000001');
+    await user.click(screen.getByRole('button', { name: '确认发货' }));
+
+    expect(await screen.findByText('物流公司不能为空')).toBeInTheDocument();
+    expect(screen.getByText(`订单发货 ${created.data.id}`)).toBeInTheDocument();
   });
 
   it('renders account, no permission, and read-only admin pages', async () => {

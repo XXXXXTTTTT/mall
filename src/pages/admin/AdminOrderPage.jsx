@@ -1,4 +1,4 @@
-import { Button, Card, Descriptions, Drawer, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Descriptions, Drawer, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { OrderShipModal } from '../../components/admin/OrderShipModal.jsx';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
@@ -13,6 +13,7 @@ export function AdminOrderPage() {
   const [keyword, setKeyword] = useState('');
   const [detailOrderId, setDetailOrderId] = useState(null);
   const [shipOrderId, setShipOrderId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   async function loadOrders(nextPage = page, nextPageSize = pageSize) {
     const result = await orderService.listPagedOrders({
@@ -38,9 +39,12 @@ export function AdminOrderPage() {
   async function handleShip(payload) {
     const result = await orderService.shipOrder(shipOrderId, payload);
     if (result.success) {
+      setErrorMessage('');
       setShipOrderId(null);
       await loadOrders(page, pageSize);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   const columns = [
@@ -85,6 +89,7 @@ export function AdminOrderPage() {
         title="订单管理"
         description="查看订单状态、核对订单详情并完成已支付订单发货。"
       />
+      {errorMessage ? <Alert message={errorMessage} showIcon type="error" /> : null}
       <Space wrap>
         <Select
           allowClear

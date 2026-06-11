@@ -92,6 +92,33 @@ describe('C3 mock service chain', () => {
     });
   });
 
+  it('normalizes generated product sku ids after product creation', async () => {
+    const first = await productService.createProduct({
+      name: '后台新增商品一号',
+      categoryId: 'cat-digital-office',
+      price: 128,
+      stock: 8,
+      image: 'https://dummyimage.com/640x480/e8eef3/203244&text=sku-1',
+      status: 'online',
+      skuOptions: [{ id: 'new-standard', name: '标准版', stock: 8, price: 128 }],
+    });
+    const second = await productService.createProduct({
+      name: '后台新增商品二号',
+      categoryId: 'cat-digital-office',
+      price: 168,
+      stock: 6,
+      image: 'https://dummyimage.com/640x480/e8eef3/203244&text=sku-2',
+      status: 'online',
+      skuOptions: [{ id: 'new-standard', name: '标准版', stock: 6, price: 168 }],
+    });
+
+    expect(first.success).toBe(true);
+    expect(second.success).toBe(true);
+    expect(first.data.skuOptions[0].id).toBe(`${first.data.id}-standard`);
+    expect(second.data.skuOptions[0].id).toBe(`${second.data.id}-standard`);
+    expect(first.data.skuOptions[0].id).not.toBe(second.data.skuOptions[0].id);
+  });
+
   it('updates cart selection, preserves cart after order creation, and clears selected items explicitly', async () => {
     await cartService.addItem({
       userId: 'user-001',

@@ -1,9 +1,16 @@
 import { Button, Card, Descriptions, Space, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { authService } from '../../mock/mockService.js';
 
 export function AdminAccountPage() {
+  const navigate = useNavigate();
   const session = authService.getAdminSession();
+
+  function handleLogout() {
+    authService.logoutAdmin();
+    navigate('/admin/login', { replace: true });
+  }
 
   return (
     <Space direction="vertical" size={20} style={{ display: 'flex' }}>
@@ -17,7 +24,7 @@ export function AdminAccountPage() {
         <Typography.Paragraph style={{ marginBottom: 0, marginTop: 16 }}>
           当前账号：{session?.name || '未登录'}
         </Typography.Paragraph>
-        <Button onClick={() => authService.logoutAdmin()} style={{ marginTop: 16 }}>
+        <Button onClick={handleLogout} style={{ marginTop: 16 }}>
           退出登录
         </Button>
       </Card>

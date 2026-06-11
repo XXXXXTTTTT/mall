@@ -1,6 +1,6 @@
 import { Layout, Menu, Space, Tag, Typography } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { authService } from '../../mock/mockService.js';
+import { authService, permissionService } from '../../mock/mockService.js';
 
 const { Header, Sider, Content } = Layout;
 
@@ -15,19 +15,21 @@ const menuPaths = [
   '/admin/logs',
 ];
 
+const menuConfig = [
+  { key: '/admin/dashboard', permission: 'dashboard', label: <Link to="/admin/dashboard">数据看板</Link> },
+  { key: '/admin/products', permission: 'products', label: <Link to="/admin/products">商品管理</Link> },
+  { key: '/admin/categories', permission: 'categories', label: <Link to="/admin/categories">分类管理</Link> },
+  { key: '/admin/orders', permission: 'orders', label: <Link to="/admin/orders">订单管理</Link> },
+  { key: '/admin/roles', permission: 'roles', label: <Link to="/admin/roles">权限角色</Link> },
+  { key: '/admin/users', permission: 'users', label: <Link to="/admin/users">用户管理</Link> },
+  { key: '/admin/account', permission: 'account', label: <Link to="/admin/account">账号设置</Link> },
+  { key: '/admin/logs', permission: 'logs', label: <Link to="/admin/logs">操作日志</Link> },
+];
+
 export function AdminLayout() {
   const location = useLocation();
   const session = authService.getAdminSession();
-  const menuItems = [
-    { key: '/admin/dashboard', label: <Link to="/admin/dashboard">数据看板</Link> },
-    { key: '/admin/products', label: <Link to="/admin/products">商品管理</Link> },
-    { key: '/admin/categories', label: <Link to="/admin/categories">分类管理</Link> },
-    { key: '/admin/orders', label: <Link to="/admin/orders">订单管理</Link> },
-    { key: '/admin/roles', label: <Link to="/admin/roles">权限角色</Link> },
-    { key: '/admin/users', label: <Link to="/admin/users">用户管理</Link> },
-    { key: '/admin/account', label: <Link to="/admin/account">账号设置</Link> },
-    { key: '/admin/logs', label: <Link to="/admin/logs">操作日志</Link> },
-  ];
+  const menuItems = menuConfig.filter((item) => !session || permissionService.canAccess(session.roleCode, item.permission));
   const selectedKey = menuPaths.find((path) => location.pathname.startsWith(path)) || '/admin/dashboard';
 
   return (

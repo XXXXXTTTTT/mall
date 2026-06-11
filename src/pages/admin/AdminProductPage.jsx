@@ -1,4 +1,4 @@
-import { Button, Image, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Image, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { ProductFormDrawer } from '../../components/admin/ProductFormDrawer.jsx';
@@ -23,6 +23,7 @@ export function AdminProductPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState('create');
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const categories = categoryService.listCategoriesSync();
   const categoryMap = useMemo(() => buildCategoryMap(categories), [categories]);
 
@@ -64,24 +65,33 @@ export function AdminProductPage() {
         ? await productService.updateProduct(payload)
         : await productService.createProduct(payload);
     if (result.success) {
+      setErrorMessage('');
       setDrawerOpen(false);
       setCurrentProduct(null);
       await loadProducts(1, pageSize);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   async function handleDelete(productId) {
     const result = await productService.deleteProduct(productId);
     if (result.success) {
+      setErrorMessage('');
       await loadProducts(1, pageSize);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   async function handleToggle(product, nextStatus) {
     const result = await productService.toggleProductStatus(product.id, nextStatus);
     if (result.success) {
+      setErrorMessage('');
       await loadProducts(page, pageSize);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   const columns = [
@@ -159,6 +169,7 @@ export function AdminProductPage() {
           </Button>
         }
       />
+      {errorMessage ? <Alert message={errorMessage} showIcon type="error" /> : null}
       <Space wrap>
         <Input
           onChange={(event) => setKeyword(event.target.value)}
