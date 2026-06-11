@@ -56,11 +56,18 @@ describe('shop transaction flow pages', () => {
 
     renderRoutes(['/shop/cart']);
 
+    const checkoutBar = await screen.findByTestId('cart-checkout-bar');
+    expect(checkoutBar.className).toContain('backdrop-blur-md');
+    expect(checkoutBar.className).toContain('bg-white/80');
+    expect(screen.getByRole('button', { name: /选择 曜石无线降噪耳机/ }).className).toContain('h-11');
+    expect(screen.getByRole('button', { name: /删除 曜石无线降噪耳机/ }).className).toContain('h-11');
     expect(await screen.findByText('购物车')).toBeInTheDocument();
     expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: '去结算' }));
 
     await waitFor(() => expect(screen.getByText('确认订单')).toBeInTheDocument());
+    expect(screen.getByTestId('create-order-submit-bar').className).toContain('backdrop-blur-md');
+    expect(screen.getByText('默认地址')).toBeInTheDocument();
     await user.type(screen.getByLabelText('订单备注'), 'C3 页面测试');
     await user.click(screen.getByRole('button', { name: '提交订单' }));
 
