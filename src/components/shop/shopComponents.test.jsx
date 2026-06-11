@@ -3,9 +3,14 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { EmptyState } from './EmptyState.jsx';
+import { IconButton } from './IconButton.jsx';
+import { MetricTile } from './MetricTile.jsx';
 import { ProductCard } from './ProductCard.jsx';
+import { ProductTag } from './ProductTag.jsx';
 import { QuantityStepper } from './QuantityStepper.jsx';
 import { SectionHeader } from './SectionHeader.jsx';
+import { SettingRow } from './SettingRow.jsx';
+import { ShopIcon } from './ShopIcon.jsx';
 import { StatusTag } from './StatusTag.jsx';
 
 const product = {
@@ -19,6 +24,46 @@ const product = {
 };
 
 describe('shop shared components', () => {
+  it('renders local svg icons without adding icon dependencies', () => {
+    const { container } = render(<ShopIcon name="search" className="h-5 w-5" />);
+
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('keeps icon buttons at a 44px touch target', () => {
+    render(<IconButton ariaLabel="删除" icon="trash" onClick={() => {}} />);
+
+    const button = screen.getByRole('button', { name: '删除' });
+    expect(button.className).toContain('h-11');
+    expect(button.className).toContain('w-11');
+  });
+
+  it('renders settings rows with icon and chevron link', () => {
+    render(
+      <MemoryRouter>
+        <SettingRow to="/shop/orders" icon="receipt" title="我的订单" description="查看订单进度" />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /我的订单/ })).toHaveAttribute('href', '/shop/orders');
+    expect(screen.getByText('查看订单进度')).toBeInTheDocument();
+  });
+
+  it('renders metric tiles and product tags with icons', () => {
+    const { container } = render(
+      <>
+        <MetricTile icon="coupon" label="优惠券" value="3" />
+        <ProductTag tag="热门" />
+      </>,
+    );
+
+    expect(screen.getByText('优惠券')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('热门')).toBeInTheDocument();
+    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(2);
+  });
+
   it('renders product card with detail link and product facts', () => {
     render(
       <MemoryRouter>
@@ -61,8 +106,11 @@ describe('shop shared components', () => {
     await user.click(screen.getByRole('button', { name: '减少数量' }));
     expect(onChange).not.toHaveBeenCalledWith(0);
 
+    expect(screen.getByRole('button', { name: '减少数量' }).className).toContain('h-11');
+
     await user.click(screen.getByRole('button', { name: '增加数量' }));
     expect(onChange).toHaveBeenCalledWith(2);
+    expect(screen.getByRole('button', { name: '增加数量' }).className).toContain('h-11');
   });
 
   it('clamps displayed quantity and emitted changes to minimum', async () => {
@@ -75,8 +123,11 @@ describe('shop shared components', () => {
     await user.click(screen.getByRole('button', { name: '减少数量' }));
     expect(onChange).not.toHaveBeenCalledWith(0);
 
+    expect(screen.getByRole('button', { name: '减少数量' }).className).toContain('h-11');
+
     await user.click(screen.getByRole('button', { name: '增加数量' }));
     expect(onChange).toHaveBeenCalledWith(2);
+    expect(screen.getByRole('button', { name: '增加数量' }).className).toContain('h-11');
   });
 
   it('renders section header action link', () => {

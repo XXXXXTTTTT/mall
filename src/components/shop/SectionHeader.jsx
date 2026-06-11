@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ShopIcon } from './ShopIcon.jsx';
 
 export function SectionHeader({ eyebrow, title, actionText, actionTo }) {
   return (
@@ -12,9 +13,10 @@ export function SectionHeader({ eyebrow, title, actionText, actionTo }) {
       {actionText && actionTo ? (
         <Link
           to={actionTo}
-          className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-teal-500/40 hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-teal-500/40 hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
         >
           {actionText}
+          <ShopIcon name="chevronRight" className="h-4 w-4" />
         </Link>
       ) : null}
     </div>
