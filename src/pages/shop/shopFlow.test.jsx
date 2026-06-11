@@ -59,8 +59,10 @@ describe('shop transaction flow pages', () => {
     const checkoutBar = await screen.findByTestId('cart-checkout-bar');
     expect(checkoutBar.className).toContain('backdrop-blur-md');
     expect(checkoutBar.className).toContain('bg-white/80');
-    expect(screen.getByRole('button', { name: /选择 曜石无线降噪耳机/ }).className).toContain('h-11');
-    expect(screen.getByRole('button', { name: /删除 曜石无线降噪耳机/ }).className).toContain('h-11');
+    const itemSelectButton = screen.getByRole('button', { name: /选择 曜石无线降噪耳机 标准版/ });
+    expect(itemSelectButton.className).toContain('h-11');
+    expect(itemSelectButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /删除 曜石无线降噪耳机 标准版/ }).className).toContain('h-11');
     expect(await screen.findByText('购物车')).toBeInTheDocument();
     expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: '去结算' }));
@@ -79,6 +81,27 @@ describe('shop transaction flow pages', () => {
     const paidOrder = orderService.listOrdersSync('user-001')[0];
     expect(paidOrder.status).toBe('paid');
     expect(cartService.listCartSync('user-001')).toHaveLength(0);
+  });
+
+  it('toggles a selected cart item from the item selection button', async () => {
+    const user = userEvent.setup();
+    await cartService.addItem({
+      userId: 'user-001',
+      productId: 'p-001',
+      skuId: 'p-001-standard',
+      quantity: 1,
+      selected: true,
+    });
+
+    renderRoutes(['/shop/cart']);
+
+    const itemSelectButton = await screen.findByRole('button', { name: /选择 曜石无线降噪耳机 标准版/ });
+    expect(screen.getAllByText('已选 1 件')).not.toHaveLength(0);
+
+    await user.click(itemSelectButton);
+
+    await waitFor(() => expect(itemSelectButton).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.getAllByText('已选 0 件')).not.toHaveLength(0);
   });
 
   it('blocks paid order from showing payable state', async () => {

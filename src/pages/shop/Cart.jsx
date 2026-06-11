@@ -70,6 +70,7 @@ export function Cart() {
         <section className="mt-6 space-y-4">
           <button
             type="button"
+            aria-pressed={allSelected}
             onClick={() => toggleAll(!allSelected)}
             className="flex min-h-14 w-full items-center gap-3 rounded-3xl border border-white/75 bg-[#fbfcfa] px-4 py-2 text-left text-sm font-semibold shadow-sm transition hover:border-teal-100 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
           >
@@ -92,7 +93,8 @@ export function Cart() {
               <div className="flex gap-4">
                 <button
                   type="button"
-                  aria-label={`选择 ${item.product?.name || item.productId}`}
+                  aria-label={`选择 ${item.product?.name || item.productId} ${item.sku?.name || item.skuId}`}
+                  aria-pressed={item.selected}
                   onClick={() => toggleSelected(item.id, !item.selected)}
                   className={`mt-7 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                     item.selected ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-400'
@@ -111,7 +113,11 @@ export function Cart() {
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <QuantityStepper value={item.quantity} onChange={(quantity) => updateQuantity(item.id, quantity)} />
-                <IconButton ariaLabel={`删除 ${item.product?.name || item.productId}`} icon="trash" onClick={() => removeItem(item.id)} />
+                <IconButton
+                  ariaLabel={`删除 ${item.product?.name || item.productId} ${item.sku?.name || item.skuId}`}
+                  icon="trash"
+                  onClick={() => removeItem(item.id)}
+                />
               </div>
             </article>
           ))}
