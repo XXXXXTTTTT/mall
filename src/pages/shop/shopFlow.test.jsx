@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
-import { authService, cartService, databaseService, orderService } from '../../mock/mockService.js';
+import { addressService, authService, cartService, databaseService, orderService } from '../../mock/mockService.js';
 import { AddressPage } from './AddressPage.jsx';
 import { Cart } from './Cart.jsx';
 import { CreateOrder } from './CreateOrder.jsx';
@@ -125,6 +125,15 @@ describe('shop transaction flow pages', () => {
 
   it('guards address actions when no user session exists', async () => {
     const user = userEvent.setup();
+    await addressService.createAddress({
+      userId: 'user-001',
+      receiver: '备用收货人',
+      phone: '13900000001',
+      province: '上海市',
+      city: '上海市',
+      detail: '备用路 2 号',
+      isDefault: false,
+    });
     authService.logoutUser();
 
     renderRoutes(['/shop/address']);
@@ -135,6 +144,9 @@ describe('shop transaction flow pages', () => {
 
     expect(await screen.findByText('请先登录后管理收货地址')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '去登录' })).toHaveAttribute('href', '/shop/login');
+
+    expect(screen.queryByRole('button', { name: '设置默认' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '删除' })).not.toBeInTheDocument();
   });
 
   it('renders user center entries and order list filter', async () => {
