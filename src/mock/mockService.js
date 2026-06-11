@@ -23,7 +23,7 @@ export const STORAGE_KEYS = {
 };
 
 const SCHEMA_VERSION = '2026-06-11-foundation-v1';
-const NETWORK_DELAY_MS = 0;
+const NETWORK_DELAY_MS = 200;
 
 function ok(data, message = '') {
   return { success: true, data, message };

@@ -44,10 +44,9 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
   const title = mode === 'edit' ? '编辑商品' : '新增商品';
 
   useEffect(() => {
+    if (!open) return;
     form.resetFields();
-    if (open) {
-      form.setFieldsValue(buildInitialValues(product));
-    }
+    form.setFieldsValue(buildInitialValues(product));
   }, [form, mode, open, product]);
 
   function handleFinish(values) {
