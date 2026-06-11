@@ -1,8 +1,16 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider, useAppContext } from './AppContext.jsx';
 import { databaseService } from '../mock/mockService.js';
+
+const waitForMockServiceDelay = async () => {
+  await act(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 250);
+    });
+  });
+};
 
 function Probe() {
   const { state, loginUser, logoutUser } = useAppContext();
@@ -53,6 +61,8 @@ describe('AppContext', () => {
       toggleFavorite,
       refreshFavorites,
       refreshOrders,
+      refreshAddresses,
+      logoutUser,
     } = useAppContext();
     return (
       <div>
@@ -60,8 +70,12 @@ describe('AppContext', () => {
         <p data-testid="cart-count">{state.cartItems.length}</p>
         <p data-testid="favorite-count">{state.favorites.length}</p>
         <p data-testid="order-count">{state.orders.length}</p>
+        <p data-testid="address-count">{state.addresses.length}</p>
         <button type="button" onClick={() => loginUser('member', '123456')}>
           登录会员
+        </button>
+        <button type="button" onClick={logoutUser}>
+          退出会员
         </button>
         <button type="button" onClick={() => refreshCart()}>
           刷新购物车
@@ -87,6 +101,9 @@ describe('AppContext', () => {
         <button type="button" onClick={() => refreshOrders()}>
           刷新订单
         </button>
+        <button type="button" onClick={() => refreshAddresses()}>
+          刷新地址
+        </button>
       </div>
     );
   }
@@ -111,5 +128,97 @@ describe('AppContext', () => {
 
     await user.click(screen.getByRole('button', { name: '刷新订单' }));
     await waitFor(() => expect(screen.getByTestId('order-count')).toHaveTextContent('1'));
+  });
+
+  it('refreshes addresses for logged in user', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <C3Probe />
+      </AppProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: '登录会员' }));
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('user-001'));
+
+    await user.click(screen.getByRole('button', { name: '刷新地址' }));
+    await waitFor(() => expect(screen.getByTestId('address-count')).toHaveTextContent('1'));
+  });
+
+  it('clears cartItems, favorites, orders, and addresses on logout', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <C3Probe />
+      </AppProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: '登录会员' }));
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('user-001'));
+
+    await user.click(screen.getByRole('button', { name: '加购' }));
+    await waitFor(() => expect(screen.getByTestId('cart-count')).toHaveTextContent('1'));
+
+    await user.click(screen.getByRole('button', { name: '收藏' }));
+    await user.click(screen.getByRole('button', { name: '刷新收藏' }));
+    await waitFor(() => expect(screen.getByTestId('favorite-count')).toHaveTextContent('1'));
+
+    await user.click(screen.getByRole('button', { name: '刷新订单' }));
+    await waitFor(() => expect(screen.getByTestId('order-count')).toHaveTextContent('1'));
+
+    await user.click(screen.getByRole('button', { name: '刷新地址' }));
+    await waitFor(() => expect(screen.getByTestId('address-count')).toHaveTextContent('1'));
+
+    await user.click(screen.getByRole('button', { name: '退出会员' }));
+
+    expect(screen.getByTestId('user')).toHaveTextContent('未登录');
+    expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
+    expect(screen.getByTestId('favorite-count')).toHaveTextContent('0');
+    expect(screen.getByTestId('order-count')).toHaveTextContent('0');
+    expect(screen.getByTestId('address-count')).toHaveTextContent('0');
+  });
+
+  it('does not repopulate cartItems after logout while addToCart is pending', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <C3Probe />
+      </AppProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: '登录会员' }));
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('user-001'));
+
+    await user.click(screen.getByRole('button', { name: '加购' }));
+    await user.click(screen.getByRole('button', { name: '退出会员' }));
+
+    expect(screen.getByTestId('user')).toHaveTextContent('未登录');
+    expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
+
+    await waitForMockServiceDelay();
+
+    expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
+  });
+
+  it('does not repopulate favorites after logout while toggleFavorite is pending', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <C3Probe />
+      </AppProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: '登录会员' }));
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('user-001'));
+
+    await user.click(screen.getByRole('button', { name: '收藏' }));
+    await user.click(screen.getByRole('button', { name: '退出会员' }));
+
+    expect(screen.getByTestId('user')).toHaveTextContent('未登录');
+    expect(screen.getByTestId('favorite-count')).toHaveTextContent('0');
+
+    await waitForMockServiceDelay();
+
+    expect(screen.getByTestId('favorite-count')).toHaveTextContent('0');
   });
 });

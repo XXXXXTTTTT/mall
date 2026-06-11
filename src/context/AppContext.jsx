@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 import {
   addressService,
   authService,
@@ -44,6 +44,9 @@ function reducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const currentUserIdRef = useRef(null);
+
+  currentUserIdRef.current = state.user?.id || null;
 
   useEffect(() => {
     databaseService.initializeDatabase();
@@ -68,10 +71,11 @@ export function AppProvider({ children }) {
         dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(state.user.id) });
       },
       async addToCart(payload) {
-        if (!state.user) return;
-        const result = await cartService.addItem({ userId: state.user.id, ...payload });
-        if (result.success) {
-          dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(state.user.id) });
+        const activeUserId = currentUserIdRef.current;
+        if (!activeUserId) return;
+        const result = await cartService.addItem({ userId: activeUserId, ...payload });
+        if (result.success && currentUserIdRef.current === activeUserId) {
+          dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(activeUserId) });
         }
         return result;
       },
@@ -83,12 +87,13 @@ export function AppProvider({ children }) {
         });
       },
       async toggleFavorite(productId) {
-        if (!state.user) return;
-        const result = await favoriteService.toggleFavorite(state.user.id, productId);
-        if (result.success) {
+        const activeUserId = currentUserIdRef.current;
+        if (!activeUserId) return;
+        const result = await favoriteService.toggleFavorite(activeUserId, productId);
+        if (result.success && currentUserIdRef.current === activeUserId) {
           dispatch({
             type: 'SET_FAVORITES',
-            payload: favoriteService.listFavoritesSync(state.user.id),
+            payload: favoriteService.listFavoritesSync(activeUserId),
           });
         }
         return result;
