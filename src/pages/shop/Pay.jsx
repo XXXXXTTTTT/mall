@@ -1,27 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { orderService } from '../../mock/mockService.js';
+import { ORDER_STATUS, authService, cartService, orderService } from '../../mock/mockService.js';
+
+const PAID_STATUS_MESSAGES = {
+  [ORDER_STATUS.paid]: '订单已支付，无需重复支付',
+  [ORDER_STATUS.shipped]: '订单已发货，无需重复支付',
+  [ORDER_STATUS.completed]: '订单已完成，无需重复支付',
+  [ORDER_STATUS.canceled]: '订单已取消，无法继续支付',
+};
 
 export function Pay() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const order = orderService.getOrderByIdSync(orderId);
+  const isPayable = order?.status === ORDER_STATUS.pendingPayment;
   const [secondsLeft, setSecondsLeft] = useState(10 * 60);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    if (!isPayable) return undefined;
     if (secondsLeft <= 0) return undefined;
     const timer = window.setTimeout(() => {
       setSecondsLeft((value) => Math.max(0, value - 1));
     }, 1000);
     return () => window.clearTimeout(timer);
-  }, [secondsLeft]);
+  }, [isPayable, secondsLeft]);
 
   async function confirmPaid() {
     const result = await orderService.payOrder(orderId);
     if (!result.success) {
       setMessage(result.message);
       return;
+    }
+    const user = authService.getUserSession();
+    if (user) {
+      await cartService.clearSelectedItems(user.id);
     }
     navigate(`/shop/pay-success/${orderId}`);
   }
@@ -31,6 +44,27 @@ export function Pay() {
       <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
         <section className="rounded-[2rem] bg-[#fbfcfa] p-6 text-center shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
           <h1 className="text-2xl font-bold text-slate-950">订单不存在</h1>
+        </section>
+      </main>
+    );
+  }
+
+  if (!isPayable) {
+    return (
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+        <section className="rounded-[2rem] bg-[#fbfcfa] p-6 text-center shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Pay</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">模拟支付</h1>
+          <p className="mt-5 rounded-3xl bg-slate-50 p-4 text-sm font-bold text-slate-600">
+            {PAID_STATUS_MESSAGES[order.status] || '订单状态不允许支付'}
+          </p>
+          <button
+            type="button"
+            disabled
+            className="mt-6 w-full cursor-not-allowed rounded-full bg-slate-300 px-6 py-4 text-sm font-bold text-white"
+          >
+            确认已支付
+          </button>
         </section>
       </main>
     );

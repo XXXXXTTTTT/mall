@@ -58,7 +58,6 @@ export function CreateOrder() {
       return;
     }
 
-    await cartService.clearSelectedItems(user.id);
     navigate(`/shop/pay/${result.data.id}`);
   }
 

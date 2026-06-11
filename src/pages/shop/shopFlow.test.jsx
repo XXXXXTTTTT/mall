@@ -65,12 +65,21 @@ describe('shop transaction flow pages', () => {
     await user.click(screen.getByRole('button', { name: '提交订单' }));
 
     await waitFor(() => expect(screen.getByText('模拟支付')).toBeInTheDocument());
+    expect(cartService.listCartSync('user-001')).toHaveLength(1);
     await user.click(screen.getByRole('button', { name: '确认已支付' }));
 
     await waitFor(() => expect(screen.getByText('支付成功')).toBeInTheDocument());
     const paidOrder = orderService.listOrdersSync('user-001')[0];
     expect(paidOrder.status).toBe('paid');
     expect(cartService.listCartSync('user-001')).toHaveLength(0);
+  });
+
+  it('blocks paid order from showing payable state', async () => {
+    renderRoutes(['/shop/pay/ORD_202606010001']);
+
+    expect(await screen.findByText('订单已支付，无需重复支付')).toBeInTheDocument();
+    expect(screen.queryByText('支付倒计时')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '确认已支付' })).toBeDisabled();
   });
 
   it('shows shipment logistics after admin service ships order', async () => {
@@ -112,6 +121,20 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/favorites']);
 
     expect(await screen.findByText('我的收藏')).toBeInTheDocument();
+  });
+
+  it('guards address actions when no user session exists', async () => {
+    const user = userEvent.setup();
+    authService.logoutUser();
+
+    renderRoutes(['/shop/address']);
+
+    expect(await screen.findByText('地址管理')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '新增地址' }));
+    await user.click(screen.getByRole('button', { name: '保存地址' }));
+
+    expect(await screen.findByText('请先登录后管理收货地址')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '去登录' })).toHaveAttribute('href', '/shop/login');
   });
 
   it('renders user center entries and order list filter', async () => {

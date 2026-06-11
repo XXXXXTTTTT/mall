@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { addressService, authService } from '../../mock/mockService.js';
 
 const EMPTY_FORM = {
@@ -52,6 +53,10 @@ export function AddressPage() {
 
   async function saveAddress(event) {
     event.preventDefault();
+    if (!user) {
+      setMessage('请先登录后管理收货地址');
+      return;
+    }
     const payload = {
       userId: user.id,
       receiver: form.receiver,
@@ -80,6 +85,10 @@ export function AddressPage() {
   }
 
   async function setDefault(addressId) {
+    if (!user) {
+      setMessage('请先登录后管理收货地址');
+      return;
+    }
     const result = await addressService.setDefaultAddress(user.id, addressId);
     if (!result.success) {
       setMessage(result.message);
@@ -89,6 +98,10 @@ export function AddressPage() {
   }
 
   async function deleteAddress(addressId) {
+    if (!user) {
+      setMessage('请先登录后管理收货地址');
+      return;
+    }
     const result = await addressService.deleteAddress(addressId);
     if (!result.success) {
       setMessage(result.message);
@@ -169,7 +182,19 @@ export function AddressPage() {
         </form>
       ) : null}
 
-      {message ? <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">{message}</p> : null}
+      {message ? (
+        <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+          <p>{message}</p>
+          {!user ? (
+            <Link
+              to="/shop/login"
+              className="mt-3 inline-flex rounded-full bg-slate-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            >
+              去登录
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       <section className="mt-5 space-y-4">
         {addresses.map((address) => (
