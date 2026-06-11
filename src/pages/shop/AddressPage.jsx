@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addressService, authService } from '../../mock/mockService.js';
 
@@ -12,7 +12,7 @@ const EMPTY_FORM = {
 
 export function AddressPage() {
   const user = authService.getUserSession();
-  const [addresses, setAddresses] = useState([]);
+  const [addresses, setAddresses] = useState(() => (user ? addressService.listByUserSync(user.id) : []));
   const [editingAddressId, setEditingAddressId] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -22,10 +22,6 @@ export function AddressPage() {
     if (!user) return;
     setAddresses(addressService.listByUserSync(user.id));
   }
-
-  useEffect(() => {
-    refreshAddresses();
-  }, []);
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));

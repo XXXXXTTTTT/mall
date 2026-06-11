@@ -1,24 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addressService, authService, cartService, orderService, productService } from '../../mock/mockService.js';
 
 export function CreateOrder() {
   const navigate = useNavigate();
   const user = authService.getUserSession();
-  const [items, setItems] = useState([]);
-  const [addresses, setAddresses] = useState([]);
-  const [addressId, setAddressId] = useState('');
+  const [items] = useState(() => (user ? cartService.listCartSync(user.id).filter((item) => item.selected) : []));
+  const [addresses] = useState(() => (user ? addressService.listByUserSync(user.id) : []));
+  const [addressId, setAddressId] = useState(() => {
+    if (!user) return '';
+    const userAddresses = addressService.listByUserSync(user.id);
+    return userAddresses.find((address) => address.isDefault)?.id || userAddresses[0]?.id || '';
+  });
   const [remark, setRemark] = useState('');
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    if (!user) return;
-    const selectedItems = cartService.listCartSync(user.id).filter((item) => item.selected);
-    const userAddresses = addressService.listByUserSync(user.id);
-    setItems(selectedItems);
-    setAddresses(userAddresses);
-    setAddressId(userAddresses.find((address) => address.isDefault)?.id || userAddresses[0]?.id || '');
-  }, []);
 
   const enrichedItems = useMemo(
     () =>

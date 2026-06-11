@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
 import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { useAppContext } from '../../context/AppContext.jsx';
-import { favoriteService, productService } from '../../mock/mockService.js';
+import { authService, favoriteService, productService } from '../../mock/mockService.js';
 
 export function Detail() {
   const { productId } = useParams();
@@ -13,18 +13,11 @@ export function Detail() {
   const { state, loginUser, addToCart, toggleFavorite } = useAppContext();
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState('');
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!state.user || !product) {
-      setIsFavorite(false);
-      return;
-    }
-
-    const favorites = favoriteService.listFavoritesSync(state.user.id);
-    setIsFavorite(favorites.some((favorite) => favorite.productId === product.id));
-  }, [product, state.user]);
+  const sessionUser = state.user || authService.getUserSession();
+  const isFavorite =
+    Boolean(sessionUser && product) &&
+    favoriteService.listFavoritesSync(sessionUser.id).some((favorite) => favorite.productId === product.id);
 
   if (!product) {
     return (
@@ -75,7 +68,7 @@ export function Detail() {
 
     const result = await toggleFavorite(product.id);
     if (result.success) {
-      setIsFavorite(result.data.isFavorite);
+      setMessage(result.data.isFavorite ? '已收藏' : '已取消收藏');
     } else {
       setMessage(result.message);
     }

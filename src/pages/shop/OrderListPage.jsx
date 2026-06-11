@@ -13,7 +13,7 @@ const FILTERS = [
 
 export function OrderListPage() {
   const user = authService.getUserSession();
-  const orders = user ? orderService.listOrdersSync(user.id) : [];
+  const orders = useMemo(() => (user ? orderService.listOrdersSync(user.id) : []), [user]);
   const [status, setStatus] = useState('');
   const visibleOrders = useMemo(
     () => (status ? orders.filter((order) => order.status === status) : orders),

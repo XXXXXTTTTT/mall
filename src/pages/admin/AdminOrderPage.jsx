@@ -34,8 +34,33 @@ export function AdminOrderPage() {
   }
 
   useEffect(() => {
-    loadOrders(1, pageSize);
-  }, [status, keyword]);
+    let isCurrent = true;
+
+    async function refreshOrders() {
+      const result = await orderService.listPagedOrders({
+        page: 1,
+        pageSize,
+        status,
+        keyword,
+      });
+      if (!isCurrent) return;
+      if (result.success) {
+        setErrorMessage('');
+        setOrders(result.data.list);
+        setPage(result.data.page);
+        setPageSize(result.data.pageSize);
+        setTotal(result.data.total);
+        return;
+      }
+      setErrorMessage(result.message);
+    }
+
+    void refreshOrders();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [keyword, pageSize, status]);
 
   const detailOrder = detailOrderId ? orderService.getOrderByIdSync(detailOrderId) : null;
 

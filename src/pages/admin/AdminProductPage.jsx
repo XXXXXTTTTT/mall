@@ -47,8 +47,34 @@ export function AdminProductPage() {
   }
 
   useEffect(() => {
-    loadProducts(1, pageSize);
-  }, [keyword, status, categoryId]);
+    let isCurrent = true;
+
+    async function refreshProducts() {
+      const result = await productService.listPagedProducts({
+        page: 1,
+        pageSize,
+        keyword,
+        status,
+        categoryId,
+      });
+      if (!isCurrent) return;
+      if (result.success) {
+        setErrorMessage('');
+        setProducts(result.data.list);
+        setTotal(result.data.total);
+        setPage(result.data.page);
+        setPageSize(result.data.pageSize);
+        return;
+      }
+      setErrorMessage(result.message);
+    }
+
+    void refreshProducts();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [categoryId, keyword, pageSize, status]);
 
   function openCreateDrawer() {
     setDrawerMode('create');

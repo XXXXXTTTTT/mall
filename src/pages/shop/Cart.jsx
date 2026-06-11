@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
 import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
@@ -6,18 +6,16 @@ import { authService, cartService, productService } from '../../mock/mockService
 
 export function Cart() {
   const user = authService.getUserSession();
-  const [items, setItems] = useState([]);
-  const [summary, setSummary] = useState({ totalQuantity: 0, totalAmount: 0 });
+  const [items, setItems] = useState(() => (user ? cartService.listCartSync(user.id) : []));
+  const [summary, setSummary] = useState(() =>
+    user ? cartService.calculateSelectedTotal(user.id) : { totalQuantity: 0, totalAmount: 0 },
+  );
 
   function refreshCart() {
     if (!user) return;
     setItems(cartService.listCartSync(user.id));
     setSummary(cartService.calculateSelectedTotal(user.id));
   }
-
-  useEffect(() => {
-    refreshCart();
-  }, []);
 
   const enrichedItems = useMemo(
     () =>

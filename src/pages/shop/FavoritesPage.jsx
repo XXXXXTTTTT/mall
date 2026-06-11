@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
 import { authService, favoriteService, productService } from '../../mock/mockService.js';
 
 export function FavoritesPage() {
   const user = authService.getUserSession();
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => (user ? favoriteService.listFavoritesSync(user.id) : []));
 
   function refreshFavorites() {
     if (!user) return;
     setFavorites(favoriteService.listFavoritesSync(user.id));
   }
-
-  useEffect(() => {
-    refreshFavorites();
-  }, []);
 
   const products = useMemo(
     () =>

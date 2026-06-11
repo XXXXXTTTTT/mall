@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import {
   addressService,
   authService,
@@ -44,9 +44,6 @@ function reducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const currentUserIdRef = useRef(null);
-
-  currentUserIdRef.current = state.user?.id || null;
 
   useEffect(() => {
     databaseService.initializeDatabase();
@@ -71,10 +68,10 @@ export function AppProvider({ children }) {
         dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(state.user.id) });
       },
       async addToCart(payload) {
-        const activeUserId = currentUserIdRef.current;
+        const activeUserId = authService.getUserSession()?.id || null;
         if (!activeUserId) return;
         const result = await cartService.addItem({ userId: activeUserId, ...payload });
-        if (result.success && currentUserIdRef.current === activeUserId) {
+        if (result.success && authService.getUserSession()?.id === activeUserId) {
           dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(activeUserId) });
         }
         return result;
@@ -87,10 +84,10 @@ export function AppProvider({ children }) {
         });
       },
       async toggleFavorite(productId) {
-        const activeUserId = currentUserIdRef.current;
+        const activeUserId = authService.getUserSession()?.id || null;
         if (!activeUserId) return;
         const result = await favoriteService.toggleFavorite(activeUserId, productId);
-        if (result.success && currentUserIdRef.current === activeUserId) {
+        if (result.success && authService.getUserSession()?.id === activeUserId) {
           dispatch({
             type: 'SET_FAVORITES',
             payload: favoriteService.listFavoritesSync(activeUserId),
