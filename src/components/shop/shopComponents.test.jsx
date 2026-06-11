@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { EmptyState } from './EmptyState.jsx';
 import { ProductCard } from './ProductCard.jsx';
 import { QuantityStepper } from './QuantityStepper.jsx';
+import { SectionHeader } from './SectionHeader.jsx';
 import { StatusTag } from './StatusTag.jsx';
 
 const product = {
@@ -31,6 +32,27 @@ describe('shop shared components', () => {
     expect(screen.getByText('热门')).toBeInTheDocument();
   });
 
+  it('renders product card safely without tags', () => {
+    const productWithoutTags = {
+      id: 'p-002',
+      name: '云纹便携保温杯',
+      price: 129,
+      stock: 32,
+      image: 'https://dummyimage.com/640x480/e8eef3/203244&text=cup',
+      status: 'online',
+    };
+
+    render(
+      <MemoryRouter>
+        <ProductCard product={productWithoutTags} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /云纹便携保温杯/ })).toHaveAttribute('href', '/shop/detail/p-002');
+    expect(screen.getByText('¥129')).toBeInTheDocument();
+    expect(screen.getByText('库存 32')).toBeInTheDocument();
+  });
+
   it('keeps quantity at minimum 1 and emits changes', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -43,6 +65,32 @@ describe('shop shared components', () => {
     expect(onChange).toHaveBeenCalledWith(2);
   });
 
+  it('clamps displayed quantity and emitted changes to minimum', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<QuantityStepper value={0} onChange={onChange} />);
+
+    expect(screen.getByText('1')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '减少数量' }));
+    expect(onChange).not.toHaveBeenCalledWith(0);
+
+    await user.click(screen.getByRole('button', { name: '增加数量' }));
+    expect(onChange).toHaveBeenCalledWith(2);
+  });
+
+  it('renders section header action link', () => {
+    render(
+      <MemoryRouter>
+        <SectionHeader eyebrow="精选专栏" title="本周上新" actionText="查看全部" actionTo="/shop/category" />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('精选专栏')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '本周上新' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '查看全部' })).toHaveAttribute('href', '/shop/category');
+  });
+
   it('renders status and empty action link', () => {
     render(
       <MemoryRouter>
@@ -53,5 +101,11 @@ describe('shop shared components', () => {
 
     expect(screen.getByText('已支付')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '去首页看看' })).toHaveAttribute('href', '/shop');
+  });
+
+  it('hides empty state decorative icon from assistive tech', () => {
+    const { container } = render(<EmptyState title="暂无收藏商品" />);
+
+    expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
   });
 });

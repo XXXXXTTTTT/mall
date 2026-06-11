@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { StatusTag } from './StatusTag.jsx';
 
 export function ProductCard({ product }) {
+  const tags = Array.isArray(product.tags) ? product.tags : [];
+
   return (
     <Link
       to={`/shop/detail/${product.id}`}
@@ -28,7 +30,7 @@ export function ProductCard({ product }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {product.tags.map((tag) => (
+          {tags.map((tag) => (
             <span
               key={tag}
               className="rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
