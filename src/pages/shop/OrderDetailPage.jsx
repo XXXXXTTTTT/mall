@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
+import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { orderService } from '../../mock/mockService.js';
 
@@ -10,28 +11,33 @@ export function OrderDetailPage() {
 
   if (!order) {
     return (
-      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
-        <IOSCard as="section" className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-950">订单不存在</h1>
-        </IOSCard>
-      </main>
+      <>
+        <ShopNavigationBar title="订单详情" />
+        <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+          <IOSCard as="section" className="p-6 text-center">
+            <h1 className="text-2xl font-bold text-slate-950">订单不存在</h1>
+          </IOSCard>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
-      <IOSCard as="header" className="p-6">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Detail</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">订单详情</h1>
+    <>
+      <ShopNavigationBar title="订单详情" />
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+        <IOSCard as="header" className="p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Detail</p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">订单详情</h1>
+            </div>
+            <StatusTag status={order.status} />
           </div>
-          <StatusTag status={order.status} />
-        </div>
-        <p className="mt-4 text-sm font-semibold text-slate-500">{order.id}</p>
-      </IOSCard>
+          <p className="mt-4 text-sm font-semibold text-slate-500">{order.id}</p>
+        </IOSCard>
 
-      <IOSCard as="section" className="mt-5 p-5">
+        <IOSCard as="section" className="mt-5 p-5">
         <h2 className="text-lg font-bold text-slate-950">商品快照</h2>
         <div className="mt-4 space-y-3">
           {order.items.map((item) => (
@@ -44,9 +50,9 @@ export function OrderDetailPage() {
             </div>
           ))}
         </div>
-      </IOSCard>
+        </IOSCard>
 
-      <IOSCard as="section" className="mt-5 p-5">
+        <IOSCard as="section" className="mt-5 p-5">
         <h2 className="text-lg font-bold text-slate-950">收货信息</h2>
         <p className="mt-3 font-bold text-slate-950">
           {order.addressSnapshot.receiver} {order.addressSnapshot.phone}
@@ -54,18 +60,18 @@ export function OrderDetailPage() {
         <p className="mt-1 text-sm leading-6 text-slate-500">
           {order.addressSnapshot.province} {order.addressSnapshot.city} {order.addressSnapshot.detail}
         </p>
-      </IOSCard>
+        </IOSCard>
 
-      <IOSCard as="section" className="mt-5 p-5">
+        <IOSCard as="section" className="mt-5 p-5">
         <h2 className="text-lg font-bold text-slate-950">支付信息</h2>
         <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
           <span>实付金额</span>
           <span className="text-2xl font-bold text-slate-950">¥{order.totalAmount}</span>
         </div>
         {order.paidAt ? <p className="mt-2 text-sm text-slate-500">支付时间 {order.paidAt}</p> : null}
-      </IOSCard>
+        </IOSCard>
 
-      <IOSCard as="section" className="mt-5 p-5">
+        <IOSCard as="section" className="mt-5 p-5">
         <h2 className="text-lg font-bold text-slate-950">物流信息</h2>
         {order.logistics?.length ? (
           <div data-testid="order-logistics-timeline" className="mt-4 space-y-4">
@@ -85,7 +91,8 @@ export function OrderDetailPage() {
         ) : (
           <p className="mt-4 rounded-3xl bg-slate-50 p-4 text-sm font-semibold text-slate-500">暂无物流信息</p>
         )}
-      </IOSCard>
-    </main>
+        </IOSCard>
+      </main>
+    </>
   );
 }

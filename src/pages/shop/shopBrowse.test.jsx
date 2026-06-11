@@ -65,6 +65,11 @@ function renderShopShell(initialEntries) {
   return render(<RouterProvider router={router} />);
 }
 
+function expectLatestNavigationTitle(title) {
+  const bars = screen.getAllByTestId('shop-navigation-bar');
+  expect(bars[bars.length - 1]).toHaveTextContent(title);
+}
+
 beforeEach(() => {
   localStorage.clear();
   databaseService.initializeDatabase({ force: true });
@@ -162,6 +167,8 @@ describe('shop browse pages', () => {
     renderShop(['/shop/detail/p-001']);
 
     expect(await screen.findByText('曜石无线降噪耳机')).toBeInTheDocument();
+    expectLatestNavigationTitle('商品详情');
+    expect(screen.getByTestId('shop-back-button')).toHaveAccessibleName('返回');
     const purchaseBar = screen.getByTestId('detail-purchase-bar');
     expect(purchaseBar.className).toContain('backdrop-blur-md');
     expect(purchaseBar.className).toContain('bg-white/80');
@@ -188,7 +195,8 @@ describe('shop browse pages', () => {
     expect(await screen.findByText('曜石无线降噪耳机')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '立即购买' }));
 
-    await waitFor(() => expect(screen.getByText('确认订单')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('确认订单')).not.toHaveLength(0));
+    expectLatestNavigationTitle('确认订单');
     expect(screen.getByText('默认地址')).toBeInTheDocument();
     expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
   });

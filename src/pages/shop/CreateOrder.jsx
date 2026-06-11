@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GlassBar } from '../../components/shop/GlassBar.jsx';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
+import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { addressService, authService, cartService, orderService, productService } from '../../mock/mockService.js';
 
 export function CreateOrder() {
@@ -61,13 +62,15 @@ export function CreateOrder() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-6 text-slate-900">
-      <header className="rounded-[2rem] bg-[#fbfcfa] p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Checkout</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">确认订单</h1>
-      </header>
+    <>
+      <ShopNavigationBar title="确认订单" />
+      <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-6 text-slate-900">
+        <header className="rounded-[2rem] bg-[#fbfcfa] p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Checkout</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">确认订单</h1>
+        </header>
 
-      <form onSubmit={submitOrder} className="mt-6 space-y-5">
+        <form onSubmit={submitOrder} className="mt-6 space-y-5">
         <IOSCard as="section" className="p-5">
           <h2 className="text-lg font-bold text-slate-950">默认地址</h2>
           {addresses.length === 0 ? (
@@ -151,7 +154,8 @@ export function CreateOrder() {
             </button>
           </div>
         </GlassBar>
-      </form>
-    </main>
+        </form>
+      </main>
+    </>
   );
 }

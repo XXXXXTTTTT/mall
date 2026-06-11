@@ -8,6 +8,7 @@ import { AddressPage } from './AddressPage.jsx';
 import { Cart } from './Cart.jsx';
 import { CreateOrder } from './CreateOrder.jsx';
 import { FavoritesPage } from './FavoritesPage.jsx';
+import { LoginPage } from './LoginPage.jsx';
 import { OrderDetailPage } from './OrderDetailPage.jsx';
 import { OrderListPage } from './OrderListPage.jsx';
 import { Pay } from './Pay.jsx';
@@ -26,6 +27,7 @@ function renderRoutes(initialEntries) {
       { path: '/shop/user', element: <UserPage /> },
       { path: '/shop/address', element: <AddressPage /> },
       { path: '/shop/favorites', element: <FavoritesPage /> },
+      { path: '/shop/login', element: <LoginPage /> },
     ],
     { initialEntries },
   );
@@ -35,6 +37,12 @@ function renderRoutes(initialEntries) {
       <RouterProvider router={router} />
     </AppProvider>,
   );
+}
+
+function expectLatestNavigationTitle(title) {
+  const bars = screen.getAllByTestId('shop-navigation-bar');
+  expect(bars[bars.length - 1]).toHaveTextContent(title);
+  expect(screen.getAllByTestId('shop-back-button').at(-1)).toHaveAccessibleName('返回');
 }
 
 beforeEach(async () => {
@@ -67,17 +75,20 @@ describe('shop transaction flow pages', () => {
     expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: '去结算' }));
 
-    await waitFor(() => expect(screen.getByText('确认订单')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('确认订单')).not.toHaveLength(0));
+    expectLatestNavigationTitle('确认订单');
     expect(screen.getByTestId('create-order-submit-bar').className).toContain('backdrop-blur-md');
     expect(screen.getByText('默认地址')).toBeInTheDocument();
     await user.type(screen.getByLabelText('订单备注'), 'C3 页面测试');
     await user.click(screen.getByRole('button', { name: '提交订单' }));
 
-    await waitFor(() => expect(screen.getByText('模拟支付')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('模拟支付')).not.toHaveLength(0));
+    expectLatestNavigationTitle('模拟支付');
     expect(cartService.listCartSync('user-001')).toHaveLength(0);
     await user.click(screen.getByRole('button', { name: '确认已支付' }));
 
-    await waitFor(() => expect(screen.getByText('支付成功')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('支付成功')).not.toHaveLength(0));
+    expectLatestNavigationTitle('支付成功');
     const paidOrder = orderService.listOrdersSync('user-001')[0];
     expect(paidOrder.status).toBe('paid');
     expect(cartService.listCartSync('user-001')).toHaveLength(0);
@@ -127,7 +138,8 @@ describe('shop transaction flow pages', () => {
 
     renderRoutes([`/shop/orders/${created.data.id}`]);
 
-    expect(await screen.findByText('订单详情')).toBeInTheDocument();
+    expect(await screen.findAllByText('订单详情')).not.toHaveLength(0);
+    expectLatestNavigationTitle('订单详情');
     expect(screen.getByText('已发货')).toBeInTheDocument();
     expect(screen.getByText('顺丰速运')).toBeInTheDocument();
     expect(screen.getByText('SF1000000001')).toBeInTheDocument();
@@ -139,6 +151,7 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/address']);
 
     expect(await screen.findByText('地址管理')).toBeInTheDocument();
+    expectLatestNavigationTitle('收货地址');
     expect(screen.getByRole('button', { name: '新增地址' }).className).toContain('h-11');
     await user.click(screen.getByRole('button', { name: '新增地址' }));
     await user.type(screen.getByLabelText('收货人'), '新收货人');
@@ -156,7 +169,8 @@ describe('shop transaction flow pages', () => {
     await favoriteService.toggleFavorite('user-001', 'p-001');
     renderRoutes(['/shop/favorites']);
 
-    expect(await screen.findByText('我的收藏')).toBeInTheDocument();
+    expect(await screen.findAllByText('我的收藏')).not.toHaveLength(0);
+    expectLatestNavigationTitle('我的收藏');
     expect(screen.getByRole('button', { name: '取消收藏 曜石无线降噪耳机' })).toBeInTheDocument();
   });
 
@@ -176,6 +190,7 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/address']);
 
     expect(await screen.findByText('地址管理')).toBeInTheDocument();
+    expectLatestNavigationTitle('收货地址');
     await user.click(screen.getByRole('button', { name: '新增地址' }));
     await user.click(screen.getByRole('button', { name: '保存地址' }));
 
@@ -201,12 +216,22 @@ describe('shop transaction flow pages', () => {
 
     renderRoutes(['/shop/orders']);
 
-    expect(await screen.findByText('订单列表')).toBeInTheDocument();
+    expect(await screen.findAllByText('订单列表')).not.toHaveLength(0);
+    expectLatestNavigationTitle('订单列表');
     expect(screen.getByRole('button', { name: '已支付' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '已支付' }).className).toContain('min-h-11');
     const paidFilter = screen.getByRole('button', { name: '已支付' });
     expect(paidFilter).toHaveAttribute('aria-pressed', 'false');
     await user.click(paidFilter);
     expect(paidFilter).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('renders top navigation on standalone login page', async () => {
+    authService.logoutUser();
+
+    renderRoutes(['/shop/login']);
+
+    expect(await screen.findAllByText('前台登录')).not.toHaveLength(0);
+    expectLatestNavigationTitle('前台登录');
   });
 });

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { IconButton } from '../../components/shop/IconButton.jsx';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
+import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { addressService, authService } from '../../mock/mockService.js';
 
 const EMPTY_FORM = {
@@ -110,28 +111,30 @@ export function AddressPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
-      <IOSCard as="header" className="p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Address</p>
-        <div className="mt-2 flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950">地址管理</h1>
-          <button
-            type="button"
-            aria-label="新增地址"
-            onClick={openCreateForm}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-          >
-            <ShopIcon name="plus" />
-          </button>
-        </div>
-      </IOSCard>
+    <>
+      <ShopNavigationBar title="收货地址" />
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+        <IOSCard as="header" className="p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Address</p>
+          <div className="mt-2 flex items-center justify-between gap-4">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950">地址管理</h1>
+            <button
+              type="button"
+              aria-label="新增地址"
+              onClick={openCreateForm}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            >
+              <ShopIcon name="plus" />
+            </button>
+          </div>
+        </IOSCard>
 
-      {isFormOpen ? (
-        <IOSCard
-          as="form"
-          onSubmit={saveAddress}
-          className="mt-5 space-y-4 p-5"
-        >
+        {isFormOpen ? (
+          <IOSCard
+            as="form"
+            onSubmit={saveAddress}
+            className="mt-5 space-y-4 p-5"
+          >
           <h2 className="text-lg font-bold text-slate-950">{editingAddressId ? '编辑地址' : '新增地址'}</h2>
           <label className="block text-sm font-bold text-slate-700">
             收货人
@@ -180,11 +183,11 @@ export function AddressPage() {
           >
             保存地址
           </button>
-        </IOSCard>
-      ) : null}
+          </IOSCard>
+        ) : null}
 
-      {message ? (
-        <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+        {message ? (
+          <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
           <p>{message}</p>
           {!user ? (
             <Link
@@ -194,16 +197,16 @@ export function AddressPage() {
               去登录
             </Link>
           ) : null}
-        </div>
-      ) : null}
+          </div>
+        ) : null}
 
-      <section className="mt-5 space-y-4">
-        {addresses.map((address) => (
-          <IOSCard
-            as="article"
-            key={address.id}
-            className="p-5"
-          >
+        <section className="mt-5 space-y-4">
+          {addresses.map((address) => (
+            <IOSCard
+              as="article"
+              key={address.id}
+              className="p-5"
+            >
             <div className="flex items-center gap-3">
               <h2 className="font-bold text-slate-950">{address.receiver}</h2>
               <span className="text-sm text-slate-500">{address.phone}</span>
@@ -219,9 +222,10 @@ export function AddressPage() {
               <IconButton ariaLabel={`编辑地址 ${address.receiver}`} icon="location" onClick={() => openEditForm(address)} />
               <IconButton ariaLabel={`删除 ${address.receiver}`} icon="trash" onClick={() => deleteAddress(address.id)} />
             </div>
-          </IOSCard>
-        ))}
-      </section>
-    </main>
+            </IOSCard>
+          ))}
+        </section>
+      </main>
+    </>
   );
 }
