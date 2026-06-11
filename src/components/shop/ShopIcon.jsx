@@ -66,6 +66,7 @@ const ICON_PATHS = {
   ),
   minus: <path d="M5 12h14" />,
   chevronRight: <path d="m9 5 7 7-7 7" />,
+  chevronLeft: <path d="m15 5-7 7 7 7" />,
   receipt: (
     <>
       <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" />

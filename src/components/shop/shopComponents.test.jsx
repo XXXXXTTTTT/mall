@@ -11,6 +11,7 @@ import { QuantityStepper } from './QuantityStepper.jsx';
 import { SectionHeader } from './SectionHeader.jsx';
 import { SettingRow } from './SettingRow.jsx';
 import { ShopIcon } from './ShopIcon.jsx';
+import { ShopNavigationBar } from './ShopNavigationBar.jsx';
 import { StatusTag } from './StatusTag.jsx';
 
 const product = {
@@ -24,6 +25,39 @@ const product = {
 };
 
 describe('shop shared components', () => {
+  it('renders a HIG-style navigation bar with a back action', async () => {
+    const user = userEvent.setup();
+    const onBack = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <ShopNavigationBar title="订单详情" onBack={onBack} />
+      </MemoryRouter>,
+    );
+
+    const bar = screen.getByTestId('shop-navigation-bar');
+    expect(bar).toHaveTextContent('订单详情');
+    expect(bar.className).toContain('backdrop-blur-md');
+    expect(bar.className).toContain('bg-white/85');
+    expect(bar.className).toContain('border-b');
+    expect(bar.className).toContain('border-neutral-100/60');
+
+    const backButton = screen.getByTestId('shop-back-button');
+    expect(backButton).toHaveAccessibleName('返回');
+    expect(backButton.className).toContain('h-11');
+    expect(backButton.className).toContain('w-11');
+
+    await user.click(backButton);
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the shop left chevron icon key', () => {
+    const { container } = render(<ShopIcon name="chevronLeft" />);
+
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelector('path')).toHaveAttribute('d', 'm15 5-7 7 7 7');
+  });
+
   it('renders local svg icons without adding icon dependencies', () => {
     const { container } = render(<ShopIcon name="search" className="h-5 w-5" />);
 
