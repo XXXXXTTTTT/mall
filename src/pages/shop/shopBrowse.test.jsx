@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
 import { authService, databaseService, favoriteService, productService } from '../../mock/mockService.js';
 import { Category } from './Category.jsx';
+import { CreateOrder } from './CreateOrder.jsx';
 import { Detail } from './Detail.jsx';
 import { Home } from './Home.jsx';
 import { LoginPage } from './LoginPage.jsx';
@@ -20,6 +21,7 @@ function renderShop(initialEntries) {
           { index: true, element: <Home /> },
           { path: 'category', element: <Category /> },
           { path: 'detail/:productId', element: <Detail /> },
+          { path: 'create-order', element: <CreateOrder /> },
           { path: 'login', element: <LoginPage /> },
         ],
       },
@@ -69,6 +71,29 @@ describe('shop browse pages', () => {
     expect(screen.getByRole('link', { name: /分类/ }).className).toContain('min-h-11');
   });
 
+  it('marks category and sort filters with pressed state', async () => {
+    const user = userEvent.setup();
+    renderShop(['/shop/category']);
+
+    const allButton = await screen.findByRole('button', { name: '全部' });
+    const digitalButton = screen.getByRole('button', { name: '数码办公' });
+    const defaultSortButton = screen.getByRole('button', { name: '综合' });
+    const priceSortButton = screen.getByRole('button', { name: '价格升序' });
+
+    expect(allButton).toHaveAttribute('aria-pressed', 'true');
+    expect(digitalButton).toHaveAttribute('aria-pressed', 'false');
+    expect(defaultSortButton).toHaveAttribute('aria-pressed', 'true');
+    expect(priceSortButton).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(digitalButton);
+    await user.click(priceSortButton);
+
+    expect(allButton).toHaveAttribute('aria-pressed', 'false');
+    expect(digitalButton).toHaveAttribute('aria-pressed', 'true');
+    expect(defaultSortButton).toHaveAttribute('aria-pressed', 'false');
+    expect(priceSortButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('blocks add cart for offline product detail', async () => {
     renderShop(['/shop/detail/p-008']);
 
@@ -98,6 +123,18 @@ describe('shop browse pages', () => {
     await user.click(screen.getByRole('button', { name: '加入购物车' }));
 
     await waitFor(() => expect(screen.getByText('已加入购物车')).toBeInTheDocument());
+  });
+
+  it('prepares the current product when buying immediately from detail', async () => {
+    const user = userEvent.setup();
+    renderShop(['/shop/detail/p-001']);
+
+    expect(await screen.findByText('曜石无线降噪耳机')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '立即购买' }));
+
+    await waitFor(() => expect(screen.getByText('确认订单')).toBeInTheDocument());
+    expect(screen.getByText('默认地址')).toBeInTheDocument();
+    expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
   });
 
   it('keeps empty-sku product detail stable and disables purchase actions', async () => {

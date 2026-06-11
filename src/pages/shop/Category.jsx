@@ -42,6 +42,7 @@ export function Category() {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             type="button"
+            aria-pressed={activeCategoryId === 'all'}
             onClick={() => setActiveCategoryId('all')}
             className={`min-h-11 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
               activeCategoryId === 'all' ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'
@@ -53,6 +54,7 @@ export function Category() {
             <button
               key={category.id}
               type="button"
+              aria-pressed={activeCategoryId === category.id}
               onClick={() => setActiveCategoryId(category.id)}
               className={`min-h-11 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                 activeCategoryId === category.id
@@ -71,6 +73,7 @@ export function Category() {
           <button
             key={label}
             type="button"
+            aria-pressed={activeSort === label}
             onClick={() => setActiveSort(label)}
             className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
               activeSort === label ? 'bg-[#E7F3F4] text-[#1F6F8B]' : 'bg-white text-slate-500'

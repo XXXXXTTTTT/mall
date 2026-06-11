@@ -8,7 +8,7 @@ import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { useAppContext } from '../../context/AppContext.jsx';
-import { authService, favoriteService, productService } from '../../mock/mockService.js';
+import { authService, cartService, favoriteService, productService } from '../../mock/mockService.js';
 
 export function Detail() {
   const { productId } = useParams();
@@ -76,6 +76,33 @@ export function Detail() {
     } else {
       setMessage(result.message);
     }
+  }
+
+  async function handleBuyNow() {
+    if (!canPurchase || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setMessage('');
+    const userId = await resolveUserId();
+    if (!userId) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    await cartService.toggleAllSelected(userId, false);
+    const result = await addToCart({
+      productId: product.id,
+      skuId: selectedSku.id,
+      quantity,
+    });
+    setIsSubmitting(false);
+
+    if (!result?.success) {
+      setMessage(result?.message || '创建订单失败');
+      return;
+    }
+
+    navigate('/shop/create-order');
   }
 
   return (
@@ -168,8 +195,8 @@ export function Detail() {
         </button>
         <button
           type="button"
-          disabled={!canPurchase}
-          onClick={() => navigate('/shop/create-order')}
+          disabled={!canPurchase || isSubmitting}
+          onClick={handleBuyNow}
           className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-slate-950 px-4 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
           <ShopIcon name="check" className="h-4 w-4" />
