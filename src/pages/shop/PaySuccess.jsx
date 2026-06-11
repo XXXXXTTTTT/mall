@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 
 export function PaySuccess() {
   const { orderId } = useParams();
@@ -6,7 +7,7 @@ export function PaySuccess() {
     <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
       <section className="rounded-[2rem] bg-[#fbfcfa] p-8 text-center shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-teal-50 text-3xl font-bold text-teal-700">
-          ✓
+          <ShopIcon name="check" className="h-9 w-9" />
         </div>
         <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-950">支付成功</h1>
         <p className="mt-3 text-sm text-slate-500">订单 {orderId} 已完成支付。</p>

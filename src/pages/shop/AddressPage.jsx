@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { IconButton } from '../../components/shop/IconButton.jsx';
+import { IOSCard } from '../../components/shop/IOSCard.jsx';
+import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { addressService, authService } from '../../mock/mockService.js';
 
 const EMPTY_FORM = {
@@ -108,24 +111,26 @@ export function AddressPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
-      <header className="rounded-[2rem] bg-[#fbfcfa] p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
+      <IOSCard as="header" className="p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Address</p>
         <div className="mt-2 flex items-center justify-between gap-4">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950">地址管理</h1>
           <button
             type="button"
+            aria-label="新增地址"
             onClick={openCreateForm}
-            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
           >
-            新增地址
+            <ShopIcon name="plus" />
           </button>
         </div>
-      </header>
+      </IOSCard>
 
       {isFormOpen ? (
-        <form
+        <IOSCard
+          as="form"
           onSubmit={saveAddress}
-          className="mt-5 space-y-4 rounded-[2rem] border border-slate-200/80 bg-[#fbfcfa] p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)]"
+          className="mt-5 space-y-4 p-5"
         >
           <h2 className="text-lg font-bold text-slate-950">{editingAddressId ? '编辑地址' : '新增地址'}</h2>
           <label className="block text-sm font-bold text-slate-700">
@@ -175,7 +180,7 @@ export function AddressPage() {
           >
             保存地址
           </button>
-        </form>
+        </IOSCard>
       ) : null}
 
       {message ? (
@@ -194,9 +199,10 @@ export function AddressPage() {
 
       <section className="mt-5 space-y-4">
         {addresses.map((address) => (
-          <article
+          <IOSCard
+            as="article"
             key={address.id}
-            className="rounded-[2rem] border border-slate-200/80 bg-[#fbfcfa] p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)]"
+            className="p-5"
           >
             <div className="flex items-center gap-3">
               <h2 className="font-bold text-slate-950">{address.receiver}</h2>
@@ -208,30 +214,12 @@ export function AddressPage() {
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {!address.isDefault ? (
-                <button
-                  type="button"
-                  onClick={() => setDefault(address.id)}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-teal-500 hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-                >
-                  设置默认
-                </button>
+                <IconButton ariaLabel="设置默认" icon="check" onClick={() => setDefault(address.id)} />
               ) : null}
-              <button
-                type="button"
-                onClick={() => openEditForm(address)}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-teal-500 hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-              >
-                编辑地址
-              </button>
-              <button
-                type="button"
-                onClick={() => deleteAddress(address.id)}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-              >
-                删除
-              </button>
+              <IconButton ariaLabel="编辑地址" icon="location" onClick={() => openEditForm(address)} />
+              <IconButton ariaLabel="删除" icon="trash" onClick={() => deleteAddress(address.id)} />
             </div>
-          </article>
+          </IOSCard>
         ))}
       </section>
     </main>

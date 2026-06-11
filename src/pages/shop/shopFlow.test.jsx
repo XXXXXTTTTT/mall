@@ -131,6 +131,7 @@ describe('shop transaction flow pages', () => {
     expect(screen.getByText('已发货')).toBeInTheDocument();
     expect(screen.getByText('顺丰速运')).toBeInTheDocument();
     expect(screen.getByText('SF1000000001')).toBeInTheDocument();
+    expect(screen.getByTestId('order-logistics-timeline')).toBeInTheDocument();
   });
 
   it('manages address and favorites pages', async () => {
@@ -138,6 +139,7 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/address']);
 
     expect(await screen.findByText('地址管理')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '新增地址' }).className).toContain('h-11');
     await user.click(screen.getByRole('button', { name: '新增地址' }));
     await user.type(screen.getByLabelText('收货人'), '新收货人');
     await user.type(screen.getByLabelText('手机号'), '13900000000');
@@ -183,7 +185,11 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/user']);
 
     expect(await screen.findByText('测试会员')).toBeInTheDocument();
+    expect(screen.getByText('1280')).toBeInTheDocument();
+    expect(screen.getByText('优惠券')).toBeInTheDocument();
+    expect(screen.getByText('最近订单')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '我的订单' })).toHaveAttribute('href', '/shop/orders');
+    expect(screen.getByRole('link', { name: /我的订单/ })).toHaveAttribute('href', '/shop/orders');
     expect(screen.getByRole('link', { name: '我的收藏' })).toHaveAttribute('href', '/shop/favorites');
     expect(screen.getByRole('link', { name: '地址管理' })).toHaveAttribute('href', '/shop/address');
 
@@ -191,5 +197,6 @@ describe('shop transaction flow pages', () => {
 
     expect(await screen.findByText('订单列表')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '已支付' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '已支付' }).className).toContain('min-h-11');
   });
 });
