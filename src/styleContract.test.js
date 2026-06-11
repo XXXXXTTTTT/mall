@@ -13,11 +13,18 @@ describe('global style contract', () => {
     const layout = readFileSync(resolve('src/pages/shop/ShopLayout.jsx'), 'utf-8');
     const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
     const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+    const navigationBar = readFileSync(resolve('src/components/shop/ShopNavigationBar.jsx'), 'utf-8');
+    const orderDetail = readFileSync(resolve('src/pages/shop/OrderDetailPage.jsx'), 'utf-8');
 
     expect(layout).toContain('backdrop-blur-md');
     expect(layout).toContain('bg-white/80');
     expect(layout).toContain('min-h-11');
     expect(home).toContain('HeroCarousel');
     expect(category).toContain('分类索引');
+    expect(navigationBar).toContain('backdrop-blur-md');
+    expect(navigationBar).toContain('bg-white/85');
+    expect(navigationBar).toContain('border-b border-neutral-100/60');
+    expect(orderDetail).toContain('tracking-wide');
+    expect(orderDetail).toContain('leading-relaxed');
   });
 });

@@ -34,7 +34,7 @@ export function OrderDetailPage() {
             </div>
             <StatusTag status={order.status} />
           </div>
-          <p className="mt-4 text-sm font-semibold text-slate-500">{order.id}</p>
+          <p className="mt-4 break-all text-sm font-semibold leading-relaxed tracking-wide text-slate-500">{order.id}</p>
         </IOSCard>
 
         <IOSCard as="section" className="mt-5 p-5">
@@ -42,11 +42,11 @@ export function OrderDetailPage() {
         <div className="mt-4 space-y-3">
           {order.items.map((item) => (
             <div key={`${item.productId}-${item.skuId}`} className="rounded-3xl bg-slate-50 p-4">
-              <p className="font-bold text-slate-950">{item.productName}</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="text-base font-bold leading-relaxed tracking-wide text-slate-950">{item.productName}</p>
+              <p className="mt-1 text-sm leading-relaxed tracking-wide text-slate-500">
                 {item.skuName} × {item.quantity}
               </p>
-              <p className="mt-2 font-bold text-slate-950">¥{item.price * item.quantity}</p>
+              <p className="mt-2 text-lg font-bold tracking-wide text-slate-950">¥{item.price * item.quantity}</p>
             </div>
           ))}
         </div>
@@ -54,10 +54,10 @@ export function OrderDetailPage() {
 
         <IOSCard as="section" className="mt-5 p-5">
         <h2 className="text-lg font-bold text-slate-950">收货信息</h2>
-        <p className="mt-3 font-bold text-slate-950">
+        <p className="mt-3 font-bold leading-relaxed tracking-wide text-slate-950">
           {order.addressSnapshot.receiver} {order.addressSnapshot.phone}
         </p>
-        <p className="mt-1 text-sm leading-6 text-slate-500">
+        <p className="mt-1 text-sm leading-relaxed tracking-wide text-slate-500">
           {order.addressSnapshot.province} {order.addressSnapshot.city} {order.addressSnapshot.detail}
         </p>
         </IOSCard>
@@ -66,9 +66,9 @@ export function OrderDetailPage() {
         <h2 className="text-lg font-bold text-slate-950">支付信息</h2>
         <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
           <span>实付金额</span>
-          <span className="text-2xl font-bold text-slate-950">¥{order.totalAmount}</span>
+          <span className="text-2xl font-bold tracking-wide text-slate-950">¥{order.totalAmount}</span>
         </div>
-        {order.paidAt ? <p className="mt-2 text-sm text-slate-500">支付时间 {order.paidAt}</p> : null}
+        {order.paidAt ? <p className="mt-2 text-sm leading-relaxed tracking-wide text-slate-500">支付时间 {order.paidAt}</p> : null}
         </IOSCard>
 
         <IOSCard as="section" className="mt-5 p-5">
@@ -81,9 +81,9 @@ export function OrderDetailPage() {
                   <ShopIcon name="truck" />
                 </span>
                 <div className="min-w-0 flex-1 rounded-3xl bg-slate-50 p-4">
-                  <p className="font-bold text-slate-950">{item.company}</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{item.trackingNo}</p>
-                  <p className="mt-1 text-xs text-slate-400">{item.shippedAt}</p>
+                  <p className="font-bold leading-relaxed tracking-wide text-slate-950">{item.company}</p>
+                  <p className="mt-1 break-all text-sm font-semibold leading-relaxed tracking-wide text-slate-500">{item.trackingNo}</p>
+                  <p className="mt-1 text-xs leading-relaxed tracking-wide text-slate-400">{item.shippedAt}</p>
                 </div>
               </div>
             ))}
