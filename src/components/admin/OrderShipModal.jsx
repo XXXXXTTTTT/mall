@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import { Form, Input, Modal } from 'antd';
 
 export function OrderShipModal({ open, orderId, onClose, onSubmit }) {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.resetFields();
+  }, [form, open]);
 
   async function handleOk() {
     const values = await form.validateFields();

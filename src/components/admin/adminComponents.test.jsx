@@ -204,6 +204,25 @@ describe('admin shared components', () => {
     });
   });
 
+  it('clears shipment form values after close and reopen', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const onClose = vi.fn();
+    const { rerender } = render(
+      <OrderShipModal open orderId="ORD_TEST" onClose={onClose} onSubmit={onSubmit} />,
+    );
+
+    await user.type(screen.getByLabelText('物流公司'), '顺丰速运');
+    await user.type(screen.getByLabelText('物流单号'), 'SF1000000001');
+
+    rerender(<OrderShipModal open={false} orderId="ORD_TEST" onClose={onClose} onSubmit={onSubmit} />);
+    rerender(<OrderShipModal open orderId="ORD_TEST" onClose={onClose} onSubmit={onSubmit} />);
+
+    await waitFor(() => expect(screen.getByLabelText('物流公司')).toBeInTheDocument());
+    expect(screen.getByLabelText('物流公司')).toHaveValue('');
+    expect(screen.getByLabelText('物流单号')).toHaveValue('');
+  });
+
   it('renders statistic cards', () => {
     render(
       <StatisticCardGrid
