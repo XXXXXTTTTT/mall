@@ -1,13 +1,11 @@
-import './App.css';
-import { Outlet } from 'react-router';
+import { RouterProvider } from 'react-router-dom';
+import { AppProvider } from './context/AppContext.jsx';
+import { router } from './router.jsx';
 
-function App() {
+export function App() {
   return (
-    <div className="App">
-      <h1> APP Page</h1>
-      <Outlet />
-    </div>
+    <AppProvider>
+      <RouterProvider router={router} />
+    </AppProvider>
   );
 }
-
-export default App;
