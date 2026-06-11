@@ -23,11 +23,14 @@ export function AdminOrderPage() {
       keyword,
     });
     if (result.success) {
+      setErrorMessage('');
       setOrders(result.data.list);
       setPage(result.data.page);
       setPageSize(result.data.pageSize);
       setTotal(result.data.total);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   useEffect(() => {

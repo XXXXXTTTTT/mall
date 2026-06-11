@@ -29,7 +29,9 @@ const menuConfig = [
 export function AdminLayout() {
   const location = useLocation();
   const session = authService.getAdminSession();
-  const menuItems = menuConfig.filter((item) => !session || permissionService.canAccess(session.roleCode, item.permission));
+  const menuItems = session
+    ? menuConfig.filter((item) => permissionService.canAccess(session.roleCode, item.permission))
+    : [];
   const selectedKey = menuPaths.find((path) => location.pathname.startsWith(path)) || '/admin/dashboard';
 
   return (

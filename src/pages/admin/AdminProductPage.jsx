@@ -36,11 +36,14 @@ export function AdminProductPage() {
       categoryId,
     });
     if (result.success) {
+      setErrorMessage('');
       setProducts(result.data.list);
       setTotal(result.data.total);
       setPage(result.data.page);
       setPageSize(result.data.pageSize);
+      return;
     }
+    setErrorMessage(result.message);
   }
 
   useEffect(() => {

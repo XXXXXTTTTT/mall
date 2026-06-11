@@ -147,6 +147,32 @@ describe('admin c3 pages', () => {
     expect(screen.getByText('运营订单页')).toBeInTheDocument();
   });
 
+  it('hides admin layout navigation before admin session exists', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/admin',
+          element: <AdminLayout />,
+          children: [{ path: 'dashboard', element: <div>未登录布局内容</div> }],
+        },
+      ],
+      { initialEntries: ['/admin/dashboard'] },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findAllByText('商城管理端')).toHaveLength(2);
+    expect(screen.queryByText('数据看板')).not.toBeInTheDocument();
+    expect(screen.queryByText('商品管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('分类管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('订单管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('权限角色')).not.toBeInTheDocument();
+    expect(screen.queryByText('用户管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('账号设置')).not.toBeInTheDocument();
+    expect(screen.queryByText('操作日志')).not.toBeInTheDocument();
+    expect(screen.getByText('未登录布局内容')).toBeInTheDocument();
+  });
+
   it('logs out admin account and returns to login', async () => {
     const user = userEvent.setup();
     await authService.loginAdmin('operator', 'op123456');
@@ -233,6 +259,19 @@ describe('admin c3 pages', () => {
     expect(await screen.findByText('商品不存在')).toBeInTheDocument();
   });
 
+  it('shows product list loading failure messages', async () => {
+    await authService.loginAdmin('admin', 'admin123');
+    vi.spyOn(productService, 'listPagedProducts').mockResolvedValue({
+      success: false,
+      data: null,
+      message: '商品列表加载失败',
+    });
+
+    renderAdmin(['/admin/products'], <AdminProductPage />);
+
+    expect(await screen.findByText('商品列表加载失败')).toBeInTheDocument();
+  });
+
   it('loads order page data through paged order service on first render', async () => {
     await authService.loginAdmin('admin', 'admin123');
     const listPagedOrdersSpy = vi.spyOn(orderService, 'listPagedOrders').mockResolvedValue({
@@ -256,6 +295,19 @@ describe('admin c3 pages', () => {
       }),
     );
     expect(listOrdersSyncSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows order list loading failure messages', async () => {
+    await authService.loginAdmin('admin', 'admin123');
+    vi.spyOn(orderService, 'listPagedOrders').mockResolvedValue({
+      success: false,
+      data: null,
+      message: '订单列表加载失败',
+    });
+
+    renderAdmin(['/admin/orders'], <AdminOrderPage />);
+
+    expect(await screen.findByText('订单列表加载失败')).toBeInTheDocument();
   });
 
   it('ships a paid order and writes logistics', async () => {
