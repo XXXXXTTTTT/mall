@@ -32,6 +32,7 @@ export function OrderListPage() {
           <button
             key={filter.value}
             type="button"
+            aria-pressed={status === filter.value}
             onClick={() => setStatus((value) => (value === filter.value ? '' : filter.value))}
             className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
               status === filter.value

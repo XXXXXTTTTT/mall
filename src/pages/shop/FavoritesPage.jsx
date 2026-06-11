@@ -65,7 +65,7 @@ export function FavoritesPage() {
                   </Link>
                   <p className="mt-3 text-lg font-bold text-slate-950">¥{product.price}</p>
                   <div className="mt-3">
-                    <IconButton ariaLabel="取消收藏" icon="heartFilled" onClick={() => cancelFavorite(product.id)} />
+                    <IconButton ariaLabel={`取消收藏 ${product.name}`} icon="heartFilled" onClick={() => cancelFavorite(product.id)} />
                   </div>
                 </div>
               </div>

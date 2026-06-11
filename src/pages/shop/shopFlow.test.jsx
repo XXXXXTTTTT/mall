@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
-import { addressService, authService, cartService, databaseService, orderService } from '../../mock/mockService.js';
+import { addressService, authService, cartService, databaseService, favoriteService, orderService } from '../../mock/mockService.js';
 import { AddressPage } from './AddressPage.jsx';
 import { Cart } from './Cart.jsx';
 import { CreateOrder } from './CreateOrder.jsx';
@@ -149,10 +149,14 @@ describe('shop transaction flow pages', () => {
     await user.click(screen.getByRole('button', { name: '保存地址' }));
 
     await waitFor(() => expect(screen.getByText('新收货人')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: '编辑地址 新收货人' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '删除 新收货人' })).toBeInTheDocument();
 
+    await favoriteService.toggleFavorite('user-001', 'p-001');
     renderRoutes(['/shop/favorites']);
 
     expect(await screen.findByText('我的收藏')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '取消收藏 曜石无线降噪耳机' })).toBeInTheDocument();
   });
 
   it('guards address actions when no user session exists', async () => {
@@ -182,6 +186,7 @@ describe('shop transaction flow pages', () => {
   });
 
   it('renders user center entries and order list filter', async () => {
+    const user = userEvent.setup();
     renderRoutes(['/shop/user']);
 
     expect(await screen.findByText('测试会员')).toBeInTheDocument();
@@ -198,5 +203,9 @@ describe('shop transaction flow pages', () => {
     expect(await screen.findByText('订单列表')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '已支付' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '已支付' }).className).toContain('min-h-11');
+    const paidFilter = screen.getByRole('button', { name: '已支付' });
+    expect(paidFilter).toHaveAttribute('aria-pressed', 'false');
+    await user.click(paidFilter);
+    expect(paidFilter).toHaveAttribute('aria-pressed', 'true');
   });
 });

@@ -214,10 +214,10 @@ export function AddressPage() {
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {!address.isDefault ? (
-                <IconButton ariaLabel="设置默认" icon="check" onClick={() => setDefault(address.id)} />
+                <IconButton ariaLabel={`设置默认 ${address.receiver}`} icon="check" onClick={() => setDefault(address.id)} />
               ) : null}
-              <IconButton ariaLabel="编辑地址" icon="location" onClick={() => openEditForm(address)} />
-              <IconButton ariaLabel="删除" icon="trash" onClick={() => deleteAddress(address.id)} />
+              <IconButton ariaLabel={`编辑地址 ${address.receiver}`} icon="location" onClick={() => openEditForm(address)} />
+              <IconButton ariaLabel={`删除 ${address.receiver}`} icon="trash" onClick={() => deleteAddress(address.id)} />
             </div>
           </IOSCard>
         ))}
