@@ -1,0 +1,227 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  ORDER_STATUS,
+  addressService,
+  cartService,
+  dashboardService,
+  databaseService,
+  favoriteService,
+  orderService,
+  productService,
+} from './mockService.js';
+
+beforeEach(() => {
+  localStorage.clear();
+  databaseService.initializeDatabase({ force: true });
+});
+
+describe('C3 mock service chain', () => {
+  it('creates, updates, toggles, filters, pages, and deletes products', async () => {
+    const created = await productService.createProduct({
+      name: 'C3 演示商品',
+      categoryId: 'cat-digital-office',
+      price: 288,
+      stock: 12,
+      image: 'https://dummyimage.com/640x480/e8eef3/203244&text=C3',
+      status: 'online',
+      tags: ['新品'],
+      skuOptions: [{ id: 'sku-c3-standard', name: '标准版', stock: 12, price: 288 }],
+      description: 'C3 演示商品描述',
+    });
+
+    expect(created.success).toBe(true);
+    expect(created.data.id).toMatch(/^p-/);
+    expect(productService.listProductsSync().some((product) => product.id === created.data.id)).toBe(true);
+
+    const updated = await productService.updateProduct({
+      ...created.data,
+      name: 'C3 演示商品已编辑',
+      price: 299,
+    });
+
+    expect(updated.success).toBe(true);
+    expect(productService.getProductByIdSync(created.data.id).name).toBe('C3 演示商品已编辑');
+
+    const toggled = await productService.toggleProductStatus(created.data.id, 'offline');
+
+    expect(toggled.success).toBe(true);
+    expect(productService.getProductByIdSync(created.data.id).status).toBe('offline');
+
+    const onlineProducts = await productService.listProducts({ status: 'online' });
+
+    expect(onlineProducts.success).toBe(true);
+    expect(onlineProducts.data.every((product) => product.status === 'online')).toBe(true);
+    expect(onlineProducts.data.some((product) => product.id === created.data.id)).toBe(false);
+
+    const paged = await productService.listPagedProducts({ page: 1, pageSize: 5, status: 'offline' });
+
+    expect(paged.success).toBe(true);
+    expect(paged.data.page).toBe(1);
+    expect(paged.data.pageSize).toBe(5);
+    expect(paged.data.list.some((product) => product.id === created.data.id)).toBe(true);
+    expect(paged.data.total).toBeGreaterThanOrEqual(1);
+
+    const deleted = await productService.deleteProduct(created.data.id);
+
+    expect(deleted.success).toBe(true);
+    expect(productService.getProductByIdSync(created.data.id)).toBeNull();
+  });
+
+  it('rejects invalid product payloads with Chinese messages', async () => {
+    await expect(productService.createProduct({ name: '', categoryId: 'cat-digital-office', price: 1, stock: 1, image: 'x' })).resolves.toMatchObject({
+      success: false,
+      message: '商品名称不能为空',
+    });
+    await expect(productService.createProduct({ name: '坏价格', categoryId: 'cat-digital-office', price: -1, stock: 1, image: 'x' })).resolves.toMatchObject({
+      success: false,
+      message: '商品价格不能小于 0',
+    });
+    await expect(productService.createProduct({ name: '坏库存', categoryId: 'cat-digital-office', price: 1, stock: -1, image: 'x' })).resolves.toMatchObject({
+      success: false,
+      message: '商品库存不能小于 0',
+    });
+    await expect(productService.createProduct({ name: '无分类', categoryId: '', price: 1, stock: 1, image: 'x' })).resolves.toMatchObject({
+      success: false,
+      message: '商品分类不能为空',
+    });
+    await expect(productService.createProduct({ name: '无图片', categoryId: 'cat-digital-office', price: 1, stock: 1, image: '' })).resolves.toMatchObject({
+      success: false,
+      message: '商品图片不能为空',
+    });
+  });
+
+  it('updates cart selection and clears selected items after order creation', async () => {
+    await cartService.addItem({
+      userId: 'user-001',
+      productId: 'p-001',
+      skuId: 'p-001-standard',
+      quantity: 1,
+      selected: true,
+    });
+    await cartService.addItem({
+      userId: 'user-001',
+      productId: 'p-002',
+      skuId: 'p-002-standard',
+      quantity: 1,
+      selected: false,
+    });
+
+    const firstItem = cartService.listCartSync('user-001')[0];
+    const secondItem = cartService.listCartSync('user-001')[1];
+
+    await cartService.updateItemQuantity(firstItem.id, 3);
+    await cartService.toggleItemSelected(secondItem.id, true);
+    await cartService.toggleAllSelected('user-001', false);
+    await cartService.toggleItemSelected(firstItem.id, true);
+
+    expect(cartService.calculateSelectedTotal('user-001')).toEqual({
+      totalQuantity: 3,
+      totalAmount: 2097,
+    });
+
+    await cartService.clearSelectedItems('user-001');
+
+    expect(cartService.listCartSync('user-001')).toHaveLength(1);
+    expect(cartService.listCartSync('user-001')[0].productId).toBe('p-002');
+
+    await cartService.removeItem(cartService.listCartSync('user-001')[0].id);
+
+    expect(cartService.listCartSync('user-001')).toHaveLength(0);
+  });
+
+  it('creates, updates, deletes, and defaults user addresses', async () => {
+    const created = await addressService.createAddress({
+      userId: 'user-001',
+      receiver: '新收货人',
+      phone: '13900000000',
+      province: '上海市',
+      city: '上海市',
+      detail: '演示路 1 号',
+      isDefault: false,
+    });
+
+    expect(created.success).toBe(true);
+
+    await addressService.setDefaultAddress('user-001', created.data.id);
+
+    expect(addressService.getByIdSync(created.data.id).isDefault).toBe(true);
+    expect(addressService.getByIdSync('addr-001').isDefault).toBe(false);
+
+    const updated = await addressService.updateAddress(created.data.id, {
+      ...created.data,
+      detail: '演示路 2 号',
+    });
+
+    expect(updated.success).toBe(true);
+    expect(addressService.getByIdSync(created.data.id).detail).toBe('演示路 2 号');
+
+    const deletedDefault = await addressService.deleteAddress(created.data.id);
+
+    expect(deletedDefault.success).toBe(false);
+    expect(deletedDefault.message).toBe('默认地址不能删除');
+
+    await addressService.setDefaultAddress('user-001', 'addr-001');
+    const deleted = await addressService.deleteAddress(created.data.id);
+
+    expect(deleted.success).toBe(true);
+    expect(addressService.getByIdSync(created.data.id)).toBeNull();
+  });
+
+  it('creates, pays, pages, ships, and reads the same order across frontend and admin', async () => {
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-001',
+      remark: 'C3 演示订单',
+    });
+
+    expect(created.success).toBe(true);
+    expect(created.data.status).toBe(ORDER_STATUS.pendingPayment);
+
+    const paid = await orderService.payOrder(created.data.id);
+
+    expect(paid.success).toBe(true);
+    expect(orderService.getOrderByIdSync(created.data.id).status).toBe(ORDER_STATUS.paid);
+
+    const paged = await orderService.listPagedOrders({ page: 1, pageSize: 10, status: ORDER_STATUS.paid });
+
+    expect(paged.success).toBe(true);
+    expect(paged.data.list.some((order) => order.id === created.data.id)).toBe(true);
+
+    const shipped = await orderService.shipOrder(created.data.id, {
+      company: '顺丰速运',
+      trackingNo: 'SF1000000001',
+    });
+
+    expect(shipped.success).toBe(true);
+    expect(orderService.getOrderByIdSync(created.data.id).status).toBe(ORDER_STATUS.shipped);
+    expect(orderService.getOrderByIdSync(created.data.id).logistics[0]).toMatchObject({
+      company: '顺丰速运',
+      trackingNo: 'SF1000000001',
+    });
+  });
+
+  it('toggles favorites and aggregates dashboard summary', async () => {
+    const added = await favoriteService.toggleFavorite('user-001', 'p-001');
+
+    expect(added.success).toBe(true);
+    expect(added.data.isFavorite).toBe(true);
+    expect(favoriteService.listFavoritesSync('user-001')).toHaveLength(1);
+
+    const removed = await favoriteService.toggleFavorite('user-001', 'p-001');
+
+    expect(removed.success).toBe(true);
+    expect(removed.data.isFavorite).toBe(false);
+    expect(favoriteService.listFavoritesSync('user-001')).toHaveLength(0);
+
+    const summary = await dashboardService.getSummary();
+
+    expect(summary.success).toBe(true);
+    expect(summary.data.productTotal).toBe(30);
+    expect(summary.data.onlineProductTotal).toBe(29);
+    expect(summary.data.orderTotal).toBe(1);
+    expect(summary.data.paidOrderTotal).toBe(1);
+    expect(summary.data.pendingShipmentTotal).toBe(1);
+    expect(summary.data.recentOrders).toHaveLength(1);
+  });
+});

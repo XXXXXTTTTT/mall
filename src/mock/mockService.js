@@ -82,6 +82,16 @@ function appendLog(actor, action, detail) {
   return log;
 }
 
+function paginate(list, page = 1, pageSize = 10) {
+  const start = (page - 1) * pageSize;
+  return {
+    list: list.slice(start, start + pageSize),
+    total: list.length,
+    page,
+    pageSize,
+  };
+}
+
 function seedKey(key, value, force) {
   if (force || localStorage.getItem(key) === null) {
     writeJson(key, value);
@@ -124,20 +134,77 @@ export const productService = {
   getProductByIdSync(productId) {
     return productService.listProductsSync().find((product) => product.id === productId) || null;
   },
+  async createProduct(productPayload) {
+    const validationResult = validateProductPayload(productPayload);
+    if (validationResult) return delay(validationResult);
+
+    const now = new Date().toISOString();
+    const product = {
+      ...productPayload,
+      id: `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      sales: productPayload.sales || 0,
+      tags: productPayload.tags || [],
+      skuOptions: productPayload.skuOptions || [],
+      description: productPayload.description || '',
+      createdAt: now,
+      updatedAt: now,
+    };
+    const products = productService.listProductsSync();
+    products.unshift(product);
+    writeJson(STORAGE_KEYS.products, products);
+    appendLog('管理员', '商品新增', `新增商品 ${product.name}`);
+    return delay(ok(product));
+  },
   async updateProduct(product) {
-    if (!product.name?.trim()) return delay(fail('商品名称不能为空'));
-    if (Number(product.price) < 0) return delay(fail('商品价格不能为负数'));
-    if (Number(product.stock) < 0) return delay(fail('商品库存不能为负数'));
+    const validationResult = validateProductPayload(product);
+    if (validationResult) return delay(validationResult);
 
     const products = productService.listProductsSync();
+    if (!products.some((item) => item.id === product.id)) return delay(fail('商品不存在'));
+
+    const updatedProduct = { ...product, updatedAt: new Date().toISOString() };
     const nextProducts = products.map((item) =>
-      item.id === product.id ? { ...item, ...product, updatedAt: new Date().toISOString() } : item,
+      item.id === product.id ? { ...item, ...updatedProduct } : item,
     );
     writeJson(STORAGE_KEYS.products, nextProducts);
     appendLog('管理员', '商品编辑', `编辑商品 ${product.name}`);
+    return delay(ok(updatedProduct));
+  },
+  async deleteProduct(productId) {
+    const products = productService.listProductsSync();
+    const product = products.find((item) => item.id === productId);
+    if (!product) return delay(fail('商品不存在'));
+
+    writeJson(STORAGE_KEYS.products, products.filter((item) => item.id !== productId));
+    appendLog('管理员', '商品删除', `删除商品 ${product.name}`);
     return delay(ok(product));
   },
+  async toggleProductStatus(productId, status) {
+    const products = productService.listProductsSync();
+    const product = products.find((item) => item.id === productId);
+    if (!product) return delay(fail('商品不存在'));
+
+    product.status = status;
+    product.updatedAt = new Date().toISOString();
+    writeJson(STORAGE_KEYS.products, products);
+    appendLog('管理员', '商品状态', `更新商品 ${product.name} 状态为 ${status}`);
+    return delay(ok(product));
+  },
+  async listPagedProducts(params = {}) {
+    const { page = 1, pageSize = 10, ...filters } = params;
+    const productsResult = await productService.listProducts(filters);
+    return delay(ok(paginate(productsResult.data, page, pageSize)));
+  },
 };
+
+function validateProductPayload(product) {
+  if (!product.name?.trim()) return fail('商品名称不能为空');
+  if (Number(product.price) < 0) return fail('商品价格不能小于 0');
+  if (Number(product.stock) < 0) return fail('商品库存不能小于 0');
+  if (!product.categoryId?.trim()) return fail('商品分类不能为空');
+  if (!product.image?.trim()) return fail('商品图片不能为空');
+  return null;
+}
 
 export const categoryService = {
   listCategoriesSync() {
@@ -241,6 +308,56 @@ export const cartService = {
     writeJson(STORAGE_KEYS.cart, cart);
     return delay(ok(cartService.listCartSync(userId)));
   },
+  async updateItemQuantity(cartItemId, quantity) {
+    if (quantity <= 0) return delay(fail('商品数量必须大于 0'));
+
+    const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
+    const cartItem = cart.find((item) => item.id === cartItemId);
+    if (!cartItem) return delay(fail('购物车商品不存在'));
+
+    const product = productService.getProductByIdSync(cartItem.productId);
+    if (!product) return delay(fail('商品不存在'));
+    if (product.status !== 'online') return delay(fail('商品已下架'));
+    const sku = product.skuOptions.find((item) => item.id === cartItem.skuId);
+    if (!sku) return delay(fail('商品规格不存在'));
+    if (sku.stock < quantity) return delay(fail('库存不足'));
+
+    cartItem.quantity = quantity;
+    writeJson(STORAGE_KEYS.cart, cart);
+    return delay(ok(cartItem));
+  },
+  async toggleItemSelected(cartItemId, selected) {
+    const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
+    const cartItem = cart.find((item) => item.id === cartItemId);
+    if (!cartItem) return delay(fail('购物车商品不存在'));
+
+    cartItem.selected = selected;
+    writeJson(STORAGE_KEYS.cart, cart);
+    return delay(ok(cartItem));
+  },
+  async toggleAllSelected(userId, selected) {
+    const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
+    const userCart = cart.filter((item) => item.userId === userId);
+    userCart.forEach((item) => {
+      item.selected = selected;
+    });
+    writeJson(STORAGE_KEYS.cart, cart);
+    return delay(ok(userCart));
+  },
+  async removeItem(cartItemId) {
+    const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
+    const cartItem = cart.find((item) => item.id === cartItemId);
+    if (!cartItem) return delay(fail('购物车商品不存在'));
+
+    writeJson(STORAGE_KEYS.cart, cart.filter((item) => item.id !== cartItemId));
+    return delay(ok(cartItem));
+  },
+  async clearSelectedItems(userId) {
+    const cart = readJson(STORAGE_KEYS.cart, initialDatabase.cart);
+    const nextCart = cart.filter((item) => item.userId !== userId || !item.selected);
+    writeJson(STORAGE_KEYS.cart, nextCart);
+    return delay(ok(cartService.listCartSync(userId)));
+  },
   calculateSelectedTotal(userId) {
     const cart = cartService.listCartSync(userId).filter((item) => item.selected);
     return cart.reduce(
@@ -265,12 +382,67 @@ export const addressService = {
   getByIdSync(addressId) {
     return readJson(STORAGE_KEYS.addresses, initialDatabase.addresses).find((item) => item.id === addressId) || null;
   },
+  async createAddress(payload) {
+    const addresses = readJson(STORAGE_KEYS.addresses, initialDatabase.addresses);
+    const address = {
+      ...payload,
+      id: `addr-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    };
+    if (address.isDefault) {
+      addresses.forEach((item) => {
+        if (item.userId === address.userId) item.isDefault = false;
+      });
+    }
+    addresses.push(address);
+    writeJson(STORAGE_KEYS.addresses, addresses);
+    return delay(ok(address));
+  },
+  async updateAddress(addressId, payload) {
+    const addresses = readJson(STORAGE_KEYS.addresses, initialDatabase.addresses);
+    const address = addresses.find((item) => item.id === addressId);
+    if (!address) return delay(fail('收货地址不存在'));
+
+    const nextAddress = { ...payload };
+    if (payload.isDefault) {
+      addresses.forEach((item) => {
+        if (item.userId === payload.userId) item.isDefault = false;
+      });
+    } else {
+      nextAddress.isDefault = address.isDefault;
+    }
+    Object.assign(address, nextAddress, { id: addressId });
+    writeJson(STORAGE_KEYS.addresses, addresses);
+    return delay(ok(address));
+  },
+  async deleteAddress(addressId) {
+    const addresses = readJson(STORAGE_KEYS.addresses, initialDatabase.addresses);
+    const address = addresses.find((item) => item.id === addressId);
+    if (!address) return delay(fail('收货地址不存在'));
+    if (address.isDefault) return delay(fail('默认地址不能删除'));
+
+    writeJson(STORAGE_KEYS.addresses, addresses.filter((item) => item.id !== addressId));
+    return delay(ok(address));
+  },
+  async setDefaultAddress(userId, addressId) {
+    const addresses = readJson(STORAGE_KEYS.addresses, initialDatabase.addresses);
+    const address = addresses.find((item) => item.id === addressId && item.userId === userId);
+    if (!address) return delay(fail('收货地址不存在'));
+
+    addresses.forEach((item) => {
+      if (item.userId === userId) item.isDefault = item.id === addressId;
+    });
+    writeJson(STORAGE_KEYS.addresses, addresses);
+    return delay(ok(address));
+  },
 };
 
 export const orderService = {
   listOrdersSync(userId) {
     const orders = readJson(STORAGE_KEYS.orders, initialDatabase.orders);
     return userId ? orders.filter((order) => order.userId === userId) : orders;
+  },
+  getOrderByIdSync(orderId) {
+    return orderService.listOrdersSync().find((order) => order.id === orderId) || null;
   },
   async createOrder({ userId, items, addressId, remark }) {
     if (!items?.length) return delay(fail('订单商品不能为空'));
@@ -285,6 +457,7 @@ export const orderService = {
       if (product.status !== 'online') return delay(fail('商品已下架'));
       const sku = product.skuOptions.find((skuItem) => skuItem.id === item.skuId);
       if (!sku) return delay(fail('商品规格不存在'));
+      if (item.quantity <= 0) return delay(fail('商品数量必须大于 0'));
       if (sku.stock < item.quantity) return delay(fail('库存不足'));
       totalAmount += sku.price * item.quantity;
       orderItems.push({
@@ -323,6 +496,75 @@ export const orderService = {
     order.paidAt = new Date().toISOString();
     writeJson(STORAGE_KEYS.orders, orders);
     return delay(ok(order));
+  },
+  async shipOrder(orderId, payload) {
+    const orders = orderService.listOrdersSync();
+    const order = orders.find((item) => item.id === orderId);
+    if (!order) return delay(fail('订单不存在'));
+    if (order.status !== ORDER_STATUS.paid) return delay(fail('订单状态不允许发货'));
+    if (!payload.company?.trim()) return delay(fail('物流公司不能为空'));
+    if (!payload.trackingNo?.trim()) return delay(fail('物流单号不能为空'));
+
+    const logisticsItem = {
+      company: payload.company,
+      trackingNo: payload.trackingNo,
+      shippedAt: new Date().toISOString(),
+    };
+    order.status = ORDER_STATUS.shipped;
+    order.logistics = [logisticsItem, ...(order.logistics || [])];
+    writeJson(STORAGE_KEYS.orders, orders);
+    return delay(ok(order));
+  },
+  async listPagedOrders(params = {}) {
+    const { page = 1, pageSize = 10, status, userId } = params;
+    const orders = orderService.listOrdersSync(userId).filter((order) => {
+      if (status && order.status !== status) return false;
+      return true;
+    });
+    return delay(ok(paginate(orders, page, pageSize)));
+  },
+};
+
+export const favoriteService = {
+  listFavoritesSync(userId) {
+    return readJson(STORAGE_KEYS.favorites, initialDatabase.favorites).filter((item) => item.userId === userId);
+  },
+  async toggleFavorite(userId, productId) {
+    const product = productService.getProductByIdSync(productId);
+    if (!product) return delay(fail('商品不存在'));
+
+    const favorites = readJson(STORAGE_KEYS.favorites, initialDatabase.favorites);
+    const existing = favorites.find((item) => item.userId === userId && item.productId === productId);
+    if (existing) {
+      writeJson(STORAGE_KEYS.favorites, favorites.filter((item) => item.id !== existing.id));
+      return delay(ok({ isFavorite: false }));
+    }
+
+    const favorite = {
+      id: `fav-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      userId,
+      productId,
+      createdAt: new Date().toISOString(),
+    };
+    favorites.unshift(favorite);
+    writeJson(STORAGE_KEYS.favorites, favorites);
+    return delay(ok({ isFavorite: true, favorite }));
+  },
+};
+
+export const dashboardService = {
+  async getSummary() {
+    const products = productService.listProductsSync();
+    const orders = orderService.listOrdersSync();
+    const paidOrders = orders.filter((order) => order.status === ORDER_STATUS.paid);
+    return delay(ok({
+      productTotal: products.length,
+      onlineProductTotal: products.filter((product) => product.status === 'online').length,
+      orderTotal: orders.length,
+      paidOrderTotal: paidOrders.length,
+      pendingShipmentTotal: paidOrders.length,
+      recentOrders: orders.slice(0, 5),
+    }));
   },
 };
 
