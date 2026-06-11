@@ -36,12 +36,68 @@ function renderShop(initialEntries) {
   );
 }
 
+function renderShopShell(initialEntries) {
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/shop',
+        element: <ShopLayout />,
+        children: [
+          { index: true, element: <div>首页桩</div> },
+          { path: 'category', element: <div>分类桩</div> },
+          { path: 'cart', element: <div>购物车桩</div> },
+          { path: 'user', element: <div>我的桩</div> },
+          { path: 'detail/:productId', element: <div>商品详情桩</div> },
+          { path: 'create-order', element: <div>确认订单桩</div> },
+          { path: 'pay/:orderId', element: <div>模拟支付桩</div> },
+          { path: 'pay-success/:orderId', element: <div>支付成功桩</div> },
+          { path: 'orders', element: <div>订单列表桩</div> },
+          { path: 'orders/:orderId', element: <div>订单详情桩</div> },
+          { path: 'address', element: <div>收货地址桩</div> },
+          { path: 'favorites', element: <div>我的收藏桩</div> },
+          { path: 'login', element: <div>前台登录桩</div> },
+        ],
+      },
+    ],
+    { initialEntries },
+  );
+
+  return render(<RouterProvider router={router} />);
+}
+
 beforeEach(() => {
   localStorage.clear();
   databaseService.initializeDatabase({ force: true });
 });
 
 describe('shop browse pages', () => {
+  it('shows the bottom Dock only on primary shop tab routes', () => {
+    const primaryPaths = ['/shop', '/shop/category', '/shop/cart', '/shop/user'];
+    const secondaryPaths = [
+      '/shop/detail/p-001',
+      '/shop/create-order',
+      '/shop/pay/ORD_202606010001',
+      '/shop/pay-success/ORD_202606010001',
+      '/shop/orders',
+      '/shop/orders/ORD_202606010001',
+      '/shop/address',
+      '/shop/favorites',
+      '/shop/login',
+    ];
+
+    primaryPaths.forEach((path) => {
+      const view = renderShopShell([path]);
+      expect(screen.getByTestId('shop-bottom-dock')).toBeInTheDocument();
+      view.unmount();
+    });
+
+    secondaryPaths.forEach((path) => {
+      const view = renderShopShell([path]);
+      expect(screen.queryByTestId('shop-bottom-dock')).not.toBeInTheDocument();
+      view.unmount();
+    });
+  });
+
   it('hides offline products on home and category pages', async () => {
     renderShop(['/shop']);
 
