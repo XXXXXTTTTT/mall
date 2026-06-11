@@ -1,20 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
 import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { useAppContext } from '../../context/AppContext.jsx';
-import { cartService, favoriteService, productService } from '../../mock/mockService.js';
+import { favoriteService, productService } from '../../mock/mockService.js';
 
 export function Detail() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const product = productService.getProductByIdSync(productId);
-  const { state, loginUser } = useAppContext();
+  const { state, loginUser, addToCart, toggleFavorite } = useAppContext();
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!state.user || !product) {
+      setIsFavorite(false);
+      return;
+    }
+
+    const favorites = favoriteService.listFavoritesSync(state.user.id);
+    setIsFavorite(favorites.some((favorite) => favorite.productId === product.id));
+  }, [product, state.user]);
 
   if (!product) {
     return (
@@ -25,7 +35,9 @@ export function Detail() {
   }
 
   const isOnline = product.status === 'online';
-  const selectedSku = product.skuOptions[0];
+  const selectedSku = product.skuOptions?.[0] || null;
+  const unavailableMessage = !selectedSku ? '商品规格不存在' : selectedSku.stock < 1 ? '库存不足' : '';
+  const canPurchase = isOnline && !unavailableMessage;
 
   async function resolveUserId() {
     if (state.user) return state.user.id;
@@ -39,7 +51,7 @@ export function Detail() {
   }
 
   async function handleAddToCart() {
-    if (!isOnline || isSubmitting) return;
+    if (!canPurchase || isSubmitting) return;
 
     setIsSubmitting(true);
     setMessage('');
@@ -49,8 +61,7 @@ export function Detail() {
       return;
     }
 
-    const result = await cartService.addItem({
-      userId,
+    const result = await addToCart({
       productId: product.id,
       skuId: selectedSku.id,
       quantity,
@@ -60,10 +71,9 @@ export function Detail() {
   }
 
   async function handleToggleFavorite() {
-    const userId = await resolveUserId();
-    if (!userId) return;
+    if (!(await resolveUserId())) return;
 
-    const result = await favoriteService.toggleFavorite(userId, product.id);
+    const result = await toggleFavorite(product.id);
     if (result.success) {
       setIsFavorite(result.data.isFavorite);
     } else {
@@ -95,10 +105,20 @@ export function Detail() {
 
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-950">规格</p>
-            <p className="mt-1 text-sm text-slate-500">{selectedSku.name}</p>
+            <p className="mt-1 text-sm text-slate-500">{selectedSku?.name || '暂无规格'}</p>
+            {unavailableMessage ? (
+              <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+                {unavailableMessage}
+              </p>
+            ) : null}
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-600">数量</span>
-              <QuantityStepper value={quantity} onChange={setQuantity} max={selectedSku.stock} disabled={!isOnline} />
+              <QuantityStepper
+                value={quantity}
+                onChange={setQuantity}
+                max={selectedSku?.stock || 1}
+                disabled={!canPurchase}
+              />
             </div>
           </div>
 
@@ -120,7 +140,7 @@ export function Detail() {
         </button>
         <button
           type="button"
-          disabled={!isOnline || isSubmitting}
+          disabled={!canPurchase || isSubmitting}
           onClick={handleAddToCart}
           className="rounded-full bg-[#1F6F8B] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(31,111,139,0.28)] transition hover:bg-[#185C74] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6F8B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
@@ -128,7 +148,7 @@ export function Detail() {
         </button>
         <button
           type="button"
-          disabled={!isOnline}
+          disabled={!canPurchase}
           onClick={() => navigate('/shop/create-order')}
           className="rounded-full bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
-import { databaseService, productService } from '../../mock/mockService.js';
+import { authService, databaseService, favoriteService, productService } from '../../mock/mockService.js';
 import { Category } from './Category.jsx';
 import { Detail } from './Detail.jsx';
 import { Home } from './Home.jsx';
@@ -69,5 +69,38 @@ describe('shop browse pages', () => {
     await user.click(screen.getByRole('button', { name: '加入购物车' }));
 
     await waitFor(() => expect(screen.getByText('已加入购物车')).toBeInTheDocument());
+  });
+
+  it('keeps empty-sku product detail stable and disables purchase actions', async () => {
+    const created = await productService.createProduct({
+      name: '空规格商品',
+      categoryId: 'cat-digital-office',
+      price: 128,
+      stock: 8,
+      image: 'https://dummyimage.com/640x480/e8eef3/203244&text=empty-sku',
+      status: 'online',
+      skuOptions: [],
+    });
+
+    renderShop([`/shop/detail/${created.data.id}`]);
+
+    expect(await screen.findByText('空规格商品')).toBeInTheDocument();
+    expect(screen.getByText('商品规格不存在')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '加入购物车' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '立即购买' })).toBeDisabled();
+  });
+
+  it('initializes and syncs favorite status for logged-in user', async () => {
+    const user = userEvent.setup();
+    await authService.loginUser('member', '123456');
+    await favoriteService.toggleFavorite('user-001', 'p-001');
+
+    renderShop(['/shop/detail/p-001']);
+
+    const cancelButton = await screen.findByRole('button', { name: '取消收藏' });
+    await user.click(cancelButton);
+
+    await waitFor(() => expect(screen.getByRole('button', { name: '收藏' })).toBeInTheDocument());
+    expect(favoriteService.listFavoritesSync('user-001')).toHaveLength(0);
   });
 });
