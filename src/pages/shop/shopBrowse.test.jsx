@@ -77,6 +77,18 @@ describe('shop browse pages', () => {
     expect(screen.getByRole('button', { name: '立即购买' })).toBeDisabled();
   });
 
+  it('renders product detail with glass purchase bar and touch-safe actions', async () => {
+    renderShop(['/shop/detail/p-001']);
+
+    expect(await screen.findByText('曜石无线降噪耳机')).toBeInTheDocument();
+    const purchaseBar = screen.getByTestId('detail-purchase-bar');
+    expect(purchaseBar.className).toContain('backdrop-blur-md');
+    expect(purchaseBar.className).toContain('bg-white/80');
+    expect(screen.getByRole('button', { name: '收藏' }).className).toContain('h-11');
+    expect(screen.getByRole('button', { name: '加入购物车' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '立即购买' })).toBeEnabled();
+  });
+
   it('adds online product to cart after login', async () => {
     const user = userEvent.setup();
     await productService.toggleProductStatus('p-001', 'online');

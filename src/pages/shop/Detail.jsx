@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
+import { GlassBar } from '../../components/shop/GlassBar.jsx';
+import { IconButton } from '../../components/shop/IconButton.jsx';
+import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
+import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { useAppContext } from '../../context/AppContext.jsx';
 import { authService, favoriteService, productService } from '../../mock/mockService.js';
@@ -75,30 +79,51 @@ export function Detail() {
   }
 
   return (
-    <main className="space-y-6 px-5 pb-8 pt-6">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[#FBFCFA] shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
-        <div className="relative aspect-[4/3] bg-slate-100">
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+    <main className="space-y-6 px-5 pb-44 pt-6">
+      <IOSCard as="section" className="overflow-hidden">
+        <div className="relative min-h-[420px] overflow-hidden bg-slate-100">
+          <img src={product.image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-transparent to-slate-950/72" />
           <div className="absolute left-4 top-4">
             <StatusTag status={product.status} />
+          </div>
+          <div className="absolute right-4 top-4">
+            <IconButton
+              ariaLabel={isFavorite ? '取消收藏商品' : '收藏商品'}
+              icon={isFavorite ? 'heartFilled' : 'heart'}
+              onClick={handleToggleFavorite}
+            />
           </div>
           {!isOnline ? (
             <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-slate-950/88 px-4 py-3 text-center text-sm font-semibold text-white">
               商品已下架
             </div>
           ) : null}
+          <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-white/18 px-3 py-1 text-sm font-semibold backdrop-blur-md">
+              <ShopIcon name="spark" className="h-4 w-4" />
+              ¥{product.price}
+            </p>
+            <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight">{product.name}</h1>
+          </div>
         </div>
 
         <div className="space-y-5 p-5">
-          <div>
-            <p className="text-sm font-semibold text-[#1F6F8B]">¥{product.price}</p>
-            <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-slate-950">{product.name}</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-500">{product.description}</p>
+          <div className="rounded-[1.75rem] bg-slate-50/80 p-4">
+            <p className="text-sm leading-6 text-slate-500">{product.description}</p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-semibold text-slate-950">规格</p>
-            <p className="mt-1 text-sm text-slate-500">{selectedSku?.name || '暂无规格'}</p>
+          <IOSCard className="space-y-4 bg-white/80 p-4 shadow-[0_16px_38px_rgba(24,36,51,0.08)]">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-3xl bg-slate-50 px-4 py-3">
+                <p className="text-xs font-semibold text-slate-400">规格</p>
+                <p className="mt-1 text-sm font-semibold text-slate-950">{selectedSku?.name || '暂无规格'}</p>
+              </div>
+              <div className="rounded-3xl bg-slate-50 px-4 py-3">
+                <p className="text-xs font-semibold text-slate-400">库存</p>
+                <p className="mt-1 text-sm font-semibold text-slate-950">{selectedSku?.stock ?? 0}</p>
+              </div>
+            </div>
             {unavailableMessage ? (
               <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
                 {unavailableMessage}
@@ -113,7 +138,7 @@ export function Detail() {
                 disabled={!canPurchase}
               />
             </div>
-          </div>
+          </IOSCard>
 
           {message ? (
             <p className="rounded-2xl bg-[#E7F3F4] px-4 py-3 text-center text-sm font-semibold text-[#1F6F8B]">
@@ -121,33 +146,36 @@ export function Detail() {
             </p>
           ) : null}
         </div>
-      </section>
+      </IOSCard>
 
-      <section className="grid grid-cols-[0.8fr_1fr_1fr] gap-3">
-        <button
-          type="button"
+      <GlassBar
+        className="fixed inset-x-0 bottom-24 z-20 mx-auto grid max-w-md grid-cols-[auto_1fr_1fr] gap-3 px-5 py-4"
+        data-testid="detail-purchase-bar"
+      >
+        <IconButton
+          ariaLabel={isFavorite ? '取消收藏' : '收藏'}
+          icon={isFavorite ? 'heartFilled' : 'heart'}
           onClick={handleToggleFavorite}
-          className="rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#1F6F8B]/30 hover:text-[#1F6F8B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6F8B]"
-        >
-          {isFavorite ? '取消收藏' : '收藏'}
-        </button>
+        />
         <button
           type="button"
           disabled={!canPurchase || isSubmitting}
           onClick={handleAddToCart}
-          className="rounded-full bg-[#1F6F8B] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(31,111,139,0.28)] transition hover:bg-[#185C74] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6F8B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#1F6F8B] px-4 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(31,111,139,0.28)] transition hover:bg-[#185C74] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6F8B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
+          <ShopIcon name="bag" className="h-4 w-4" />
           加入购物车
         </button>
         <button
           type="button"
           disabled={!canPurchase}
           onClick={() => navigate('/shop/create-order')}
-          className="rounded-full bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-slate-950 px-4 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
+          <ShopIcon name="check" className="h-4 w-4" />
           立即购买
         </button>
-      </section>
+      </GlassBar>
     </main>
   );
 }
