@@ -66,7 +66,7 @@ describe('route guards', () => {
       ['/shop/cart'],
     );
 
-    expect(await screen.findByText('前台登录')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: '前台登录' })).toBeInTheDocument();
   });
 
   it('blocks operator from admin product page', async () => {
