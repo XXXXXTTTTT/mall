@@ -1,10 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 
 const navItems = [
-  { to: '/shop', label: '首页' },
-  { to: '/shop/category', label: '分类' },
-  { to: '/shop/cart', label: '购物车' },
-  { to: '/shop/user', label: '我的' },
+  { to: '/shop', label: '首页', icon: 'home' },
+  { to: '/shop/category', label: '分类', icon: 'grid' },
+  { to: '/shop/cart', label: '购物车', icon: 'bag' },
+  { to: '/shop/user', label: '我的', icon: 'user' },
 ];
 
 export function ShopLayout() {
@@ -13,7 +14,11 @@ export function ShopLayout() {
       <div className="mx-auto min-h-screen max-w-md bg-[#FBFCFA] shadow-[0_0_80px_rgba(15,23,42,0.08)]">
         <Outlet />
       </div>
-      <nav className="fixed inset-x-0 bottom-0 mx-auto flex max-w-md justify-around border-t border-slate-200/80 bg-[#FBFCFA]/95 px-4 py-3 shadow-[0_-16px_40px_rgba(15,23,42,0.08)] backdrop-blur">
+      <nav
+        aria-label="前台主导航"
+        data-testid="shop-bottom-dock"
+        className="fixed inset-x-0 bottom-0 mx-auto flex max-w-md justify-around border-t border-white/80 bg-white/80 px-4 py-3 shadow-[0_-16px_40px_rgba(15,23,42,0.1)] backdrop-blur-md"
+      >
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -21,11 +26,12 @@ export function ShopLayout() {
             end={item.to === '/shop'}
             className={({ isActive }) =>
               [
-                'rounded-full px-3 py-2 text-sm font-semibold transition',
+                'flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition',
                 isActive ? 'bg-[#E7F3F4] text-[#1F6F8B]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
               ].join(' ')
             }
           >
+            <ShopIcon name={item.icon} className="h-5 w-5" />
             {item.label}
           </NavLink>
         ))}

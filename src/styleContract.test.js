@@ -8,4 +8,16 @@ describe('global style contract', () => {
 
     expect(css).not.toMatch(/a\s*{[^}]*color\s*:\s*inherit/s);
   });
+
+  it('keeps shop glass and touch target contracts in source', () => {
+    const layout = readFileSync(resolve('src/pages/shop/ShopLayout.jsx'), 'utf-8');
+    const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
+    const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+
+    expect(layout).toContain('backdrop-blur-md');
+    expect(layout).toContain('bg-white/80');
+    expect(layout).toContain('min-h-11');
+    expect(home).toContain('HeroCarousel');
+    expect(category).toContain('分类索引');
+  });
 });

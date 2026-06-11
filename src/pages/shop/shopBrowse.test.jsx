@@ -43,13 +43,30 @@ describe('shop browse pages', () => {
   it('hides offline products on home and category pages', async () => {
     renderShop(['/shop']);
 
-    expect(await screen.findByText('可信赖的精选商城')).toBeInTheDocument();
+    expect(await screen.findByText('云仓优品')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: '搜索商品' })).toBeInTheDocument();
+    expect(screen.getByTestId('shop-hero-carousel')).toBeInTheDocument();
+    expect(screen.getByText('热门商品')).toBeInTheDocument();
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
 
     renderShop(['/shop/category']);
 
-    expect(await screen.findByText('全部分类')).toBeInTheDocument();
+    expect(await screen.findByText('分类索引')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /全部/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /数码办公/ })).toBeInTheDocument();
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
+  });
+
+  it('renders icon dock navigation with glass treatment', async () => {
+    const { container } = renderShop(['/shop']);
+
+    expect(await screen.findByRole('navigation', { name: '前台主导航' })).toBeInTheDocument();
+    const dock = container.querySelector('[data-testid="shop-bottom-dock"]');
+    expect(dock).toBeInTheDocument();
+    expect(dock.className).toContain('backdrop-blur-md');
+    expect(dock.className).toContain('bg-white/80');
+    expect(screen.getByRole('link', { name: /首页/ }).className).toContain('min-h-11');
+    expect(screen.getByRole('link', { name: /分类/ }).className).toContain('min-h-11');
   });
 
   it('blocks add cart for offline product detail', async () => {
