@@ -19,9 +19,18 @@ export function HeroCarousel({ products }) {
     return () => window.clearInterval(timer);
   }, [carouselProducts.length]);
 
+  useEffect(() => {
+    if (carouselProducts.length === 0) {
+      setActiveIndex(0);
+      return;
+    }
+    setActiveIndex((index) => Math.min(index, carouselProducts.length - 1));
+  }, [carouselProducts.length]);
+
   if (carouselProducts.length === 0) return null;
 
-  const product = carouselProducts[activeIndex];
+  const safeActiveIndex = Math.min(activeIndex, carouselProducts.length - 1);
+  const product = carouselProducts[safeActiveIndex];
   const tags = Array.isArray(product.tags) ? product.tags.slice(0, 2) : [];
 
   function goTo(index) {
@@ -86,12 +95,16 @@ export function HeroCarousel({ products }) {
             key={item.id}
             type="button"
             aria-label={`切换到第 ${index + 1} 张轮播图`}
-            aria-pressed={activeIndex === index}
+            aria-pressed={safeActiveIndex === index}
             onClick={() => goTo(index)}
-            className={`h-2.5 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-              activeIndex === index ? 'w-7 bg-slate-950' : 'w-2.5 bg-slate-300'
-            }`}
-          />
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
+            <span
+              className={`h-2.5 rounded-full transition-all ${
+                safeActiveIndex === index ? 'w-7 bg-slate-950' : 'w-2.5 bg-slate-300'
+              }`}
+            />
+          </button>
         ))}
       </div>
     </section>

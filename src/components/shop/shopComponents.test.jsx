@@ -84,6 +84,41 @@ describe('shop shared components', () => {
     expect(screen.getByRole('link', { name: /雾银桌面拓展坞/ })).toBeInTheDocument();
   });
 
+  it('resets hero carousel to the first product when products shrink below the active slide', async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole('button', { name: '切换到第 3 张轮播图' }));
+    expect(screen.getByRole('link', { name: /云感人体工学鼠标/ })).toHaveAttribute('href', '/shop/detail/p-003');
+
+    expect(() => {
+      rerender(
+        <MemoryRouter>
+          <HeroCarousel products={carouselProducts.slice(0, 1)} />
+        </MemoryRouter>,
+      );
+    }).not.toThrow();
+
+    expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toHaveAttribute('href', '/shop/detail/p-001');
+  });
+
+  it('keeps hero carousel dot buttons at a 44px touch target', () => {
+    render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    screen.getAllByRole('button', { name: /切换到第/ }).forEach((button) => {
+      expect(button.className).toContain('min-h-11');
+      expect(button.className).toContain('min-w-11');
+    });
+  });
+
   it('renders a HIG-style navigation bar with a back action', async () => {
     const user = userEvent.setup();
     const onBack = vi.fn();
