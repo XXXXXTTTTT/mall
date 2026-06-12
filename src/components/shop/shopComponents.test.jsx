@@ -179,18 +179,26 @@ describe('shop shared components', () => {
     expect(screen.getByText('查看订单进度')).toBeInTheDocument();
   });
 
-  it('renders metric tiles and product tags with icons', () => {
+  it('supports static, button, and link metric tiles without dropping product tags', async () => {
+    const user = userEvent.setup();
+    const onCouponClick = vi.fn();
     const { container } = render(
-      <>
-        <MetricTile icon="coupon" label="优惠券" value="3" />
+      <MemoryRouter>
+        <MetricTile icon="star" label="积分" value="1280" />
+        <MetricTile icon="coupon" label="优惠券" value="3" onClick={onCouponClick} />
+        <MetricTile icon="heart" label="收藏" value="2" to="/shop/favorites" />
         <ProductTag tag="热门" />
-      </>,
+      </MemoryRouter>,
     );
 
+    expect(screen.getByText('积分')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '优惠券' }));
+    expect(onCouponClick).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('link', { name: '收藏' })).toHaveAttribute('href', '/shop/favorites');
     expect(screen.getByText('优惠券')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('热门')).toBeInTheDocument();
-    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(2);
+    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(4);
   });
 
   it('renders product card with detail link and product facts', () => {

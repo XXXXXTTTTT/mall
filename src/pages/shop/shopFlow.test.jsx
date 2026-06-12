@@ -206,8 +206,19 @@ describe('shop transaction flow pages', () => {
     renderRoutes(['/shop/user']);
 
     expect(await screen.findByText('测试会员')).toBeInTheDocument();
+    const profileHeading = screen.getByRole('heading', { level: 1, name: 'member' });
+    const profileCard = profileHeading.closest('section');
+    expect(profileCard?.className).toContain('sticky');
+    expect(profileCard?.className).toContain('top-0');
+    expect(profileCard?.className).toContain('z-50');
+    expect(screen.getByText('测试会员').className).toContain('text-xs');
     expect(screen.getByText('1280')).toBeInTheDocument();
-    expect(screen.getByText('优惠券')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '积分' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '优惠券' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '收藏' })).toHaveAttribute('href', '/shop/favorites');
+    expect(screen.getByRole('link', { name: '订单' })).toHaveAttribute('href', '/shop/orders');
+    await user.click(screen.getByRole('button', { name: '积分' }));
+    expect(screen.getByRole('status')).toHaveTextContent('积分明细已打开');
     expect(screen.getByText('最近订单')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '我的订单' })).toHaveAttribute('href', '/shop/orders');
     expect(screen.getByRole('link', { name: /我的订单/ })).toHaveAttribute('href', '/shop/orders');

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { MetricTile } from '../../components/shop/MetricTile.jsx';
@@ -7,6 +8,7 @@ import { authService, favoriteService, orderService } from '../../mock/mockServi
 
 export function UserPage() {
   const navigate = useNavigate();
+  const [metricStatus, setMetricStatus] = useState('');
   const user = authService.getUserSession();
   const orders = user ? orderService.listOrdersSync(user.id) : [];
   const favorites = user ? favoriteService.listFavoritesSync(user.id) : [];
@@ -15,6 +17,14 @@ export function UserPage() {
   function logout() {
     authService.logoutUser();
     navigate('/shop/login');
+  }
+
+  function openPoints() {
+    setMetricStatus('积分明细已打开');
+  }
+
+  function openCoupons() {
+    setMetricStatus('优惠券中心已打开');
   }
 
   return (
@@ -26,18 +36,25 @@ export function UserPage() {
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Member</p>
-            <h1 className="mt-2 truncate text-3xl font-bold tracking-tight text-slate-950">{user?.name || '未登录'}</h1>
-            <p className="mt-2 text-sm text-slate-500">{user?.username || ''}</p>
+            <h1 className="mt-2 truncate text-3xl font-bold tracking-tight text-slate-950">
+              {user?.username || '未登录'}
+            </h1>
+            {user?.name ? (
+              <span className="mt-2 inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                {user.name}
+              </span>
+            ) : null}
           </div>
         </div>
       </IOSCard>
 
       <section className="mt-5 grid grid-cols-2 gap-3">
-        <MetricTile icon="star" label="积分" value="1280" />
-        <MetricTile icon="coupon" label="优惠券" value="3" />
-        <MetricTile icon="heart" label="收藏" value={favorites.length} />
-        <MetricTile icon="receipt" label="订单" value={orders.length} />
+        <MetricTile icon="star" label="积分" value="1280" onClick={openPoints} />
+        <MetricTile icon="coupon" label="优惠券" value="3" onClick={openCoupons} />
+        <MetricTile icon="heart" label="收藏" value={favorites.length} to="/shop/favorites" />
+        <MetricTile icon="receipt" label="订单" value={orders.length} to="/shop/orders" />
       </section>
+      {metricStatus ? <p className="sr-only" role="status">{metricStatus}</p> : null}
 
       <IOSCard as="section" className="mt-5 p-5">
         <div className="flex items-center justify-between gap-3">
