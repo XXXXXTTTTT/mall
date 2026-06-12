@@ -30,7 +30,7 @@ export function OrderListPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Orders</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">订单列表</h1>
         </header>
-        <section className="mt-5 flex gap-2 overflow-x-auto pb-1">
+        <section className="scrollbar-none mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map((filter) => (
             <button
               key={filter.value}

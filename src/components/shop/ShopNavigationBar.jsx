@@ -8,7 +8,7 @@ export function ShopNavigationBar({ title, onBack }) {
   return (
     <header
       data-testid="shop-navigation-bar"
-      className="sticky top-0 z-40 flex min-h-16 items-center justify-center border-b border-neutral-100/60 bg-white/85 px-4 text-slate-950 shadow-[0_12px_32px_rgba(15,23,42,0.06)] backdrop-blur-md"
+      className="sticky top-0 z-50 flex min-h-16 items-center justify-center border-b border-neutral-100/60 bg-white/85 px-4 text-slate-950 shadow-[0_12px_32px_rgba(15,23,42,0.06)] backdrop-blur-md"
     >
       <button
         type="button"

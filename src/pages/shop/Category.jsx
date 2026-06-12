@@ -29,7 +29,7 @@ export function Category() {
 
   return (
     <main className="space-y-6 px-5 pb-8 pt-6">
-      <section className="rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)] backdrop-blur-md">
+      <section className="sticky top-0 z-50 rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)] backdrop-blur-md">
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E7F3F4] text-[#1F6F8B]">
             <ShopIcon name="grid" className="h-6 w-6" />

@@ -14,10 +14,16 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
+html,
+body,
+#root {
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
   background:
     radial-gradient(circle at 10% 0%, rgba(31, 111, 139, 0.14), transparent 28rem),
     linear-gradient(180deg, #f7fafc 0%, #eef3f7 100%);
@@ -32,4 +38,13 @@ select {
 
 a {
   text-decoration: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

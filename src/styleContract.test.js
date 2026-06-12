@@ -27,4 +27,28 @@ describe('global style contract', () => {
     expect(orderDetail).toContain('tracking-wide');
     expect(orderDetail).toContain('leading-relaxed');
   });
+
+  it('locks mobile app shell sticky headers and hidden scrollbars', () => {
+    const css = readFileSync(resolve('src/index.css'), 'utf-8');
+    const layout = readFileSync(resolve('src/pages/shop/ShopLayout.jsx'), 'utf-8');
+    const navigationBar = readFileSync(resolve('src/components/shop/ShopNavigationBar.jsx'), 'utf-8');
+    const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
+    const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+    const cart = readFileSync(resolve('src/pages/shop/Cart.jsx'), 'utf-8');
+    const userPage = readFileSync(resolve('src/pages/shop/UserPage.jsx'), 'utf-8');
+    const orderList = readFileSync(resolve('src/pages/shop/OrderListPage.jsx'), 'utf-8');
+
+    expect(css).toContain('overflow-x: hidden');
+    expect(css).toContain('.scrollbar-none');
+    expect(css).toContain('scrollbar-width: none');
+    expect(css).toContain('-ms-overflow-style: none');
+    expect(css).toContain('.scrollbar-none::-webkit-scrollbar');
+    expect(layout).toContain('overflow-x-hidden');
+    expect(navigationBar).toContain('sticky top-0 z-50');
+    expect(home).toContain('sticky top-0 z-50');
+    expect(category).toContain('sticky top-0 z-50');
+    expect(cart).toContain('sticky top-0 z-50');
+    expect(userPage).toContain('sticky top-0 z-50');
+    expect(orderList).toContain('scrollbar-none');
+  });
 });

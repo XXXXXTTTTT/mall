@@ -20,8 +20,8 @@ export function ShopLayout() {
   const showBottomDock = primaryShopPaths.has(normalizePathname(location.pathname));
 
   return (
-    <div className={`min-h-screen bg-[#F7F8F6] text-slate-900 ${showBottomDock ? 'pb-24' : ''}`}>
-      <div className="mx-auto min-h-screen max-w-md bg-[#FBFCFA] shadow-[0_0_80px_rgba(15,23,42,0.08)]">
+    <div className={`min-h-screen overflow-x-hidden bg-[#F7F8F6] text-slate-900 ${showBottomDock ? 'pb-24' : ''}`}>
+      <div className="mx-auto min-h-screen max-w-md overflow-x-hidden bg-[#FBFCFA] shadow-[0_0_80px_rgba(15,23,42,0.08)]">
         <Outlet />
       </div>
       {showBottomDock ? (

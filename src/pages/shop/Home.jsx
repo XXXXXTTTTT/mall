@@ -13,7 +13,7 @@ export function Home() {
 
   return (
     <main className="space-y-8 px-5 pb-8 pt-6">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
+      <section className="sticky top-0 z-50 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#98D3DC]">云仓优品</p>

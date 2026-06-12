@@ -19,7 +19,7 @@ export function UserPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
-      <IOSCard as="section" className="overflow-hidden p-6">
+      <IOSCard as="section" className="sticky top-0 z-50 overflow-hidden p-6">
         <div className="flex items-center gap-4">
           <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-950 text-white shadow-[0_16px_34px_rgba(15,23,42,0.18)]">
             <ShopIcon name="user" className="h-7 w-7" />
