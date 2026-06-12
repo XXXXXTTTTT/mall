@@ -55,4 +55,17 @@ describe('global style contract', () => {
     expect(userPage).toContain('sticky top-0 z-50');
     expect(orderList).toContain('scrollbar-none');
   });
+
+  it('keeps app-like shop pages free from visible web overflow patterns', () => {
+    const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
+    const heroCarousel = readFileSync(resolve('src/components/shop/HeroCarousel.jsx'), 'utf-8');
+    const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+    const orderList = readFileSync(resolve('src/pages/shop/OrderListPage.jsx'), 'utf-8');
+
+    expect(heroCarousel).not.toContain('overflow-x-auto');
+    expect(home).toContain('to="/shop/search"');
+    expect(category).toContain('grid-cols-[6.75rem_1fr]');
+    expect(category).toContain('scrollbar-none');
+    expect(orderList).toContain('scrollbar-none');
+  });
 });

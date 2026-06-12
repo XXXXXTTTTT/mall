@@ -140,6 +140,19 @@ describe('shop browse pages', () => {
     expect(screen.queryByText('雾银桌面拓展坞')).not.toBeInTheDocument();
   });
 
+  it('keeps README-required storefront modules visible from browse entry points', async () => {
+    renderShop(['/shop']);
+
+    expect(await screen.findByRole('link', { name: /搜索商品/ })).toBeInTheDocument();
+    expect(screen.getByTestId('shop-hero-carousel')).toBeInTheDocument();
+    expect(screen.getByText('热门商品')).toBeInTheDocument();
+
+    renderShop(['/shop/category']);
+
+    expect(await screen.findByRole('navigation', { name: '一级分类' })).toBeInTheDocument();
+    expect(screen.getByTestId('category-product-grid')).toBeInTheDocument();
+  });
+
   it('renders icon dock navigation with glass treatment', async () => {
     const { container } = renderShop(['/shop']);
 
