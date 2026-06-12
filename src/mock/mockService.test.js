@@ -28,6 +28,17 @@ describe('mockService database foundation', () => {
     expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.products))).toHaveLength(30);
   });
 
+  it('uses generated no-watermark product images instead of dummy text boxes', () => {
+    const products = productService.listProductsSync();
+
+    expect(products).toHaveLength(30);
+    expect(products.every((product) => product.image.startsWith('data:image/svg+xml;charset=UTF-8,'))).toBe(true);
+    expect(products.every((product) => !product.image.includes('dummyimage.com'))).toBe(true);
+    expect(products.find((product) => product.id === 'p-001').image).toContain('headphones');
+    expect(products.find((product) => product.id === 'p-003').image).toContain('mouse');
+    expect(products.find((product) => product.id === 'p-004').image).toContain('projector');
+  });
+
   it('calculates selected cart totals', async () => {
     await cartService.addItem({
       userId: 'user-001',

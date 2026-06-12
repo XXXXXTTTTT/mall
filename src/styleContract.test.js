@@ -15,6 +15,7 @@ describe('global style contract', () => {
     const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
     const navigationBar = readFileSync(resolve('src/components/shop/ShopNavigationBar.jsx'), 'utf-8');
     const orderDetail = readFileSync(resolve('src/pages/shop/OrderDetailPage.jsx'), 'utf-8');
+    const mockData = readFileSync(resolve('src/mock/mockData.js'), 'utf-8');
 
     expect(layout).toContain('backdrop-blur-md');
     expect(layout).toContain('bg-white/80');
@@ -27,6 +28,8 @@ describe('global style contract', () => {
     expect(navigationBar).toContain('border-b border-neutral-100/60');
     expect(orderDetail).toContain('tracking-wide');
     expect(orderDetail).toContain('leading-relaxed');
+    expect(mockData).not.toContain('dummyimage.com');
+    expect(mockData).toContain('createProductImage');
   });
 
   it('locks mobile app shell sticky headers and hidden scrollbars', () => {

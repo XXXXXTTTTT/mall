@@ -1,3 +1,5 @@
+import { createProductImage } from './productImages.js';
+
 export const ADMIN_ROLE_CODES = {
   admin: 'admin',
   operator: 'operator',
@@ -70,7 +72,7 @@ export const products = productNames.map(([id, name, categoryId, price, stock], 
   price,
   stock,
   sales: 320 - index * 7,
-  image: `https://dummyimage.com/640x480/e8eef3/203244&text=${encodeURIComponent(name)}`,
+  image: createProductImage(id, name),
   status: index === 7 ? 'offline' : 'online',
   tags: index % 3 === 0 ? ['热门', '精选'] : index % 3 === 1 ? ['新品'] : ['限时特惠'],
   skuOptions: [
