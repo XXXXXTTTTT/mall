@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
+import { categories } from '../../mock/mockData.js';
 import { authService, databaseService, favoriteService, productService } from '../../mock/mockService.js';
 import { Category } from './Category.jsx';
 import { CreateOrder } from './CreateOrder.jsx';
@@ -72,6 +73,8 @@ function expectLatestNavigationTitle(title) {
   const bars = screen.getAllByTestId('shop-navigation-bar');
   expect(bars[bars.length - 1]).toHaveTextContent(title);
 }
+
+const primaryCategoryNames = categories.filter((category) => category.parentId === null).map((category) => category.name);
 
 beforeEach(() => {
   localStorage.clear();
@@ -149,7 +152,10 @@ describe('shop browse pages', () => {
 
     renderShop(['/shop/category']);
 
-    expect(await screen.findByRole('navigation', { name: '一级分类' })).toBeInTheDocument();
+    const categoryNavigation = await screen.findByRole('navigation', { name: '一级分类' });
+    ['全部', ...primaryCategoryNames].forEach((categoryName) => {
+      expect(within(categoryNavigation).getByRole('button', { name: categoryName })).toBeInTheDocument();
+    });
     expect(screen.getByTestId('category-product-grid')).toBeInTheDocument();
   });
 
