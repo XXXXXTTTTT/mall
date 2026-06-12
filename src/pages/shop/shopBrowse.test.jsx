@@ -119,9 +119,11 @@ describe('shop browse pages', () => {
 
     renderShop(['/shop/category']);
 
-    expect(await screen.findByText('分类索引')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /全部/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /数码办公/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: '分类' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: '一级分类' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '全部' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '数码办公' })).toBeInTheDocument();
+    expect(screen.getByTestId('category-product-grid')).toBeInTheDocument();
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
   });
 
@@ -150,18 +152,16 @@ describe('shop browse pages', () => {
     expect(within(dock).getByRole('link', { name: /分类/ }).className).toContain('min-h-11');
   });
 
-  it('marks category and sort filters with pressed state', async () => {
+  it('uses a left category rail and marks category filters with pressed state', async () => {
     const user = userEvent.setup();
     renderShop(['/shop/category']);
 
     const allButton = await screen.findByRole('button', { name: '全部' });
     const digitalButton = screen.getByRole('button', { name: '数码办公' });
-    const defaultSortButton = screen.getByRole('button', { name: '综合' });
     const priceSortButton = screen.getByRole('button', { name: '价格升序' });
 
     expect(allButton).toHaveAttribute('aria-pressed', 'true');
     expect(digitalButton).toHaveAttribute('aria-pressed', 'false');
-    expect(defaultSortButton).toHaveAttribute('aria-pressed', 'true');
     expect(priceSortButton).toHaveAttribute('aria-pressed', 'false');
 
     await user.click(digitalButton);
@@ -169,7 +169,6 @@ describe('shop browse pages', () => {
 
     expect(allButton).toHaveAttribute('aria-pressed', 'false');
     expect(digitalButton).toHaveAttribute('aria-pressed', 'true');
-    expect(defaultSortButton).toHaveAttribute('aria-pressed', 'false');
     expect(priceSortButton).toHaveAttribute('aria-pressed', 'true');
   });
 

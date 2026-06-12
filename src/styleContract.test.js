@@ -20,7 +20,8 @@ describe('global style contract', () => {
     expect(layout).toContain('bg-white/80');
     expect(layout).toContain('min-h-11');
     expect(home).toContain('HeroCarousel');
-    expect(category).toContain('分类索引');
+    expect(category).toContain('aria-label="一级分类"');
+    expect(category).toContain('data-testid="category-product-grid"');
     expect(navigationBar).toContain('backdrop-blur-md');
     expect(navigationBar).toContain('bg-white/85');
     expect(navigationBar).toContain('border-b border-neutral-100/60');
