@@ -13,12 +13,24 @@ const waitForMockServiceDelay = async () => {
 };
 
 function Probe() {
-  const { state, loginUser, logoutUser } = useAppContext();
+  const { state, loginUser, registerUser, logoutUser } = useAppContext();
   return (
     <div>
       <p data-testid="user">{state.user?.username || '未登录'}</p>
       <button type="button" onClick={() => loginUser('member', '123456')}>
         登录
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          registerUser({
+            username: 'new-member',
+            password: '123456',
+            name: '新会员',
+          })
+        }
+      >
+        注册
       </button>
       <button type="button" onClick={logoutUser}>
         退出
@@ -50,6 +62,21 @@ describe('AppContext', () => {
     await user.click(screen.getByRole('button', { name: '退出' }));
 
     expect(screen.getByTestId('user')).toHaveTextContent('未登录');
+  });
+
+  it('registers frontend user through context action', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <Probe />
+      </AppProvider>,
+    );
+
+    expect(screen.getByTestId('user')).toHaveTextContent('未登录');
+
+    await user.click(screen.getByRole('button', { name: '注册' }));
+
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('new-member'));
   });
 
   function C3Probe() {

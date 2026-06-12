@@ -63,6 +63,17 @@ export function AppProvider({ children }) {
         dispatch({ type: 'SET_USER', payload: result.data });
         return result;
       },
+      async registerUser(payload) {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        const result = await authService.registerUser(payload);
+        dispatch({ type: 'SET_LOADING', payload: false });
+        if (!result.success) {
+          dispatch({ type: 'SET_ERROR', payload: result.message });
+          return result;
+        }
+        dispatch({ type: 'SET_USER', payload: result.data });
+        return result;
+      },
       refreshCart() {
         if (!state.user) return;
         dispatch({ type: 'SET_CART_ITEMS', payload: cartService.listCartSync(state.user.id) });

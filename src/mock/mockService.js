@@ -250,6 +250,31 @@ export const authService = {
     writeJson(STORAGE_KEYS.session, session);
     return delay(ok(session));
   },
+  async registerUser({ username, password, name }) {
+    const normalizedUsername = username?.trim() || '';
+    const normalizedPassword = password?.trim() || '';
+    const normalizedName = name?.trim() || '';
+    if (!normalizedUsername) return delay(fail('用户名不能为空'));
+    if (!normalizedPassword) return delay(fail('密码不能为空'));
+    if (normalizedPassword.length < 6) return delay(fail('密码至少 6 位'));
+    if (!normalizedName) return delay(fail('昵称不能为空'));
+
+    const users = readJson(STORAGE_KEYS.users, initialDatabase.users);
+    if (users.some((item) => item.username === normalizedUsername)) return delay(fail('用户名已存在'));
+
+    const user = {
+      id: `user-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      username: normalizedUsername,
+      password: normalizedPassword,
+      name: normalizedName,
+      phone: '',
+    };
+    users.push(user);
+    writeJson(STORAGE_KEYS.users, users);
+    const session = { id: user.id, username: user.username, name: user.name };
+    writeJson(STORAGE_KEYS.session, session);
+    return delay(ok(session));
+  },
   logoutUser() {
     writeJson(STORAGE_KEYS.session, null);
     return ok(null);

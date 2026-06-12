@@ -120,4 +120,105 @@ describe('mockService database foundation', () => {
     expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.session)).username).toBe('member');
     expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.adminSession)).roleCode).toBe(ADMIN_ROLE_CODES.admin);
   });
+
+  it('rejects registration with empty username', async () => {
+    const result = await authService.registerUser({
+      username: '',
+      password: '123456',
+      name: '新会员',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('用户名不能为空');
+  });
+
+  it('rejects registration when password is shorter than 6 characters', async () => {
+    const result = await authService.registerUser({
+      username: 'new-member',
+      password: '12345',
+      name: '新会员',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('密码至少 6 位');
+  });
+
+  it('rejects registration with empty password', async () => {
+    const result = await authService.registerUser({
+      username: 'new-member',
+      password: '   ',
+      name: '新会员',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('密码不能为空');
+  });
+
+  it('rejects registration with empty name', async () => {
+    const result = await authService.registerUser({
+      username: 'new-member',
+      password: '123456',
+      name: '   ',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('昵称不能为空');
+  });
+
+  it('rejects registration with duplicate username member', async () => {
+    const result = await authService.registerUser({
+      username: 'member',
+      password: '123456',
+      name: '新会员',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('用户名已存在');
+  });
+
+  it('registers new-member and creates a frontend user session', async () => {
+    const result = await authService.registerUser({
+      username: 'new-member',
+      password: '123456',
+      name: '新会员',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({
+      username: 'new-member',
+      name: '新会员',
+    });
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.session)).username).toBe('new-member');
+    expect(
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.users)).find((user) => user.username === 'new-member'),
+    ).toMatchObject({
+      id: expect.any(String),
+      username: 'new-member',
+      password: '123456',
+      name: '新会员',
+      phone: '',
+    });
+  });
+
+  it('trims registration username, password, and name before creating user', async () => {
+    const result = await authService.registerUser({
+      username: ' new-member ',
+      password: ' 123456 ',
+      name: ' 新会员 ',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({
+      username: 'new-member',
+      name: '新会员',
+    });
+    expect(
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.users)).find((user) => user.username === 'new-member'),
+    ).toMatchObject({
+      username: 'new-member',
+      password: '123456',
+      name: '新会员',
+      phone: '',
+    });
+  });
 });
