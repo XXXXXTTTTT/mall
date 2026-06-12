@@ -19,14 +19,6 @@ export function HeroCarousel({ products }) {
     return () => window.clearInterval(timer);
   }, [carouselProducts.length]);
 
-  useEffect(() => {
-    if (carouselProducts.length === 0) {
-      setActiveIndex(0);
-      return;
-    }
-    setActiveIndex((index) => Math.min(index, carouselProducts.length - 1));
-  }, [carouselProducts.length]);
-
   if (carouselProducts.length === 0) return null;
 
   const safeActiveIndex = Math.min(activeIndex, carouselProducts.length - 1);
