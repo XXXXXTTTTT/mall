@@ -39,6 +39,27 @@ describe('mockService database foundation', () => {
     expect(products.find((product) => product.id === 'p-004').image).toContain('projector');
   });
 
+  it('migrates legacy dummy product images without resetting edited fields', () => {
+    const legacyProducts = productService.listProductsSync().map((product) =>
+      product.id === 'p-001'
+        ? {
+            ...product,
+            image: 'https://dummyimage.com/640x480/e8eef3/203244&text=legacy',
+            stock: 77,
+          }
+        : product,
+    );
+    localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(legacyProducts));
+
+    databaseService.initializeDatabase();
+
+    const product = productService.getProductByIdSync('p-001');
+    expect(product.image.startsWith('data:image/svg+xml;charset=UTF-8,')).toBe(true);
+    expect(product.image).toContain('headphones');
+    expect(product.image).not.toContain('dummyimage.com');
+    expect(product.stock).toBe(77);
+  });
+
   it('calculates selected cart totals', async () => {
     await cartService.addItem({
       userId: 'user-001',

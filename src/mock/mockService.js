@@ -3,6 +3,7 @@ import {
   ORDER_STATUS,
   initialDatabase,
 } from './mockData.js';
+import { createProductImage } from './productImages.js';
 
 export { ADMIN_ROLE_CODES, ORDER_STATUS };
 
@@ -98,9 +99,26 @@ function seedKey(key, value, force) {
   }
 }
 
+function migrateProductImages() {
+  const products = readJson(STORAGE_KEYS.products, initialDatabase.products);
+  let hasChanged = false;
+  const nextProducts = products.map((product) => {
+    if (typeof product.image === 'string' && product.image.includes('dummyimage.com')) {
+      hasChanged = true;
+      return { ...product, image: createProductImage(product.id, product.name) };
+    }
+    return product;
+  });
+
+  if (hasChanged) {
+    writeJson(STORAGE_KEYS.products, nextProducts);
+  }
+}
+
 export const databaseService = {
   initializeDatabase({ force = false } = {}) {
     seedKey(STORAGE_KEYS.products, initialDatabase.products, force);
+    migrateProductImages();
     seedKey(STORAGE_KEYS.categories, initialDatabase.categories, force);
     seedKey(STORAGE_KEYS.orders, initialDatabase.orders, force);
     seedKey(STORAGE_KEYS.users, initialDatabase.users, force);
