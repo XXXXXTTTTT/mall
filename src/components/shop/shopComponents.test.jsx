@@ -1,8 +1,9 @@
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EmptyState } from './EmptyState.jsx';
+import { HeroCarousel } from './HeroCarousel.jsx';
 import { IconButton } from './IconButton.jsx';
 import { MetricTile } from './MetricTile.jsx';
 import { ProductCard } from './ProductCard.jsx';
@@ -24,7 +25,65 @@ const product = {
   status: 'online',
 };
 
+const carouselProducts = [
+  { ...product, id: 'p-001', name: '曜石无线降噪耳机' },
+  { ...product, id: 'p-002', name: '雾银桌面拓展坞' },
+  { ...product, id: 'p-003', name: '云感人体工学鼠标' },
+];
+
+beforeEach(() => {
+  vi.useRealTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe('shop shared components', () => {
+  it('renders hero carousel without native horizontal scrolling', () => {
+    render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    const carousel = screen.getByTestId('shop-hero-carousel');
+    expect(carousel.className).not.toContain('overflow-x-auto');
+    expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toHaveAttribute('href', '/shop/detail/p-001');
+    expect(screen.getAllByRole('button', { name: /切换到第/ })).toHaveLength(3);
+  });
+
+  it('auto advances and loops hero carousel slides', async () => {
+    vi.useFakeTimers();
+    render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toBeInTheDocument();
+
+    await vi.advanceTimersByTimeAsync(3600);
+    expect(screen.getByRole('link', { name: /雾银桌面拓展坞/ })).toBeInTheDocument();
+
+    await vi.advanceTimersByTimeAsync(7200);
+    expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toBeInTheDocument();
+  });
+
+  it('supports touch swipe to change hero carousel slide', () => {
+    render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    const carousel = screen.getByTestId('shop-hero-carousel');
+    fireEvent.touchStart(carousel, { touches: [{ clientX: 260 }] });
+    fireEvent.touchEnd(carousel, { changedTouches: [{ clientX: 80 }] });
+
+    expect(screen.getByRole('link', { name: /雾银桌面拓展坞/ })).toBeInTheDocument();
+  });
+
   it('renders a HIG-style navigation bar with a back action', async () => {
     const user = userEvent.setup();
     const onBack = vi.fn();

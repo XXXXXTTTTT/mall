@@ -113,6 +113,7 @@ describe('shop browse pages', () => {
     expect(await screen.findByRole('link', { name: /搜索商品/ })).toHaveAttribute('href', '/shop/search');
     expect(screen.queryByText('可信赖的精选商城')).not.toBeInTheDocument();
     expect(screen.getByTestId('shop-hero-carousel')).toBeInTheDocument();
+    expect(screen.getByTestId('shop-hero-carousel').className).not.toContain('overflow-x-auto');
     expect(screen.getByText('热门商品')).toBeInTheDocument();
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
 
