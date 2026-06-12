@@ -54,7 +54,11 @@ export function UserPage() {
         <MetricTile icon="heart" label="收藏" value={favorites.length} to="/shop/favorites" />
         <MetricTile icon="receipt" label="订单" value={orders.length} to="/shop/orders" />
       </section>
-      {metricStatus ? <p className="sr-only" role="status">{metricStatus}</p> : null}
+      {metricStatus ? (
+        <p className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-lg" role="status">
+          {metricStatus}
+        </p>
+      ) : null}
 
       <IOSCard as="section" className="mt-5 p-5">
         <div className="flex items-center justify-between gap-3">

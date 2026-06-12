@@ -218,7 +218,10 @@ describe('shop transaction flow pages', () => {
     expect(screen.getByRole('link', { name: '收藏' })).toHaveAttribute('href', '/shop/favorites');
     expect(screen.getByRole('link', { name: '订单' })).toHaveAttribute('href', '/shop/orders');
     await user.click(screen.getByRole('button', { name: '积分' }));
-    expect(screen.getByRole('status')).toHaveTextContent('积分明细已打开');
+    const metricStatus = screen.getByRole('status');
+    expect(metricStatus).toHaveTextContent('积分明细已打开');
+    expect(metricStatus.className).not.toContain('sr-only');
+    expect(metricStatus.className).toContain('bg-slate-950');
     expect(screen.getByText('最近订单')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '我的订单' })).toHaveAttribute('href', '/shop/orders');
     expect(screen.getByRole('link', { name: /我的订单/ })).toHaveAttribute('href', '/shop/orders');
