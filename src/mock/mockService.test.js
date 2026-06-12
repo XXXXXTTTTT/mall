@@ -221,4 +221,21 @@ describe('mockService database foundation', () => {
       phone: '',
     });
   });
+
+  it('logs in with the same normalized credentials after registration and logout', async () => {
+    await authService.registerUser({
+      username: ' padded-member ',
+      password: ' 123456 ',
+      name: ' 空格会员 ',
+    });
+    authService.logoutUser();
+
+    const result = await authService.loginUser(' padded-member ', ' 123456 ');
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({
+      username: 'padded-member',
+      name: '空格会员',
+    });
+  });
 });

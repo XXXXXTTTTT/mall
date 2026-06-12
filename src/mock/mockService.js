@@ -243,8 +243,10 @@ export const categoryService = {
 
 export const authService = {
   async loginUser(username, password) {
+    const normalizedUsername = username?.trim() || '';
+    const normalizedPassword = password?.trim() || '';
     const users = readJson(STORAGE_KEYS.users, initialDatabase.users);
-    const user = users.find((item) => item.username === username && item.password === password);
+    const user = users.find((item) => item.username === normalizedUsername && item.password === normalizedPassword);
     if (!user) return delay(fail('用户名或密码错误'));
     const session = { id: user.id, username: user.username, name: user.name };
     writeJson(STORAGE_KEYS.session, session);
