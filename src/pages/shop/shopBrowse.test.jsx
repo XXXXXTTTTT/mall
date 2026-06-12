@@ -1,5 +1,5 @@
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppProvider } from '../../context/AppContext.jsx';
@@ -9,6 +9,7 @@ import { CreateOrder } from './CreateOrder.jsx';
 import { Detail } from './Detail.jsx';
 import { Home } from './Home.jsx';
 import { LoginPage } from './LoginPage.jsx';
+import { SearchPage } from './SearchPage.jsx';
 import { ShopLayout } from './ShopLayout.jsx';
 
 function renderShop(initialEntries) {
@@ -23,6 +24,7 @@ function renderShop(initialEntries) {
           { path: 'detail/:productId', element: <Detail /> },
           { path: 'create-order', element: <CreateOrder /> },
           { path: 'login', element: <LoginPage /> },
+          { path: 'search', element: <SearchPage /> },
         ],
       },
     ],
@@ -56,6 +58,7 @@ function renderShopShell(initialEntries) {
           { path: 'address', element: <div>收货地址桩</div> },
           { path: 'favorites', element: <div>我的收藏桩</div> },
           { path: 'login', element: <div>前台登录桩</div> },
+          { path: 'search', element: <div>搜索页桩</div> },
         ],
       },
     ],
@@ -88,6 +91,7 @@ describe('shop browse pages', () => {
       '/shop/address',
       '/shop/favorites',
       '/shop/login',
+      '/shop/search',
     ];
 
     primaryPaths.forEach((path) => {
@@ -106,8 +110,8 @@ describe('shop browse pages', () => {
   it('hides offline products on home and category pages', async () => {
     renderShop(['/shop']);
 
-    expect(await screen.findByText('云仓优品')).toBeInTheDocument();
-    expect(screen.getByRole('searchbox', { name: '搜索商品' })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /搜索商品/ })).toHaveAttribute('href', '/shop/search');
+    expect(screen.queryByText('可信赖的精选商城')).not.toBeInTheDocument();
     expect(screen.getByTestId('shop-hero-carousel')).toBeInTheDocument();
     expect(screen.getByText('热门商品')).toBeInTheDocument();
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
@@ -120,6 +124,19 @@ describe('shop browse pages', () => {
     expect(screen.queryByText('恒温香薰加湿器')).not.toBeInTheDocument();
   });
 
+  it('opens a dedicated search page and filters online products', async () => {
+    const user = userEvent.setup();
+    renderShop(['/shop/search']);
+
+    expect(await screen.findByText('搜索商品')).toBeInTheDocument();
+    const searchbox = screen.getByRole('searchbox', { name: '输入商品关键词' });
+
+    await user.type(searchbox, '耳机');
+
+    expect(await screen.findByText('曜石无线降噪耳机')).toBeInTheDocument();
+    expect(screen.queryByText('雾银桌面拓展坞')).not.toBeInTheDocument();
+  });
+
   it('renders icon dock navigation with glass treatment', async () => {
     const { container } = renderShop(['/shop']);
 
@@ -128,8 +145,8 @@ describe('shop browse pages', () => {
     expect(dock).toBeInTheDocument();
     expect(dock.className).toContain('backdrop-blur-md');
     expect(dock.className).toContain('bg-white/80');
-    expect(screen.getByRole('link', { name: /首页/ }).className).toContain('min-h-11');
-    expect(screen.getByRole('link', { name: /分类/ }).className).toContain('min-h-11');
+    expect(within(dock).getByRole('link', { name: /首页/ }).className).toContain('min-h-11');
+    expect(within(dock).getByRole('link', { name: /分类/ }).className).toContain('min-h-11');
   });
 
   it('marks category and sort filters with pressed state', async () => {

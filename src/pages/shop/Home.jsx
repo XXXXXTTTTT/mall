@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { HeroCarousel } from '../../components/shop/HeroCarousel.jsx';
 import { IconButton } from '../../components/shop/IconButton.jsx';
 import { ProductCard } from '../../components/shop/ProductCard.jsx';
@@ -13,25 +14,19 @@ export function Home() {
 
   return (
     <main className="space-y-8 px-5 pb-8 pt-6">
-      <section className="sticky top-0 z-50 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#98D3DC]">云仓优品</p>
-            <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight">可信赖的精选商城</h1>
-          </div>
-          <IconButton ariaLabel="打开索引" icon="grid" to="/shop/category" />
+      <header className="sticky top-0 z-50 -mx-5 border-b border-white/70 bg-[#FBFCFA]/90 px-5 py-4 shadow-[0_14px_34px_rgba(24,36,51,0.08)] backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/shop/search"
+            aria-label="搜索商品"
+            className="flex min-h-12 flex-1 items-center gap-3 rounded-full border border-slate-200/80 bg-white px-4 text-left text-sm font-semibold text-slate-400 shadow-sm transition hover:border-teal-200 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
+            <ShopIcon name="search" className="h-5 w-5 shrink-0" />
+            <span>搜索商品、分类或生活方式</span>
+          </Link>
+          <IconButton ariaLabel="打开分类" icon="grid" to="/shop/category" />
         </div>
-        <p className="mt-3 text-sm leading-6 text-slate-300">精选高频生活商品，用稳定服务、透明库存和克制价格，让每一次下单更安心。</p>
-        <label className="mt-6 flex items-center gap-3 rounded-full border border-white/10 bg-white px-5 py-3 text-slate-950 transition focus-within:border-[#98D3DC] focus-within:ring-2 focus-within:ring-[#98D3DC]/50">
-          <ShopIcon name="search" className="h-5 w-5 shrink-0 text-slate-400" />
-          <span className="sr-only">搜索商品</span>
-          <input
-            type="search"
-            placeholder="搜索商品、分类或生活方式"
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-slate-400"
-          />
-        </label>
-      </section>
+      </header>
 
       <HeroCarousel products={onlineProducts} />
 

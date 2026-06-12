@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext.jsx';
 import { authService, databaseService } from './mock/mockService.js';
 import { Cart } from './pages/shop/Cart.jsx';
 import { LoginPage } from './pages/shop/LoginPage.jsx';
+import { SearchPage } from './pages/shop/SearchPage.jsx';
 import { AdminProductPage } from './pages/admin/AdminProductPage.jsx';
 import { AdminLoginPage } from './pages/admin/AdminLoginPage.jsx';
 import { NoPermissionPage } from './pages/admin/NoPermissionPage.jsx';
@@ -67,6 +68,20 @@ describe('route guards', () => {
     );
 
     expect(await screen.findByRole('heading', { level: 1, name: '前台登录' })).toBeInTheDocument();
+  });
+
+  it('renders shop search as an unguarded frontend route', async () => {
+    renderWithRouter(
+      [
+        {
+          path: '/shop/search',
+          element: <SearchPage />,
+        },
+      ],
+      ['/shop/search'],
+    );
+
+    expect(await screen.findByRole('searchbox', { name: '输入商品关键词' })).toBeInTheDocument();
   });
 
   it('blocks operator from admin product page', async () => {

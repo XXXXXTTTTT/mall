@@ -24,6 +24,7 @@ import { OrderDetailPage } from './pages/shop/OrderDetailPage.jsx';
 import { OrderListPage } from './pages/shop/OrderListPage.jsx';
 import { Pay } from './pages/shop/Pay.jsx';
 import { PaySuccess } from './pages/shop/PaySuccess.jsx';
+import { SearchPage } from './pages/shop/SearchPage.jsx';
 import { ShopLayout } from './pages/shop/ShopLayout.jsx';
 import { UserPage } from './pages/shop/UserPage.jsx';
 
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: 'category', element: <Category /> },
       { path: 'detail/:productId', element: <Detail /> },
       { path: 'login', element: <LoginPage /> },
+      { path: 'search', element: <SearchPage /> },
       { path: 'pay/:orderId', element: <Pay /> },
       { path: 'pay-success/:orderId', element: <PaySuccess /> },
       {
