@@ -241,11 +241,28 @@ describe('shop transaction flow pages', () => {
   });
 
   it('renders top navigation on standalone login page', async () => {
+    const user = userEvent.setup();
     authService.logoutUser();
 
-    renderRoutes(['/shop/login']);
+    renderRoutes([{ pathname: '/shop/login', state: { from: '/shop/user' } }]);
 
     expect(await screen.findAllByText('前台登录')).not.toHaveLength(0);
     expectLatestNavigationTitle('前台登录');
+    expect(screen.getByLabelText('用户名')).toBeInTheDocument();
+    expect(screen.getByLabelText('密码')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '登录' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '使用测试会员登录' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '去注册' }));
+
+    expect(screen.getByRole('heading', { level: 1, name: '注册账号' })).toBeInTheDocument();
+    expect(screen.getByLabelText('昵称')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('用户名'), 'new-member');
+    await user.type(screen.getByLabelText('密码'), '123456');
+    await user.type(screen.getByLabelText('昵称'), '新会员');
+    await user.click(screen.getByRole('button', { name: '注册' }));
+
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'new-member' })).toBeInTheDocument());
   });
 });
