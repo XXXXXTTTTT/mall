@@ -2,7 +2,15 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authService, databaseService, orderService, productService } from '../../mock/mockService.js';
+import {
+  adminUserService,
+  authService,
+  categoryService,
+  databaseService,
+  orderService,
+  productService,
+  roleService,
+} from '../../mock/mockService.js';
 import { AdminAccountPage } from './AdminAccountPage.jsx';
 import { AdminCategoryPage } from './AdminCategoryPage.jsx';
 import { AdminLayout } from './AdminLayout.jsx';
@@ -58,26 +66,37 @@ afterEach(() => {
 });
 
 describe('admin c3 pages', () => {
-  it('logs in with admin shortcut and operator shortcut', async () => {
+  it('logs in from the single-card admin form and redirects with replace', async () => {
     const user = userEvent.setup();
     const { router } = renderLoginWithRoutes(['/admin/login']);
 
     expect(await screen.findByText('后台登录')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: '管理员登录' }));
+    await user.clear(screen.getByLabelText('账号'));
+    await user.type(screen.getByLabelText('账号'), 'admin');
+    await user.clear(screen.getByLabelText('密码'));
+    await user.type(screen.getByLabelText('密码'), 'admin123');
+    await user.click(screen.getByRole('button', { name: '登录后台' }));
+
     await waitFor(() => expect(authService.getAdminSession().roleCode).toBe('admin'));
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/dashboard'));
     expect(router.state.historyAction).toBe('REPLACE');
     expect(screen.getByText('快捷登录已跳转')).toBeInTheDocument();
   });
 
-  it('logs in with operator shortcut and redirects with replace', async () => {
+  it('blocks disabled admin accounts from logging in', async () => {
     const user = userEvent.setup();
     const { router } = renderLoginWithRoutes(['/admin/login']);
+    await adminUserService.toggleAdminStatus('admin-002', false);
 
-    await user.click(screen.getByRole('button', { name: '普通运营登录' }));
-    await waitFor(() => expect(authService.getAdminSession().roleCode).toBe('operator'));
-    await waitFor(() => expect(router.state.location.pathname).toBe('/admin/dashboard'));
-    expect(router.state.historyAction).toBe('REPLACE');
+    await user.clear(screen.getByLabelText('账号'));
+    await user.type(screen.getByLabelText('账号'), 'operator');
+    await user.clear(screen.getByLabelText('密码'));
+    await user.type(screen.getByLabelText('密码'), 'op123456');
+    await user.click(screen.getByRole('button', { name: '登录后台' }));
+
+    expect(await screen.findByText('账号已被禁用')).toBeInTheDocument();
+    expect(authService.getAdminSession()).toBeNull();
+    expect(router.state.location.pathname).toBe('/admin/login');
   });
 
   it('shows dashboard summary from current service data', async () => {
@@ -108,17 +127,17 @@ describe('admin c3 pages', () => {
 
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findAllByText('商城管理端')).toHaveLength(2);
-    expect(screen.getAllByText('云仓后台')).toHaveLength(2);
+    expect(await screen.findByText('Outlet 子元素')).toBeInTheDocument();
+    expect(screen.queryByText('云仓后台')).not.toBeInTheDocument();
     expect(screen.getByText('数据看板')).toBeInTheDocument();
     expect(screen.getByText('商品管理')).toBeInTheDocument();
     expect(screen.getByText('分类管理')).toBeInTheDocument();
     expect(screen.getByText('订单管理')).toBeInTheDocument();
     expect(screen.getByText('权限角色')).toBeInTheDocument();
-    expect(screen.getByText('用户管理')).toBeInTheDocument();
+    expect(screen.getByText('账号管理')).toBeInTheDocument();
     expect(screen.getByText('账号设置')).toBeInTheDocument();
     expect(screen.getByText('操作日志')).toBeInTheDocument();
-    expect(screen.getByText('Outlet 子元素')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /admin/ })).toBeInTheDocument();
   });
 
   it('filters admin layout navigation by operator permissions', async () => {
@@ -142,7 +161,7 @@ describe('admin c3 pages', () => {
     expect(screen.queryByText('商品管理')).not.toBeInTheDocument();
     expect(screen.queryByText('分类管理')).not.toBeInTheDocument();
     expect(screen.queryByText('权限角色')).not.toBeInTheDocument();
-    expect(screen.queryByText('用户管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('账号管理')).not.toBeInTheDocument();
     expect(screen.queryByText('操作日志')).not.toBeInTheDocument();
     expect(screen.getByText('运营订单页')).toBeInTheDocument();
   });
@@ -161,16 +180,59 @@ describe('admin c3 pages', () => {
 
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findAllByText('商城管理端')).toHaveLength(2);
+    expect(await screen.findByText('未登录布局内容')).toBeInTheDocument();
     expect(screen.queryByText('数据看板')).not.toBeInTheDocument();
     expect(screen.queryByText('商品管理')).not.toBeInTheDocument();
     expect(screen.queryByText('分类管理')).not.toBeInTheDocument();
     expect(screen.queryByText('订单管理')).not.toBeInTheDocument();
     expect(screen.queryByText('权限角色')).not.toBeInTheDocument();
-    expect(screen.queryByText('用户管理')).not.toBeInTheDocument();
+    expect(screen.queryByText('账号管理')).not.toBeInTheDocument();
     expect(screen.queryByText('账号设置')).not.toBeInTheDocument();
     expect(screen.queryByText('操作日志')).not.toBeInTheDocument();
-    expect(screen.getByText('未登录布局内容')).toBeInTheDocument();
+    expect(screen.queryByText('云仓后台')).not.toBeInTheDocument();
+  });
+
+  it('opens header dropdown and logs out from admin layout shell', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/admin',
+          element: <AdminLayout />,
+          children: [{ path: 'dashboard', element: <div>后台内容区</div> }],
+        },
+        { path: '/admin/login', element: <div>后台登录已显示</div> },
+      ],
+      { initialEntries: ['/admin/dashboard'] },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText('后台内容区')).toBeInTheDocument();
+    expect(screen.queryByText('云仓后台')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /admin/ }));
+
+    expect(await screen.findByText('个人设置')).toBeInTheDocument();
+    expect(screen.getByText('安全退出登录')).toBeInTheDocument();
+
+    await user.click(screen.getByText('安全退出登录'));
+
+    await waitFor(() => expect(authService.getAdminSession()).toBeNull());
+    await waitFor(() => expect(router.state.location.pathname).toBe('/admin/login'));
+  });
+
+  it('renders redesigned single-card admin login page', async () => {
+    renderLoginWithRoutes(['/admin/login']);
+
+    expect(await screen.findByRole('heading', { level: 1, name: '商城系统管理端' })).toBeInTheDocument();
+    expect(screen.getByText('后台登录')).toBeInTheDocument();
+    expect(screen.getByLabelText('账号')).toBeInTheDocument();
+    expect(screen.getByLabelText('密码')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '登录后台' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '管理员登录' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '普通运营登录' })).not.toBeInTheDocument();
   });
 
   it('logs out admin account and returns to login', async () => {
@@ -376,21 +438,138 @@ describe('admin c3 pages', () => {
 
     renderAdmin(['/admin/account'], <AdminAccountPage />);
     expect(await screen.findByText('账号设置')).toBeInTheDocument();
-    expect(screen.getByText('普通运营')).toBeInTheDocument();
+    expect(screen.getByText('当前账号：普通运营')).toBeInTheDocument();
 
     renderAdmin(['/admin/products'], <NoPermissionPage />);
     expect(await screen.findByText('无权限')).toBeInTheDocument();
 
     renderAdmin(['/admin/categories'], <AdminCategoryPage />);
-    expect(await screen.findByText('分类管理')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '分类管理' })).toBeInTheDocument();
 
     renderAdmin(['/admin/roles'], <AdminRolePage />);
-    expect(await screen.findByText('权限角色')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '角色管理' })).toBeInTheDocument();
 
     renderAdmin(['/admin/users'], <AdminUserPage />);
-    expect(await screen.findByText('用户管理')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '后台账号管理' })).toBeInTheDocument();
 
     renderAdmin(['/admin/logs'], <AdminLogPage />);
-    expect(await screen.findByText('操作日志')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '操作日志' })).toBeInTheDocument();
   });
+
+  it('renders admin account table with role status and created time columns', async () => {
+    await authService.loginAdmin('admin', 'admin123');
+    renderAdmin(['/admin/users'], <AdminUserPage />);
+
+    expect(await screen.findByRole('heading', { name: '后台账号管理' })).toBeInTheDocument();
+    expect(await screen.findByText('admin')).toBeInTheDocument();
+    expect(screen.getByText('用户名')).toBeInTheDocument();
+    expect(screen.getByText('角色')).toBeInTheDocument();
+    expect(screen.getByText('状态')).toBeInTheDocument();
+    expect(screen.getByText('创建时间')).toBeInTheDocument();
+  });
+
+  it('creates roles and updates permission packages from admin role page', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    renderAdmin(['/admin/roles'], <AdminRolePage />);
+
+    expect(await screen.findByRole('heading', { name: '角色管理' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '新增角色' }));
+    await user.type(screen.getByLabelText('角色名称'), '商品专员');
+    await user.type(screen.getByLabelText('角色标识'), 'product_specialist');
+    await user.click((await screen.findAllByText('商品管理')).at(-1));
+    await user.click((await screen.findAllByText('分类管理')).at(-1));
+    await user.click(screen.getByRole('button', { name: '保存角色' }));
+
+    await waitFor(() => expect(roleService.getRoleByCodeSync('product_specialist')).toBeTruthy());
+    const editRoleButton = await screen.findByRole('button', { name: '编辑角色 商品专员' });
+    expect(editRoleButton).toBeInTheDocument();
+
+    await user.click(editRoleButton);
+    await user.clear(screen.getByLabelText('角色名称'));
+    await user.type(screen.getByLabelText('角色名称'), '高级商品专员');
+    await user.click((await screen.findAllByText('订单管理')).at(-1));
+    await user.click(screen.getByRole('button', { name: '保存角色' }));
+
+    await waitFor(() =>
+      expect(roleService.getRoleByCodeSync('product_specialist').permissions).toContain('orders'),
+    );
+    expect(roleService.getRoleByCodeSync('product_specialist').name).toBe('高级商品专员');
+    expect(screen.queryByRole('button', { name: '删除角色 超级管理员' })).not.toBeInTheDocument();
+  }, 30000);
+
+  it('creates child categories toggles status and deletes leaf rows in admin category page', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    renderAdmin(['/admin/categories'], <AdminCategoryPage />);
+
+    expect(await screen.findByRole('heading', { name: '分类管理' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '新增子分类 数码办公' }));
+    await user.type(screen.getByLabelText('分类名称'), '桌面氛围灯');
+    await user.type(screen.getByLabelText('排序'), '13');
+    await user.click(screen.getByRole('button', { name: '保存分类' }));
+
+    expect(await screen.findByText('桌面氛围灯')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('switch', { name: '切换分类状态 桌面氛围灯' }));
+    await waitFor(() =>
+      expect(categoryService.listCategoriesSync().find((item) => item.name === '桌面氛围灯').isActive).toBe(false),
+    );
+
+    await user.click(screen.getByRole('button', { name: '删除分类 桌面氛围灯' }));
+    await waitFor(() =>
+      expect(categoryService.listCategoriesSync().some((item) => item.name === '桌面氛围灯')).toBe(false),
+    );
+  }, 30000);
+
+  it('creates edits disables resets and deletes admin accounts from admin user page', async () => {
+    const user = userEvent.setup();
+    await authService.loginAdmin('admin', 'admin123');
+    await roleService.createRole({
+      name: '商品专员',
+      code: 'product_specialist',
+      permissions: ['dashboard', 'products', 'categories'],
+    });
+    renderAdmin(['/admin/users'], <AdminUserPage />);
+
+    expect(await screen.findByRole('heading', { name: '后台账号管理' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '新增账号' }));
+    await user.type(screen.getByLabelText('用户名'), 'xiaoming');
+    await user.type(screen.getByLabelText('显示名称'), '小明');
+    await user.type(screen.getByLabelText('初始密码'), 'xm123456');
+    await user.click(screen.getByLabelText('角色'));
+    await user.click((await screen.findAllByText('商品专员')).at(-1));
+    await user.click(screen.getByRole('button', { name: '保存账号' }));
+
+    await waitFor(() => expect(adminUserService.getAdminByUsernameSync('xiaoming')).toBeTruthy());
+    expect(await screen.findByText('xiaoming')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '编辑账号 xiaoming' }));
+    await user.clear(screen.getByLabelText('显示名称'));
+    await user.type(screen.getByLabelText('显示名称'), '订单小明');
+    await user.click(screen.getByLabelText('角色'));
+    await user.click((await screen.findAllByText('普通运营')).at(-1));
+    await user.click(screen.getByRole('button', { name: '保存账号' }));
+
+    await waitFor(() =>
+      expect(adminUserService.getAdminByUsernameSync('xiaoming').roleCode).toBe('operator'),
+    );
+    expect(adminUserService.getAdminByUsernameSync('xiaoming').name).toBe('订单小明');
+
+    await user.click(screen.getByRole('button', { name: '重置密码 xiaoming' }));
+    await waitFor(() =>
+      expect(adminUserService.getAdminByUsernameSync('xiaoming').password).toBe('xm123456'),
+    );
+
+    await user.click(screen.getByRole('switch', { name: '切换账号状态 xiaoming' }));
+    await waitFor(() => expect(adminUserService.getAdminByUsernameSync('xiaoming').isEnabled).toBe(false));
+    await expect(authService.loginAdmin('xiaoming', 'xm123456')).resolves.toMatchObject({
+      success: false,
+      message: '账号已被禁用',
+    });
+
+    await user.click(screen.getByRole('button', { name: '删除账号 xiaoming' }));
+    await waitFor(() => expect(adminUserService.getAdminByUsernameSync('xiaoming')).toBeNull());
+    expect(screen.queryByRole('button', { name: '编辑账号 admin' })).not.toBeInTheDocument();
+  }, 30000);
 });

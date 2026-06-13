@@ -87,4 +87,26 @@ describe('global style contract', () => {
     expect(productCard).toContain('flex flex-wrap gap-1 items-center');
     expect(productCard).toContain('text-[10px]');
   });
+
+  it('keeps admin shell typography and spacing contracts in source', () => {
+    const layout = readFileSync(resolve('src/pages/admin/AdminLayout.jsx'), 'utf-8');
+    const login = readFileSync(resolve('src/pages/admin/AdminLoginPage.jsx'), 'utf-8');
+    const headerCard = readFileSync(resolve('src/components/admin/PageHeaderCard.jsx'), 'utf-8');
+
+    expect(layout).toContain('font-sans');
+    expect(layout).toContain('items-center');
+    expect(layout).toContain('Dropdown');
+    expect(layout).toContain('w-screen');
+    expect(layout).toContain('h-screen');
+    expect(layout).toContain('flex-shrink-0');
+    expect(layout).toContain('min-w-0');
+    expect(layout).toContain('h-16');
+    expect(login).toContain('商城系统管理端');
+    expect(login).toContain('items-center');
+    expect(login).toContain('justify-center');
+    expect(login).toContain('登录后台');
+    expect(login).not.toContain('lg:grid-cols');
+    expect(headerCard).toContain('font-semibold');
+    expect(headerCard).toContain('tracking-wide');
+  });
 });

@@ -1,9 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { AdminUserFormModal } from './AdminUserFormModal.jsx';
+import { CategoryFormModal } from './CategoryFormModal.jsx';
 import { OrderShipModal } from './OrderShipModal.jsx';
 import { PageHeaderCard } from './PageHeaderCard.jsx';
 import { ProductFormDrawer } from './ProductFormDrawer.jsx';
+import { RolePermissionModal } from './RolePermissionModal.jsx';
 import { StatisticCardGrid } from './StatisticCardGrid.jsx';
 
 Object.defineProperty(window, 'matchMedia', {
@@ -52,6 +55,11 @@ const secondProduct = {
 };
 
 describe('admin shared components', () => {
+  const roleOptions = [
+    { label: '超级管理员', value: 'admin' },
+    { label: '普通运营', value: 'operator' },
+  ];
+
   it('validates product form fields before submit', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
@@ -250,5 +258,125 @@ describe('admin shared components', () => {
     expect(screen.getByRole('heading', { name: '商品管理' })).toBeInTheDocument();
     expect(screen.getByText('维护商品信息')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '新增商品' })).toBeInTheDocument();
+  });
+
+  it('submits checked permission keys from role permission modal', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <RolePermissionModal
+        open
+        mode="edit"
+        role={{ code: 'operator', name: '普通运营', permissions: ['dashboard', 'orders'] }}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await user.clear(screen.getByLabelText('角色名称'));
+    await user.type(screen.getByLabelText('角色名称'), '订单运营');
+    await user.click(screen.getByText('账号管理'));
+    await user.click(screen.getByRole('button', { name: '保存角色' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+      code: 'operator',
+      name: '订单运营',
+    });
+    expect(onSubmit.mock.calls[0][0].permissions).toContain('users');
+  });
+
+  it('validates role permission modal fields before submit', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <RolePermissionModal
+        open
+        mode="create"
+        role={null}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: '保存角色' }));
+
+    expect(await screen.findByText('请输入角色名称')).toBeInTheDocument();
+    expect(screen.getByText('请输入角色标识')).toBeInTheDocument();
+    expect(screen.getByText('请至少选择一个权限模块')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('validates admin user form modal before submit', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <AdminUserFormModal
+        open
+        mode="create"
+        admin={null}
+        roles={roleOptions}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: '保存账号' }));
+
+    expect(await screen.findByText('请输入用户名')).toBeInTheDocument();
+    expect(screen.getByText('请输入初始密码')).toBeInTheDocument();
+    expect(screen.getByText('请选择角色')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('submits admin user form payload with role binding', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <AdminUserFormModal
+        open
+        mode="create"
+        admin={null}
+        roles={roleOptions}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await user.type(screen.getByLabelText('用户名'), 'xiaoming');
+    await user.type(screen.getByLabelText('显示名称'), '小明');
+    await user.type(screen.getByLabelText('初始密码'), 'xm123456');
+    await user.click(screen.getByLabelText('角色'));
+    await user.click(await screen.findByText('普通运营'));
+    await user.click(screen.getByRole('button', { name: '保存账号' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit).toHaveBeenCalledWith({
+      username: 'xiaoming',
+      name: '小明',
+      password: 'xm123456',
+      roleCode: 'operator',
+    });
+  });
+
+  it('validates category form modal before submit', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <CategoryFormModal
+        open
+        mode="create"
+        parentCategory={null}
+        category={null}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: '保存分类' }));
+
+    expect(await screen.findByText('请输入分类名称')).toBeInTheDocument();
+    expect(screen.getByText('排序不能小于 0')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

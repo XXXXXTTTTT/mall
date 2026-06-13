@@ -1,5 +1,6 @@
-import { Card, List, Space, Tag, Typography } from 'antd';
+import { List, Space, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
+import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { StatisticCardGrid } from '../../components/admin/StatisticCardGrid.jsx';
 import { dashboardService } from '../../mock/mockService.js';
@@ -31,7 +32,7 @@ export function Dashboard() {
   }, []);
 
   return (
-    <Space direction="vertical" size={20} style={{ display: 'flex' }}>
+    <Space direction="vertical" size={20} className="!flex">
       <PageHeaderCard
         title="数据看板"
         description="统一查看商品、订单与待发货情况，便于后台运营日常巡检。"
@@ -45,9 +46,9 @@ export function Dashboard() {
           { label: '待发货订单', value: summary.pendingShipmentTotal },
         ]}
       />
-      <Card style={{ borderRadius: 18 }}>
-        <Space direction="vertical" size={16} style={{ display: 'flex' }}>
-          <Typography.Title level={4} style={{ margin: 0 }}>
+      <AdminSurfaceCard>
+        <Space direction="vertical" size={16} className="!flex">
+          <Typography.Title className="!mb-0 !text-xl !font-semibold !tracking-tight !text-slate-900" level={4}>
             最近订单
           </Typography.Title>
           <List
@@ -67,7 +68,7 @@ export function Dashboard() {
             )}
           />
         </Space>
-      </Card>
+      </AdminSurfaceCard>
     </Space>
   );
 }
