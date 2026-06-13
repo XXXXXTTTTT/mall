@@ -175,10 +175,16 @@ describe('shop browse pages', () => {
     const user = userEvent.setup();
     renderShop(['/shop/category']);
 
+    const categoryRail = await screen.findByTestId('category-rail');
+    const productScroll = screen.getByTestId('category-product-scroll');
     const allButton = await screen.findByRole('button', { name: '全部' });
     const digitalButton = screen.getByRole('button', { name: '数码办公' });
     const priceSortButton = screen.getByRole('button', { name: '价格升序' });
 
+    expect(categoryRail.className).toContain('h-full');
+    expect(categoryRail.className).toContain('overflow-y-auto');
+    expect(productScroll.className).toContain('h-full');
+    expect(productScroll.className).toContain('overflow-y-auto');
     expect(allButton).toHaveAttribute('aria-pressed', 'true');
     expect(digitalButton).toHaveAttribute('aria-pressed', 'false');
     expect(priceSortButton).toHaveAttribute('aria-pressed', 'false');

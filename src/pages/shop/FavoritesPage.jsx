@@ -32,7 +32,7 @@ export function FavoritesPage() {
   return (
     <>
       <ShopNavigationBar title="我的收藏" />
-      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 pb-6 pt-20 text-slate-900">
         <IOSCard as="header" className="p-6">
           <div className="flex items-center gap-4">
             <span className="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-rose-50 text-rose-700">

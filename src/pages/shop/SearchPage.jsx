@@ -26,8 +26,8 @@ export function SearchPage() {
   return (
     <>
       <ShopNavigationBar title="搜索商品" />
-      <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-8 pt-4 text-slate-900">
-        <label className="sticky top-16 z-40 flex min-h-12 items-center gap-3 rounded-full border border-white/80 bg-white/90 px-4 shadow-[0_14px_32px_rgba(24,36,51,0.08)] backdrop-blur-md focus-within:ring-2 focus-within:ring-teal-500">
+      <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-8 pt-20 text-slate-900">
+        <label className="sticky top-20 z-40 flex min-h-12 items-center gap-3 rounded-full border border-white/80 bg-white/90 px-4 shadow-[0_14px_32px_rgba(24,36,51,0.08)] backdrop-blur-md focus-within:ring-2 focus-within:ring-teal-500">
           <ShopIcon name="search" className="h-5 w-5 shrink-0 text-slate-400" />
           <span className="sr-only">输入商品关键词</span>
           <input

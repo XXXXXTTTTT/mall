@@ -32,7 +32,7 @@ describe('global style contract', () => {
     expect(mockData).toContain('createProductImage');
   });
 
-  it('locks mobile app shell sticky headers and hidden scrollbars', () => {
+  it('locks mobile app shell fixed headers and hidden scrollbars', () => {
     const css = readFileSync(resolve('src/index.css'), 'utf-8');
     const layout = readFileSync(resolve('src/pages/shop/ShopLayout.jsx'), 'utf-8');
     const navigationBar = readFileSync(resolve('src/components/shop/ShopNavigationBar.jsx'), 'utf-8');
@@ -48,11 +48,13 @@ describe('global style contract', () => {
     expect(css).toContain('-ms-overflow-style: none');
     expect(css).toContain('.scrollbar-none::-webkit-scrollbar');
     expect(layout).toContain('overflow-x-hidden');
-    expect(navigationBar).toContain('sticky top-0 z-50');
-    expect(home).toContain('sticky top-0 z-50');
-    expect(category).toContain('sticky top-0 z-50');
-    expect(cart).toContain('sticky top-0 z-50');
-    expect(userPage).toContain('sticky top-0 z-50');
+    expect(navigationBar).toContain('fixed inset-x-0 top-0 z-50');
+    expect(home).toContain('fixed inset-x-0 top-0 z-50');
+    expect(category).toContain('fixed inset-x-0 top-0 z-50');
+    expect(cart).toContain('fixed inset-x-4 top-3 z-50');
+    expect(cart).toContain('pt-36');
+    expect(userPage).toContain('fixed inset-x-4 top-3 z-50');
+    expect(userPage).toContain('pt-36');
     expect(orderList).toContain('scrollbar-none');
   });
 
@@ -64,8 +66,25 @@ describe('global style contract', () => {
 
     expect(heroCarousel).not.toContain('overflow-x-auto');
     expect(home).toContain('to="/shop/search"');
-    expect(category).toContain('grid-cols-[6.75rem_1fr]');
+    expect(category).toContain('flex h-[calc(100vh-4rem-6rem)]');
+    expect(category).toContain('w-[6.75rem]');
     expect(category).toContain('scrollbar-none');
     expect(orderList).toContain('scrollbar-none');
+  });
+
+  it('locks final shop prompt viewport and narrow-card layout fixes', () => {
+    const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
+    const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+    const productCard = readFileSync(resolve('src/components/shop/ProductCard.jsx'), 'utf-8');
+
+    expect(home).toContain('justify-center');
+    expect(home).toContain('py-4');
+    expect(category).toContain('h-[calc(100vh-4rem-6rem)]');
+    expect(category).toContain('data-testid="category-rail"');
+    expect(category).toContain('data-testid="category-product-scroll"');
+    expect(category).toContain('h-full overflow-y-auto');
+    expect(productCard).toContain('line-clamp-1');
+    expect(productCard).toContain('flex flex-wrap gap-1 items-center');
+    expect(productCard).toContain('text-[10px]');
   });
 });

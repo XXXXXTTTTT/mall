@@ -7,7 +7,7 @@ export function PaySuccess() {
   return (
     <>
       <ShopNavigationBar title="支付成功" />
-      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 pb-6 pt-20 text-slate-900">
         <section className="rounded-[2rem] bg-[#fbfcfa] p-8 text-center shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-teal-50 text-3xl font-bold text-teal-700">
             <ShopIcon name="check" className="h-9 w-9" />

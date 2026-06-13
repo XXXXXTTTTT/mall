@@ -13,9 +13,9 @@ export function Home() {
   const dealProducts = onlineProducts.filter((product) => product.tags?.includes('限时特惠')).slice(0, 4);
 
   return (
-    <main className="space-y-8 px-5 pb-8 pt-6">
-      <header className="sticky top-0 z-50 -mx-5 border-b border-white/70 bg-[#FBFCFA]/90 px-5 py-4 shadow-[0_14px_34px_rgba(24,36,51,0.08)] backdrop-blur-md">
-        <div className="flex items-center gap-3">
+    <main className="space-y-8 px-5 pb-8 pt-24">
+      <header className="fixed inset-x-0 top-0 z-50 mx-auto flex min-h-20 w-full max-w-md items-center justify-center border-b border-white/70 bg-[#FBFCFA]/90 px-5 py-4 shadow-[0_14px_34px_rgba(24,36,51,0.08)] backdrop-blur-md">
+        <div className="flex w-full items-center gap-3">
           <Link
             to="/shop/search"
             aria-label="搜索商品"

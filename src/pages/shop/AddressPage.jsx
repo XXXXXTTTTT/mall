@@ -113,7 +113,7 @@ export function AddressPage() {
   return (
     <>
       <ShopNavigationBar title="收货地址" />
-      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 pb-6 pt-20 text-slate-900">
         <IOSCard as="header" className="p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Address</p>
           <div className="mt-2 flex items-center justify-between gap-4">

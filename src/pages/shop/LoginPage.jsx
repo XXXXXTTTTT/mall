@@ -57,7 +57,7 @@ export function LoginPage() {
   return (
     <>
       <ShopNavigationBar title="前台登录" />
-      <main className="mx-auto flex min-h-screen max-w-md items-center bg-[#F5F7F6] px-5 py-8 text-slate-900">
+      <main className="mx-auto flex min-h-screen max-w-md items-center bg-[#F5F7F6] px-5 pb-8 pt-24 text-slate-900">
         <section className="w-full overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[#FBFCFA] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
           <div className="rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-[0_18px_42px_rgba(15,23,42,0.2)]">
             <div className="flex items-center gap-3">

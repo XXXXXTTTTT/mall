@@ -28,7 +28,7 @@ export function Detail() {
     return (
       <>
         <ShopNavigationBar title="商品详情" />
-        <main className="px-5 pb-8 pt-6">
+        <main className="px-5 pb-8 pt-20">
           <EmptyState title="商品不存在" description="该商品不存在或已被移除。" actionText="返回首页" actionTo="/shop" />
         </main>
       </>
@@ -112,7 +112,7 @@ export function Detail() {
   return (
     <>
       <ShopNavigationBar title="商品详情" />
-      <main className="space-y-6 px-5 pb-32 pt-5">
+      <main className="space-y-6 px-5 pb-32 pt-20">
         <IOSCard as="section" className="overflow-hidden">
           <div className="relative min-h-[420px] overflow-hidden bg-slate-100">
             <img src={product.image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />

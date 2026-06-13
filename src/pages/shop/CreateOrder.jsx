@@ -64,7 +64,7 @@ export function CreateOrder() {
   return (
     <>
       <ShopNavigationBar title="确认订单" />
-      <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-6 text-slate-900">
+      <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-20 text-slate-900">
         <header className="rounded-[2rem] bg-[#fbfcfa] p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)]">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Checkout</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">确认订单</h1>

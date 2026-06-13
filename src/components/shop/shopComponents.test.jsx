@@ -132,6 +132,10 @@ describe('shop shared components', () => {
     const bar = screen.getByTestId('shop-navigation-bar');
     expect(bar).toHaveTextContent('订单详情');
     expect(screen.queryByRole('heading', { level: 1, name: '订单详情' })).not.toBeInTheDocument();
+    expect(bar.className).toContain('fixed');
+    expect(bar.className).toContain('inset-x-0');
+    expect(bar.className).toContain('top-0');
+    expect(bar.className).toContain('z-50');
     expect(bar.className).toContain('backdrop-blur-md');
     expect(bar.className).toContain('bg-white/85');
     expect(bar.className).toContain('border-b');
@@ -210,7 +214,10 @@ describe('shop shared components', () => {
 
     expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toHaveAttribute('href', '/shop/detail/p-001');
     expect(screen.getByText('¥699')).toBeInTheDocument();
+    expect(screen.getByText('曜石无线降噪耳机').className).toContain('line-clamp-1');
     expect(screen.getByText('库存 98')).toBeInTheDocument();
+    expect(screen.getByText('库存 98').className).toContain('text-[10px]');
+    expect(screen.getByTestId('product-card-tags').className).toContain('flex flex-wrap gap-1 items-center');
     expect(screen.getByText('热门')).toBeInTheDocument();
   });
 

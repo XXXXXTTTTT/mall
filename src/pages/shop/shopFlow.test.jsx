@@ -208,8 +208,8 @@ describe('shop transaction flow pages', () => {
     expect(await screen.findByText('测试会员')).toBeInTheDocument();
     const profileHeading = screen.getByRole('heading', { level: 1, name: 'member' });
     const profileCard = profileHeading.closest('section');
-    expect(profileCard?.className).toContain('sticky');
-    expect(profileCard?.className).toContain('top-0');
+    expect(profileCard?.className).toContain('fixed');
+    expect(profileCard?.className).toContain('top-3');
     expect(profileCard?.className).toContain('z-50');
     expect(screen.getByText('测试会员').className).toContain('text-xs');
     expect(screen.getByText('1280')).toBeInTheDocument();

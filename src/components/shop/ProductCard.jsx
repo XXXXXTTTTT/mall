@@ -21,17 +21,17 @@ export function ProductCard({ product }) {
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
       </div>
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3.5">
         <div className="space-y-2">
-          <h3 className="line-clamp-2 text-base font-semibold leading-6 text-slate-950">{product.name}</h3>
-          <div className="flex items-end justify-between gap-3">
-            <p className="text-xl font-bold tracking-tight text-slate-950">¥{product.price}</p>
-            <p className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm">
+          <h3 className="line-clamp-1 text-sm font-semibold leading-5 text-slate-950">{product.name}</h3>
+          <div className="flex flex-wrap items-end justify-between gap-1.5">
+            <p className="text-lg font-bold tracking-tight text-slate-950">¥{product.price}</p>
+            <p className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-500 shadow-sm">
               库存 {product.stock}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div data-testid="product-card-tags" className="flex flex-wrap gap-1 items-center">
           {tags.map((tag) => (
             <ProductTag key={tag} tag={tag} />
           ))}

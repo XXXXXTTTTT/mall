@@ -53,8 +53,8 @@ export function Cart() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-6 text-slate-900">
-      <header className="sticky top-0 z-50 rounded-[2rem] border border-white/75 bg-[#fbfcfa]/90 p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)] backdrop-blur-md">
+    <main className="mx-auto min-h-screen max-w-md bg-[#F5F7F6] px-4 pb-32 pt-36 text-slate-900">
+      <header className="fixed inset-x-4 top-3 z-50 mx-auto max-w-md rounded-[2rem] border border-white/75 bg-[#fbfcfa]/90 p-6 shadow-[0_18px_48px_rgba(24,36,51,0.08)] backdrop-blur-md">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">Cart</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950">购物车</h1>

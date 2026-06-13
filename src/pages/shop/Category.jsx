@@ -27,13 +27,17 @@ export function Category() {
     });
 
   return (
-    <main className="mx-auto min-h-screen max-w-md overflow-hidden bg-[#F5F7F6] text-slate-900">
-      <header className="sticky top-0 z-50 border-b border-white/70 bg-[#FBFCFA]/90 px-5 py-4 text-center shadow-[0_14px_34px_rgba(24,36,51,0.08)] backdrop-blur-md">
+    <main className="mx-auto h-screen max-w-md overflow-hidden bg-[#F5F7F6] text-slate-900">
+      <header className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-md border-b border-white/70 bg-[#FBFCFA]/90 px-5 py-4 text-center shadow-[0_14px_34px_rgba(24,36,51,0.08)] backdrop-blur-md">
         <h1 className="text-lg font-bold tracking-tight text-slate-950">分类</h1>
       </header>
 
-      <div className="grid min-h-[calc(100vh-4rem)] grid-cols-[6.75rem_1fr]">
-        <nav aria-label="一级分类" className="border-r border-slate-200/70 bg-white/65 py-3">
+      <div className="mt-16 flex h-[calc(100vh-4rem-6rem)]">
+        <nav
+          aria-label="一级分类"
+          data-testid="category-rail"
+          className="scrollbar-none h-full overflow-y-auto w-[6.75rem] shrink-0 border-r border-slate-200/70 bg-white/65 py-3"
+        >
           <button
             type="button"
             aria-pressed={activeCategoryId === 'all'}
@@ -65,7 +69,10 @@ export function Category() {
           ))}
         </nav>
 
-        <section className="min-w-0 px-4 pb-8 pt-4">
+        <section
+          data-testid="category-product-scroll"
+          className="h-full overflow-y-auto min-w-0 flex-1 px-3 pb-8 pt-4"
+        >
           <div className="scrollbar-none flex gap-2 overflow-x-auto pb-3">
             {sortOptions.map((label) => (
               <button
@@ -83,7 +90,7 @@ export function Category() {
           </div>
 
           {visibleProducts.length > 0 ? (
-            <div data-testid="category-product-grid" className="grid grid-cols-2 gap-4">
+            <div data-testid="category-product-grid" className="grid grid-cols-2 gap-3">
               {visibleProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

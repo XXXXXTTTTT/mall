@@ -13,7 +13,7 @@ export function OrderDetailPage() {
     return (
       <>
         <ShopNavigationBar title="订单详情" />
-        <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+        <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 pb-6 pt-20 text-slate-900">
           <IOSCard as="section" className="p-6 text-center">
             <h1 className="text-2xl font-bold text-slate-950">订单不存在</h1>
           </IOSCard>
@@ -25,7 +25,7 @@ export function OrderDetailPage() {
   return (
     <>
       <ShopNavigationBar title="订单详情" />
-      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 py-6 text-slate-900">
+      <main className="mx-auto min-h-screen max-w-md bg-slate-100 px-4 pb-6 pt-20 text-slate-900">
         <IOSCard as="header" className="p-6">
           <div className="flex items-center justify-between gap-3">
             <div>

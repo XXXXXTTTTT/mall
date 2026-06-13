@@ -11,7 +11,7 @@ export function ProductTag({ tag }) {
   const tagStyle = TAG_STYLES[tag] || { icon: 'spark', className: 'border-slate-200 bg-slate-50 text-slate-600' };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${tagStyle.className}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${tagStyle.className}`}>
       <ShopIcon name={tagStyle.icon} className="h-3.5 w-3.5" />
       {tag}
     </span>
