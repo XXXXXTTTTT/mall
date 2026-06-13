@@ -1,4 +1,5 @@
 import {
+  ADMIN_PERMISSIONS,
   ADMIN_ROLE_CODES,
   ORDER_STATUS,
   initialDatabase,
@@ -22,8 +23,9 @@ export const STORAGE_KEYS = {
   schemaVersion: 'mall_schema_version',
 };
 
-const SCHEMA_VERSION = '2026-06-11-foundation-v1';
+const SCHEMA_VERSION = '2026-06-13-admin-rbac-v2';
 const NETWORK_DELAY_MS = 200;
+const SYSTEM_PROTECTION_MESSAGE = '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！';
 
 function ok(data, message = '') {
   return { success: true, data, message };
@@ -98,6 +100,144 @@ function seedKey(key, value, force) {
   }
 }
 
+function getSeedAdminRole() {
+  return initialDatabase.roles.find((role) => role.code === ADMIN_ROLE_CODES.admin);
+}
+
+function getSeedAdminAccount() {
+  return initialDatabase.admins.find((admin) => admin.username === 'admin');
+}
+
+function isProtectedRoleCode(roleCode) {
+  return roleCode === ADMIN_ROLE_CODES.admin;
+}
+
+function isProtectedAdminRecord(admin) {
+  return admin?.username === 'admin';
+}
+
+function backfillCategoryFields(categories) {
+  let changed = false;
+  const nextCategories = categories.map((category) => {
+    if (Object.hasOwn(category, 'isActive')) {
+      return category;
+    }
+    changed = true;
+    return {
+      ...category,
+      isActive: true,
+    };
+  });
+  return { changed, value: nextCategories };
+}
+
+function backfillUserFields(users) {
+  let changed = false;
+  const nextUsers = users.map((user) => {
+    if (user.createdAt) {
+      return user;
+    }
+    const seedUser = initialDatabase.users.find((item) => item.id === user.id);
+    if (!seedUser?.createdAt) {
+      return user;
+    }
+    changed = true;
+    return {
+      ...user,
+      createdAt: seedUser.createdAt,
+    };
+  });
+  return { changed, value: nextUsers };
+}
+
+function backfillAdminFields(admins) {
+  let changed = false;
+  const nextAdmins = admins.map((admin) => {
+    const seedAdmin = initialDatabase.admins.find((item) => item.id === admin.id || item.username === admin.username);
+    const nextAdmin = { ...admin };
+
+    if (!Object.hasOwn(nextAdmin, 'initialPassword')) {
+      nextAdmin.initialPassword = seedAdmin?.initialPassword || nextAdmin.password || '';
+      changed = true;
+    }
+    if (!Object.hasOwn(nextAdmin, 'isEnabled')) {
+      nextAdmin.isEnabled = true;
+      changed = true;
+    }
+    if (!nextAdmin.createdAt) {
+      nextAdmin.createdAt = seedAdmin?.createdAt || new Date().toISOString();
+      changed = true;
+    }
+
+    return nextAdmin;
+  });
+  return { changed, value: nextAdmins };
+}
+
+function normalizeRoleStorage(roles) {
+  const nextRoles = clone(roles);
+  const seedRole = getSeedAdminRole();
+  const protectedIndex = nextRoles.findIndex((role) => role.code === ADMIN_ROLE_CODES.admin);
+
+  if (protectedIndex >= 0) {
+    nextRoles[protectedIndex] = {
+      ...nextRoles[protectedIndex],
+      name: seedRole.name,
+      permissions: clone(ADMIN_PERMISSIONS),
+    };
+  } else {
+    nextRoles.unshift(clone(seedRole));
+  }
+
+  return nextRoles;
+}
+
+function normalizeAdminStorage(admins) {
+  const nextAdmins = clone(admins);
+  const seedAdmin = getSeedAdminAccount();
+  const protectedIndex = nextAdmins.findIndex((admin) => admin.id === seedAdmin.id || admin.username === seedAdmin.username);
+
+  if (protectedIndex >= 0) {
+    const protectedAdmin = nextAdmins[protectedIndex];
+    nextAdmins[protectedIndex] = {
+      ...protectedAdmin,
+      id: seedAdmin.id,
+      username: seedAdmin.username,
+      name: seedAdmin.name,
+      roleCode: ADMIN_ROLE_CODES.admin,
+      isEnabled: true,
+      createdAt: protectedAdmin.createdAt || seedAdmin.createdAt,
+      initialPassword: protectedAdmin.initialPassword || seedAdmin.initialPassword,
+      password: protectedAdmin.password || seedAdmin.password,
+    };
+  } else {
+    nextAdmins.unshift(clone(seedAdmin));
+  }
+
+  return nextAdmins;
+}
+
+function normalizeExistingStorage() {
+  const categories = readJson(STORAGE_KEYS.categories, initialDatabase.categories);
+  const categoryBackfill = backfillCategoryFields(categories);
+  if (categoryBackfill.changed) {
+    writeJson(STORAGE_KEYS.categories, categoryBackfill.value);
+  }
+
+  const users = readJson(STORAGE_KEYS.users, initialDatabase.users);
+  const userBackfill = backfillUserFields(users);
+  if (userBackfill.changed) {
+    writeJson(STORAGE_KEYS.users, userBackfill.value);
+  }
+
+  const roles = readJson(STORAGE_KEYS.roles, initialDatabase.roles);
+  writeJson(STORAGE_KEYS.roles, normalizeRoleStorage(roles));
+
+  const admins = readJson(STORAGE_KEYS.admins, initialDatabase.admins);
+  const adminBackfill = backfillAdminFields(admins);
+  writeJson(STORAGE_KEYS.admins, normalizeAdminStorage(adminBackfill.value));
+}
+
 export const databaseService = {
   initializeDatabase({ force = false } = {}) {
     seedKey(STORAGE_KEYS.products, initialDatabase.products, force);
@@ -112,6 +252,9 @@ export const databaseService = {
     seedKey(STORAGE_KEYS.logs, initialDatabase.logs, force);
     seedKey(STORAGE_KEYS.session, initialDatabase.session, force);
     seedKey(STORAGE_KEYS.adminSession, initialDatabase.adminSession, force);
+    if (!force) {
+      normalizeExistingStorage();
+    }
     localStorage.setItem(STORAGE_KEYS.schemaVersion, SCHEMA_VERSION);
     return ok({ schemaVersion: SCHEMA_VERSION });
   },
@@ -214,6 +357,22 @@ function validateProductPayload(product) {
   return null;
 }
 
+function buildCategoryTree(categories, parentId = null) {
+  return categories
+    .filter((category) => category.parentId === parentId)
+    .sort((left, right) => Number(left.sort) - Number(right.sort))
+    .map((category) => ({
+      ...category,
+      children: buildCategoryTree(categories, category.id),
+    }));
+}
+
+function validateCategoryPayload(payload) {
+  if (!payload.name?.trim()) return fail('分类名称不能为空');
+  if (Number(payload.sort) < 0) return fail('分类排序不能小于 0');
+  return null;
+}
+
 export const categoryService = {
   listCategoriesSync() {
     return readJson(STORAGE_KEYS.categories, initialDatabase.categories);
@@ -221,7 +380,104 @@ export const categoryService = {
   async listCategories() {
     return delay(ok(categoryService.listCategoriesSync()));
   },
+  listCategoryTreeSync() {
+    return buildCategoryTree(categoryService.listCategoriesSync());
+  },
+  getCategoryByIdSync(categoryId) {
+    return categoryService.listCategoriesSync().find((category) => category.id === categoryId) || null;
+  },
+  async createCategory(payload) {
+    const validationResult = validateCategoryPayload(payload);
+    if (validationResult) return delay(validationResult);
+
+    const categories = categoryService.listCategoriesSync();
+    const category = {
+      id: `cat-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name: payload.name.trim(),
+      parentId: payload.parentId ?? null,
+      sort: Number(payload.sort),
+      isActive: Boolean(payload.isActive),
+    };
+    categories.push(category);
+    writeJson(STORAGE_KEYS.categories, categories);
+    appendLog('管理员', '分类新增', `新增分类 ${category.name}`);
+    return delay(ok(category));
+  },
+  async updateCategory(categoryId, payload) {
+    const validationResult = validateCategoryPayload(payload);
+    if (validationResult) return delay(validationResult);
+
+    const categories = categoryService.listCategoriesSync();
+    const category = categories.find((item) => item.id === categoryId);
+    if (!category) return delay(fail('分类不存在'));
+
+    category.name = payload.name.trim();
+    category.sort = Number(payload.sort);
+    if (Object.hasOwn(payload, 'parentId')) {
+      category.parentId = payload.parentId;
+    }
+    if (Object.hasOwn(payload, 'isActive')) {
+      category.isActive = Boolean(payload.isActive);
+    }
+    writeJson(STORAGE_KEYS.categories, categories);
+    appendLog('管理员', '分类编辑', `编辑分类 ${category.name}`);
+    return delay(ok(category));
+  },
+  async toggleCategoryStatus(categoryId, isActive) {
+    const categories = categoryService.listCategoriesSync();
+    const category = categories.find((item) => item.id === categoryId);
+    if (!category) return delay(fail('分类不存在'));
+
+    category.isActive = Boolean(isActive);
+    writeJson(STORAGE_KEYS.categories, categories);
+    appendLog('管理员', '分类状态', `更新分类 ${category.name} 状态为 ${category.isActive ? '启用' : '停用'}`);
+    return delay(ok(category));
+  },
+  async deleteCategory(categoryId) {
+    const categories = categoryService.listCategoriesSync();
+    const category = categories.find((item) => item.id === categoryId);
+    if (!category) return delay(fail('分类不存在'));
+    if (categories.some((item) => item.parentId === categoryId)) return delay(fail('请先删除子分类'));
+    if (productService.listProductsSync().some((item) => item.categoryId === categoryId)) {
+      return delay(fail('请先移除该分类下的商品'));
+    }
+
+    writeJson(STORAGE_KEYS.categories, categories.filter((item) => item.id !== categoryId));
+    appendLog('管理员', '分类删除', `删除分类 ${category.name}`);
+    return delay(ok(category));
+  },
 };
+
+function listAdminAccountsSync() {
+  return readJson(STORAGE_KEYS.admins, initialDatabase.admins);
+}
+
+function validateRolePayload(payload, { isCreate }) {
+  if (!payload.name?.trim()) return fail('角色名称不能为空');
+  if (isCreate && !payload.code?.trim()) return fail('角色标识不能为空');
+  if (!Array.isArray(payload.permissions) || payload.permissions.length === 0) {
+    return fail('请至少选择一个权限模块');
+  }
+  return null;
+}
+
+function validateAdminPayload(payload, { isCreate, currentAdminId = null } = {}) {
+  if (!payload.username?.trim()) return fail('用户名不能为空');
+  if (isCreate && !payload.password?.trim()) return fail('初始密码不能为空');
+  if (!payload.roleCode?.trim()) return fail('角色不能为空');
+
+  const roles = roleService.listRolesSync();
+  if (!roles.some((role) => role.code === payload.roleCode)) {
+    return fail('角色不存在');
+  }
+
+  const duplicated = listAdminAccountsSync().find((admin) => admin.username === payload.username.trim() && admin.id !== currentAdminId);
+  if (duplicated) {
+    return fail('用户名已存在');
+  }
+
+  return null;
+}
 
 export const authService = {
   async loginUser(username, password) {
@@ -240,9 +496,12 @@ export const authService = {
     return readJson(STORAGE_KEYS.session, null);
   },
   async loginAdmin(username, password) {
-    const adminList = readJson(STORAGE_KEYS.admins, initialDatabase.admins);
+    const adminList = listAdminAccountsSync();
     const admin = adminList.find((item) => item.username === username && item.password === password);
     if (!admin) return delay(fail('后台账号或密码错误'));
+    if (!admin.isEnabled) return delay(fail('账号已被禁用'));
+    const role = roleService.getRoleByCodeSync(admin.roleCode);
+    if (!role) return delay(fail('后台角色不存在'));
     const session = {
       id: admin.id,
       username: admin.username,
@@ -264,6 +523,9 @@ export const authService = {
 
 export const permissionService = {
   canAccess(roleCode, permission) {
+    if (isProtectedRoleCode(roleCode)) {
+      return true;
+    }
     const roleList = readJson(STORAGE_KEYS.roles, initialDatabase.roles);
     const role = roleList.find((item) => item.code === roleCode);
     return Boolean(role?.permissions.includes(permission));
@@ -289,11 +551,188 @@ export const roleService = {
   listRolesSync() {
     return readJson(STORAGE_KEYS.roles, initialDatabase.roles);
   },
+  getRoleByCodeSync(roleCode) {
+    return roleService.listRolesSync().find((role) => role.code === roleCode) || null;
+  },
+  async createRole(payload) {
+    const validationResult = validateRolePayload(payload, { isCreate: true });
+    if (validationResult) return delay(validationResult);
+
+    const roles = roleService.listRolesSync();
+    if (roles.some((role) => role.code === payload.code.trim())) {
+      return delay(fail('角色标识已存在'));
+    }
+
+    const role = {
+      code: payload.code.trim(),
+      name: payload.name.trim(),
+      permissions: clone(payload.permissions),
+    };
+    roles.push(role);
+    writeJson(STORAGE_KEYS.roles, roles);
+    appendLog('管理员', '角色新增', `新增角色 ${role.name}`);
+    return delay(ok(role));
+  },
+  async updateRole(roleCode, payload) {
+    if (isProtectedRoleCode(roleCode)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    const validationResult = validateRolePayload({ ...payload, code: roleCode }, { isCreate: false });
+    if (validationResult) return delay(validationResult);
+
+    const roles = roleService.listRolesSync();
+    const role = roles.find((item) => item.code === roleCode);
+    if (!role) return delay(fail('角色不存在'));
+
+    role.name = payload.name.trim();
+    role.permissions = clone(payload.permissions);
+    writeJson(STORAGE_KEYS.roles, roles);
+    appendLog('管理员', '角色编辑', `编辑角色 ${role.name}`);
+    return delay(ok(role));
+  },
+  async updateRolePermissions(roleCode, permissions) {
+    if (isProtectedRoleCode(roleCode)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+    const roles = roleService.listRolesSync();
+    const role = roles.find((item) => item.code === roleCode);
+    if (!role) return delay(fail('角色不存在'));
+    if (!Array.isArray(permissions) || permissions.length === 0) return delay(fail('请至少选择一个权限'));
+
+    role.permissions = clone(permissions);
+    writeJson(STORAGE_KEYS.roles, roles);
+    appendLog('管理员', '角色权限更新', `更新角色 ${role.name} 权限`);
+    return delay(ok(role));
+  },
+  async deleteRole(roleCode) {
+    if (isProtectedRoleCode(roleCode)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    const roles = roleService.listRolesSync();
+    const role = roles.find((item) => item.code === roleCode);
+    if (!role) return delay(fail('角色不存在'));
+    if (listAdminAccountsSync().some((admin) => admin.roleCode === roleCode)) {
+      return delay(fail('当前角色下仍有关联账号，无法删除'));
+    }
+
+    writeJson(STORAGE_KEYS.roles, roles.filter((item) => item.code !== roleCode));
+    appendLog('管理员', '角色删除', `删除角色 ${role.name}`);
+    return delay(ok(role));
+  },
+};
+
+export const adminUserService = {
+  listAdminsSync() {
+    return listAdminAccountsSync();
+  },
+  getAdminByIdSync(adminId) {
+    return adminUserService.listAdminsSync().find((admin) => admin.id === adminId) || null;
+  },
+  getAdminByUsernameSync(username) {
+    return adminUserService.listAdminsSync().find((admin) => admin.username === username) || null;
+  },
+  async listPagedAdmins(params = {}) {
+    const { page = 1, pageSize = 10, keyword = '', roleCode, isEnabled } = params;
+    const admins = adminUserService.listAdminsSync().filter((admin) => {
+      if (roleCode && admin.roleCode !== roleCode) return false;
+      if (typeof isEnabled === 'boolean' && admin.isEnabled !== isEnabled) return false;
+      if (!keyword) return true;
+      return admin.username.includes(keyword) || admin.name.includes(keyword);
+    });
+    return delay(ok(paginate(admins, page, pageSize)));
+  },
+  async createAdmin(payload) {
+    const validationResult = validateAdminPayload(payload, { isCreate: true });
+    if (validationResult) return delay(validationResult);
+
+    const now = new Date().toISOString();
+    const admin = {
+      id: `admin-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      username: payload.username.trim(),
+      name: payload.name?.trim() || payload.username.trim(),
+      password: payload.password.trim(),
+      initialPassword: payload.password.trim(),
+      roleCode: payload.roleCode.trim(),
+      isEnabled: true,
+      createdAt: now,
+    };
+    const admins = adminUserService.listAdminsSync();
+    admins.unshift(admin);
+    writeJson(STORAGE_KEYS.admins, admins);
+    appendLog('管理员', '后台账号新增', `新增后台账号 ${admin.username}`);
+    return delay(ok(admin));
+  },
+  async updateAdmin(adminId, payload) {
+    const admins = adminUserService.listAdminsSync();
+    const admin = admins.find((item) => item.id === adminId);
+    if (!admin) return delay(fail('后台账号不存在'));
+    if (isProtectedAdminRecord(admin)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    const validationResult = validateAdminPayload(payload, { isCreate: false, currentAdminId: adminId });
+    if (validationResult) return delay(validationResult);
+
+    admin.username = payload.username.trim();
+    admin.name = payload.name?.trim() || payload.username.trim();
+    admin.roleCode = payload.roleCode.trim();
+    writeJson(STORAGE_KEYS.admins, admins);
+    appendLog('管理员', '后台账号编辑', `编辑后台账号 ${admin.username}`);
+    return delay(ok(admin));
+  },
+  async toggleAdminStatus(adminId, isEnabled) {
+    const admins = adminUserService.listAdminsSync();
+    const admin = admins.find((item) => item.id === adminId);
+    if (!admin) return delay(fail('后台账号不存在'));
+    if (isProtectedAdminRecord(admin)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    admin.isEnabled = Boolean(isEnabled);
+    writeJson(STORAGE_KEYS.admins, admins);
+    appendLog('管理员', '后台账号状态', `${admin.username} 已${admin.isEnabled ? '启用' : '禁用'}`);
+    return delay(ok(admin));
+  },
+  async resetAdminPassword(adminId) {
+    const admins = adminUserService.listAdminsSync();
+    const admin = admins.find((item) => item.id === adminId);
+    if (!admin) return delay(fail('后台账号不存在'));
+    if (isProtectedAdminRecord(admin)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    admin.password = admin.initialPassword;
+    writeJson(STORAGE_KEYS.admins, admins);
+    appendLog('管理员', '后台账号密码重置', `重置后台账号 ${admin.username} 密码`);
+    return delay(ok(admin));
+  },
+  async deleteAdmin(adminId) {
+    const admins = adminUserService.listAdminsSync();
+    const admin = admins.find((item) => item.id === adminId);
+    if (!admin) return delay(fail('后台账号不存在'));
+    if (isProtectedAdminRecord(admin)) {
+      return delay(fail(SYSTEM_PROTECTION_MESSAGE));
+    }
+
+    writeJson(STORAGE_KEYS.admins, admins.filter((item) => item.id !== adminId));
+    appendLog('管理员', '后台账号删除', `删除后台账号 ${admin.username}`);
+    return delay(ok(admin));
+  },
 };
 
 export const userService = {
   listUsersSync() {
     return readJson(STORAGE_KEYS.users, initialDatabase.users);
+  },
+  async listPagedUsers(params = {}) {
+    const { page = 1, pageSize = 10, keyword } = params;
+    const users = userService.listUsersSync().filter((user) => {
+      if (!keyword) return true;
+      return user.username.includes(keyword) || user.name.includes(keyword) || user.phone.includes(keyword);
+    });
+    return delay(ok(paginate(users, page, pageSize)));
   },
 };
 

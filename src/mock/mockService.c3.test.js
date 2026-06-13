@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   ORDER_STATUS,
+  adminUserService,
   addressService,
+  authService,
+  categoryService,
   cartService,
   dashboardService,
   databaseService,
   favoriteService,
   orderService,
+  permissionService,
   productService,
   roleService,
   userService,
@@ -361,5 +365,188 @@ describe('C3 mock service chain', () => {
   it('reads roles and users through service APIs', () => {
     expect(roleService.listRolesSync()).toHaveLength(2);
     expect(userService.listUsersSync()).toHaveLength(1);
+  });
+
+  it('updates role permissions and changes permission checks immediately', async () => {
+    const updated = await roleService.updateRolePermissions('operator', ['dashboard', 'orders', 'users']);
+
+    expect(updated.success).toBe(true);
+    expect(roleService.getRoleByCodeSync('operator').permissions).toEqual(['dashboard', 'orders', 'users']);
+    expect(permissionService.canAccess('operator', 'users')).toBe(true);
+  });
+
+  it('creates edits and deletes custom roles while protecting the super admin role', async () => {
+    const created = await roleService.createRole({
+      name: '商品专员',
+      code: 'product_specialist',
+      permissions: ['dashboard', 'products', 'categories'],
+    });
+
+    expect(created.success).toBe(true);
+    expect(roleService.getRoleByCodeSync('product_specialist')).toMatchObject({
+      name: '商品专员',
+      permissions: ['dashboard', 'products', 'categories'],
+    });
+
+    const updated = await roleService.updateRole('product_specialist', {
+      name: '高级商品专员',
+      permissions: ['dashboard', 'products', 'categories', 'orders'],
+    });
+
+    expect(updated.success).toBe(true);
+    expect(roleService.getRoleByCodeSync('product_specialist')).toMatchObject({
+      name: '高级商品专员',
+      permissions: ['dashboard', 'products', 'categories', 'orders'],
+    });
+
+    await expect(roleService.updateRolePermissions('admin', ['dashboard'])).resolves.toMatchObject({
+      success: false,
+      message: '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！',
+    });
+    await expect(roleService.deleteRole('admin')).resolves.toMatchObject({
+      success: false,
+      message: '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！',
+    });
+
+    const deleted = await roleService.deleteRole('product_specialist');
+
+    expect(deleted.success).toBe(true);
+    expect(roleService.getRoleByCodeSync('product_specialist')).toBeNull();
+  });
+
+  it('creates updates disables resets and deletes admin accounts with role binding', async () => {
+    const created = await adminUserService.createAdmin({
+      username: 'xiaoming',
+      name: '小明',
+      password: 'xm123456',
+      roleCode: 'operator',
+    });
+
+    expect(created.success).toBe(true);
+    expect(adminUserService.getAdminByIdSync(created.data.id)).toMatchObject({
+      username: 'xiaoming',
+      name: '小明',
+      roleCode: 'operator',
+      isEnabled: true,
+    });
+
+    const updated = await adminUserService.updateAdmin(created.data.id, {
+      username: 'xiaoming',
+      name: '订单小明',
+      roleCode: 'operator',
+    });
+
+    expect(updated.success).toBe(true);
+    expect(adminUserService.getAdminByIdSync(created.data.id)).toMatchObject({
+      username: 'xiaoming',
+      name: '订单小明',
+      roleCode: 'operator',
+    });
+
+    const paged = await adminUserService.listPagedAdmins({ page: 1, pageSize: 10, keyword: 'xiaoming' });
+
+    expect(paged.success).toBe(true);
+    expect(paged.data.list[0]).toMatchObject({
+      username: 'xiaoming',
+      roleCode: 'operator',
+    });
+
+    const toggled = await adminUserService.toggleAdminStatus(created.data.id, false);
+
+    expect(toggled.success).toBe(true);
+    expect(adminUserService.getAdminByIdSync(created.data.id).isEnabled).toBe(false);
+    await expect(authService.loginAdmin('xiaoming', 'xm123456')).resolves.toMatchObject({
+      success: false,
+      message: '账号已被禁用',
+    });
+
+    const reset = await adminUserService.resetAdminPassword(created.data.id);
+
+    expect(reset.success).toBe(true);
+    expect(adminUserService.getAdminByIdSync(created.data.id).password).toBe('xm123456');
+
+    await adminUserService.toggleAdminStatus(created.data.id, true);
+
+    await expect(authService.loginAdmin('xiaoming', 'xm123456')).resolves.toMatchObject({
+      success: true,
+    });
+
+    const deleted = await adminUserService.deleteAdmin(created.data.id);
+
+    expect(deleted.success).toBe(true);
+    expect(adminUserService.getAdminByIdSync(created.data.id)).toBeNull();
+  });
+
+  it('protects the system admin account and roles that still have bound accounts', async () => {
+    await expect(
+      adminUserService.updateAdmin('admin-001', {
+        username: 'admin',
+        name: '管理员',
+        roleCode: 'operator',
+      }),
+    ).resolves.toMatchObject({
+      success: false,
+      message: '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！',
+    });
+    await expect(adminUserService.toggleAdminStatus('admin-001', false)).resolves.toMatchObject({
+      success: false,
+      message: '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！',
+    });
+    await expect(adminUserService.deleteAdmin('admin-001')).resolves.toMatchObject({
+      success: false,
+      message: '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！',
+    });
+    await expect(roleService.deleteRole('operator')).resolves.toMatchObject({
+      success: false,
+      message: '当前角色下仍有关联账号，无法删除',
+    });
+  });
+
+  it('creates edits toggles and deletes tree categories with local persistence', async () => {
+    const created = await categoryService.createCategory({
+      name: '办公灯具',
+      parentId: 'cat-home',
+      sort: 23,
+      isActive: true,
+    });
+
+    expect(created.success).toBe(true);
+    expect(
+      categoryService
+        .listCategoryTreeSync()
+        .find((item) => item.id === 'cat-home')
+        .children.some((item) => item.id === created.data.id),
+    ).toBe(true);
+
+    const updated = await categoryService.updateCategory(created.data.id, {
+      name: '办公灯具升级版',
+      sort: 24,
+      isActive: true,
+    });
+
+    expect(updated.success).toBe(true);
+    expect(categoryService.getCategoryByIdSync(created.data.id).name).toBe('办公灯具升级版');
+
+    const toggled = await categoryService.toggleCategoryStatus(created.data.id, false);
+
+    expect(toggled.success).toBe(true);
+    expect(categoryService.getCategoryByIdSync(created.data.id).isActive).toBe(false);
+
+    const deleted = await categoryService.deleteCategory(created.data.id);
+
+    expect(deleted.success).toBe(true);
+    expect(categoryService.getCategoryByIdSync(created.data.id)).toBeNull();
+  });
+
+  it('pages users with createdAt metadata for admin user table', async () => {
+    const result = await userService.listPagedUsers({ page: 1, pageSize: 10, keyword: 'member' });
+
+    expect(result.success).toBe(true);
+    expect(result.data.list[0]).toMatchObject({
+      id: 'user-001',
+      username: 'member',
+      name: '测试会员',
+    });
+    expect(result.data.list[0].createdAt).toBeTruthy();
   });
 });

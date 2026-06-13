@@ -3,6 +3,17 @@ export const ADMIN_ROLE_CODES = {
   operator: 'operator',
 };
 
+export const ADMIN_PERMISSIONS = [
+  'dashboard',
+  'products',
+  'categories',
+  'orders',
+  'roles',
+  'users',
+  'account',
+  'logs',
+];
+
 export const ORDER_STATUS = {
   pendingPayment: 'pending_payment',
   paid: 'paid',
@@ -12,22 +23,22 @@ export const ORDER_STATUS = {
 };
 
 export const categories = [
-  { id: 'cat-digital', name: '数码办公', parentId: null, sort: 1 },
-  { id: 'cat-home', name: '家居生活', parentId: null, sort: 2 },
-  { id: 'cat-food', name: '品质食品', parentId: null, sort: 3 },
-  { id: 'cat-beauty', name: '个护清洁', parentId: null, sort: 4 },
-  { id: 'cat-sport', name: '运动户外', parentId: null, sort: 5 },
-  { id: 'cat-fashion', name: '服饰箱包', parentId: null, sort: 6 },
-  { id: 'cat-digital-audio', name: '智能影音', parentId: 'cat-digital', sort: 11 },
-  { id: 'cat-digital-office', name: '效率办公', parentId: 'cat-digital', sort: 12 },
-  { id: 'cat-home-storage', name: '收纳整理', parentId: 'cat-home', sort: 21 },
-  { id: 'cat-home-light', name: '氛围照明', parentId: 'cat-home', sort: 22 },
-  { id: 'cat-food-coffee', name: '咖啡茶饮', parentId: 'cat-food', sort: 31 },
-  { id: 'cat-food-snack', name: '健康零食', parentId: 'cat-food', sort: 32 },
-  { id: 'cat-beauty-care', name: '身体护理', parentId: 'cat-beauty', sort: 41 },
-  { id: 'cat-beauty-clean', name: '清洁工具', parentId: 'cat-beauty', sort: 42 },
-  { id: 'cat-sport-training', name: '训练装备', parentId: 'cat-sport', sort: 51 },
-  { id: 'cat-fashion-bag', name: '通勤箱包', parentId: 'cat-fashion', sort: 61 },
+  { id: 'cat-digital', name: '数码办公', parentId: null, sort: 1, isActive: true },
+  { id: 'cat-home', name: '家居生活', parentId: null, sort: 2, isActive: true },
+  { id: 'cat-food', name: '品质食品', parentId: null, sort: 3, isActive: true },
+  { id: 'cat-beauty', name: '个护清洁', parentId: null, sort: 4, isActive: true },
+  { id: 'cat-sport', name: '运动户外', parentId: null, sort: 5, isActive: true },
+  { id: 'cat-fashion', name: '服饰箱包', parentId: null, sort: 6, isActive: true },
+  { id: 'cat-digital-audio', name: '智能影音', parentId: 'cat-digital', sort: 11, isActive: true },
+  { id: 'cat-digital-office', name: '效率办公', parentId: 'cat-digital', sort: 12, isActive: true },
+  { id: 'cat-home-storage', name: '收纳整理', parentId: 'cat-home', sort: 21, isActive: true },
+  { id: 'cat-home-light', name: '氛围照明', parentId: 'cat-home', sort: 22, isActive: true },
+  { id: 'cat-food-coffee', name: '咖啡茶饮', parentId: 'cat-food', sort: 31, isActive: true },
+  { id: 'cat-food-snack', name: '健康零食', parentId: 'cat-food', sort: 32, isActive: true },
+  { id: 'cat-beauty-care', name: '身体护理', parentId: 'cat-beauty', sort: 41, isActive: true },
+  { id: 'cat-beauty-clean', name: '清洁工具', parentId: 'cat-beauty', sort: 42, isActive: true },
+  { id: 'cat-sport-training', name: '训练装备', parentId: 'cat-sport', sort: 51, isActive: true },
+  { id: 'cat-fashion-bag', name: '通勤箱包', parentId: 'cat-fashion', sort: 61, isActive: true },
 ];
 
 const productNames = [
@@ -89,6 +100,7 @@ export const users = [
     password: '123456',
     name: '测试会员',
     phone: '13800000000',
+    createdAt: '2026-06-01T08:00:00.000Z',
   },
 ];
 
@@ -98,22 +110,28 @@ export const admins = [
     username: 'admin',
     password: 'admin123',
     name: '管理员',
+    initialPassword: 'admin123',
     roleCode: ADMIN_ROLE_CODES.admin,
+    isEnabled: true,
+    createdAt: '2026-06-01T08:00:00.000Z',
   },
   {
     id: 'admin-002',
     username: 'operator',
     password: 'op123456',
     name: '普通运营',
+    initialPassword: 'op123456',
     roleCode: ADMIN_ROLE_CODES.operator,
+    isEnabled: true,
+    createdAt: '2026-06-02T08:00:00.000Z',
   },
 ];
 
 export const roles = [
   {
     code: ADMIN_ROLE_CODES.admin,
-    name: '管理员',
-    permissions: ['dashboard', 'products', 'categories', 'orders', 'roles', 'users', 'account', 'logs'],
+    name: '超级管理员',
+    permissions: ADMIN_PERMISSIONS,
   },
   {
     code: ADMIN_ROLE_CODES.operator,

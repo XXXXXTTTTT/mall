@@ -1,30 +1,25 @@
-import { Card, Statistic } from 'antd';
+import { Statistic, Typography } from 'antd';
+import { AdminSurfaceCard } from './AdminSurfaceCard.jsx';
 
 export function StatisticCardGrid({ items }) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gap: 16,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-      }}
-    >
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
       {items.map((item) => (
-        <Card
+        <AdminSurfaceCard
           key={item.label}
-          style={{
-            background: '#ffffff',
-            borderColor: '#d8e2e1',
-            borderRadius: 18,
-            boxShadow: '0 14px 34px rgba(23, 52, 57, 0.07)',
-          }}
+          className="h-full bg-white/95"
+          styles={{ body: { padding: 24 } }}
         >
           <Statistic
-            title={<span style={{ color: '#647275' }}>{item.label}</span>}
+            title={
+              <Typography.Text className="text-[13px] font-semibold uppercase tracking-wide text-slate-400">
+                {item.label}
+              </Typography.Text>
+            }
             value={item.value}
-            valueStyle={{ color: '#173439', fontWeight: 700 }}
+            valueStyle={{ color: '#0f172a', fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em' }}
           />
-        </Card>
+        </AdminSurfaceCard>
       ))}
     </div>
   );
