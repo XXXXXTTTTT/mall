@@ -20,10 +20,15 @@ function normalizePathname(pathname) {
 // 渲染前台主布局和底部导航。
 export function ShopLayout() {
   const location = useLocation();
-  const showBottomDock = primaryShopPaths.has(normalizePathname(location.pathname));
+  const normalizedPathname = normalizePathname(location.pathname);
+  const showBottomDock = primaryShopPaths.has(normalizedPathname);
+  const reserveDockSpacer = showBottomDock && normalizedPathname !== '/shop/category';
 
   return (
-    <div className={`min-h-screen overflow-x-hidden bg-[#F7F8F6] text-slate-900 ${showBottomDock ? 'pb-24' : ''}`}>
+    <div
+      data-testid="shop-layout-shell"
+      className={`min-h-screen overflow-x-hidden bg-[#F7F8F6] text-slate-900 ${reserveDockSpacer ? 'pb-24' : ''}`}
+    >
       <div className="mx-auto min-h-screen max-w-md overflow-x-hidden bg-[#FBFCFA] shadow-[0_0_80px_rgba(15,23,42,0.08)]">
         <Outlet />
       </div>

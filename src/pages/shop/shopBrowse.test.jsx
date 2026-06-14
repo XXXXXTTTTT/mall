@@ -114,6 +114,15 @@ describe('shop browse pages', () => {
     });
   });
 
+  it('does not reserve outer bottom spacer on category route while keeping the Dock visible', () => {
+    const view = renderShopShell(['/shop/category']);
+
+    expect(screen.getByTestId('shop-bottom-dock')).toBeInTheDocument();
+    expect(screen.getByTestId('shop-layout-shell').className).not.toContain('pb-24');
+
+    view.unmount();
+  });
+
   it('hides offline products on home and category pages', async () => {
     renderShop(['/shop']);
 
