@@ -82,11 +82,14 @@ describe('global style contract', () => {
 
   it('locks the old mock branch fixes for shop scroll and product card details', () => {
     const css = readFileSync(resolve('src/index.css'), 'utf-8');
+    const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
     const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
     const productCard = readFileSync(resolve('src/components/shop/ProductCard.jsx'), 'utf-8');
 
     expect(css).toContain('scrollbar-width: none');
     expect(css).toContain('::-webkit-scrollbar');
+    expect(home).toContain('useLocation');
+    expect(home).toContain('location.key');
     expect(category).toContain('overflow-hidden');
     expect(category).toContain('scrollbar-none');
     expect(category).not.toContain('pb-8');

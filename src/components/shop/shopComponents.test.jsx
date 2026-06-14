@@ -256,6 +256,7 @@ describe('shop shared components', () => {
     expect(productLink.className).toContain('duration-300');
     expect(productLink.className).toContain('ease-out');
     expect(productLink.className).toContain('motion-safe:hover:-translate-y-1');
+    expect(productLink.className).not.toContain('hover:bg-');
   });
 
   it('keeps quantity at minimum 1 and emits changes', async () => {
