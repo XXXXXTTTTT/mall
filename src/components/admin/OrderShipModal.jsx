@@ -1,6 +1,8 @@
+// 后台订单发货弹窗。
 import { useEffect } from 'react';
 import { Form, Input, Modal } from 'antd';
 
+// 渲染后台订单发货弹窗。
 export function OrderShipModal({ open, orderId, onClose, onSubmit }) {
   const [form] = Form.useForm();
 
@@ -8,6 +10,7 @@ export function OrderShipModal({ open, orderId, onClose, onSubmit }) {
     form.resetFields();
   }, [form, open]);
 
+  // 校验物流表单后提交发货信息。
   async function handleOk() {
     const values = await form.validateFields();
     onSubmit({

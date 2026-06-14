@@ -1,3 +1,4 @@
+// 前台图标映射。
 const ICON_PATHS = {
   search: (
     <>
@@ -132,6 +133,7 @@ const ICON_PATHS = {
   ),
 };
 
+// 按名称输出内置的前台 SVG 图标。
 export function ShopIcon({ name, className = 'h-5 w-5' }) {
   return (
     <svg

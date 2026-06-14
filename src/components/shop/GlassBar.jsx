@@ -1,3 +1,5 @@
+// 前台磨砂工具栏容器。
+// 渲染前台磨砂玻璃效果容器。
 export function GlassBar({ as: Component = 'div', children, className = '', ...props }) {
   return (
     <Component

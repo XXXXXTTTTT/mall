@@ -1,3 +1,4 @@
+// 前台交易链路测试。
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +16,7 @@ import { Pay } from './Pay.jsx';
 import { PaySuccess } from './PaySuccess.jsx';
 import { UserPage } from './UserPage.jsx';
 
+// 按指定路由渲染前台交易链路页面。
 function renderRoutes(initialEntries) {
   const router = createMemoryRouter(
     [
@@ -39,6 +41,7 @@ function renderRoutes(initialEntries) {
   );
 }
 
+// 断言当前页面最后一个顶部导航栏标题。
 function expectLatestNavigationTitle(title) {
   const bars = screen.getAllByTestId('shop-navigation-bar');
   expect(bars[bars.length - 1]).toHaveTextContent(title);

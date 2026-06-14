@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+// 应用路由定义与访问控制入口。
 import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom';
 import { authService, permissionService } from './mock/mockService.js';
 import { AdminLayout } from './pages/admin/AdminLayout.jsx';
@@ -32,6 +33,7 @@ function RequireShopAuth({ children }) {
   const location = useLocation();
   const session = authService.getUserSession();
   if (!session) {
+    // 前台受保护页面统一回退到登录页，保留原始跳转路径。
     return <Navigate to="/shop/login" replace state={{ from: location.pathname }} />;
   }
   return children;
@@ -41,6 +43,7 @@ function RequireAdminAuth({ permission, children }) {
   const location = useLocation();
   const session = authService.getAdminSession();
   if (!session) {
+    // 后台未登录时先进入后台登录页，再继续处理权限判断。
     return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
   }
   if (!permissionService.canAccess(session.roleCode, permission)) {
@@ -49,6 +52,7 @@ function RequireAdminAuth({ permission, children }) {
   return children;
 }
 
+// 前台和后台共用同一棵路由树，便于集中管理跳转与访问控制。
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/shop" replace /> },
   {

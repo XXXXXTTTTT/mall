@@ -1,7 +1,9 @@
+// 前台商品卡片。
 import { Link } from 'react-router-dom';
 import { ProductTag } from './ProductTag.jsx';
 import { StatusTag } from './StatusTag.jsx';
 
+// 渲染商品卡片并跳转到详情页。
 export function ProductCard({ product }) {
   const tags = Array.isArray(product.tags) ? product.tags : [];
 

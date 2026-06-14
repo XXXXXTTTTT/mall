@@ -1,3 +1,4 @@
+// 后台管理布局。
 import {
   AppstoreOutlined,
   LogoutOutlined,
@@ -8,6 +9,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { authService, permissionService, roleService } from '../../mock/mockService.js';
 import { ADMIN_NAV_ITEMS, getAdminNavItem, getAdminSelectedKey } from './adminConfig.js';
 
+// 渲染后台整体布局、菜单和顶部账号区域。
 export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ export function AdminLayout() {
         }))
     : [];
 
+  // 清除后台会话并回到登录页。
   function handleLogout() {
     authService.logoutAdmin();
     navigate('/admin/login', { replace: true });

@@ -1,3 +1,4 @@
+// 前台收藏页。
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
@@ -7,10 +8,12 @@ import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { authService, favoriteService, productService } from '../../mock/mockService.js';
 
+// 渲染用户收藏列表并支持取消收藏。
 export function FavoritesPage() {
   const user = authService.getUserSession();
   const [favorites, setFavorites] = useState(() => (user ? favoriteService.listFavoritesSync(user.id) : []));
 
+  // 重新读取当前用户的收藏列表。
   function refreshFavorites() {
     if (!user) return;
     setFavorites(favoriteService.listFavoritesSync(user.id));
@@ -24,6 +27,7 @@ export function FavoritesPage() {
     [favorites],
   );
 
+  // 取消指定商品的收藏状态。
   async function cancelFavorite(productId) {
     await favoriteService.toggleFavorite(user.id, productId);
     refreshFavorites();

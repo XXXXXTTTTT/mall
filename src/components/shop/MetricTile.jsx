@@ -1,9 +1,11 @@
+// 前台数据指标卡片。
 import { Link } from 'react-router-dom';
 import { ShopIcon } from './ShopIcon.jsx';
 
 const TILE_CLASS =
   'rounded-[1.5rem] border border-white/75 bg-white/85 p-4 text-left shadow-[0_16px_34px_rgba(24,36,51,0.08)] backdrop-blur-md';
 
+// 渲染前台个人中心的指标入口。
 export function MetricTile({ icon, label, value, onClick, to }) {
   const Component = to ? Link : onClick ? 'button' : 'div';
   const actionProps = to ? { to, 'aria-label': label } : onClick ? { type: 'button', onClick, 'aria-label': label } : {};

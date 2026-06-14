@@ -1,3 +1,4 @@
+// 前台登录注册页。
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
@@ -10,6 +11,7 @@ const EMPTY_FORM = {
   name: '',
 };
 
+// 渲染前台登录与注册页面。
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,22 +22,26 @@ export function LoginPage() {
   const redirectTo = location.state?.from || '/shop';
   const isRegisterMode = mode === 'register';
 
+  // 更新登录或注册表单字段。
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
     if (message) setMessage('');
   }
 
+  // 在登录模式和注册模式之间切换。
   function toggleMode() {
     setMode((current) => (current === 'login' ? 'register' : 'login'));
     setMessage('');
   }
 
+  // 使用预置测试账号直接登录。
   async function handleQuickLogin() {
     const result = await loginUser('member', '123456');
     if (result.success) navigate(redirectTo, { replace: true });
     else setMessage(result.message || '登录失败');
   }
 
+  // 根据当前模式提交登录或注册请求。
   async function handleSubmit(event) {
     event.preventDefault();
     const result = isRegisterMode

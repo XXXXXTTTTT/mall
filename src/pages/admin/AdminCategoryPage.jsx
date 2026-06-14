@@ -1,3 +1,4 @@
+// 后台分类管理页。
 import { Alert, Button, Space, Switch, Table, Tag } from 'antd';
 import { useState } from 'react';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
@@ -5,6 +6,7 @@ import { CategoryFormModal } from '../../components/admin/CategoryFormModal.jsx'
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { categoryService } from '../../mock/mockService.js';
 
+// 渲染后台分类管理页并维护树形分类数据。
 export function AdminCategoryPage() {
   const [categories, setCategories] = useState(categoryService.listCategoryTreeSync());
   const [errorMessage, setErrorMessage] = useState('');
@@ -12,10 +14,12 @@ export function AdminCategoryPage() {
   const [currentCategory, setCurrentCategory] = useState(null);
   const [parentCategory, setParentCategory] = useState(null);
 
+  // 重新读取分类树数据。
   function refreshCategories() {
     setCategories(categoryService.listCategoryTreeSync());
   }
 
+  // 切换分类启用状态。
   async function handleToggle(category, checked) {
     const result = await categoryService.toggleCategoryStatus(category.id, checked);
     if (!result.success) {
@@ -26,6 +30,7 @@ export function AdminCategoryPage() {
     refreshCategories();
   }
 
+  // 删除指定分类节点。
   async function handleDelete(category) {
     const result = await categoryService.deleteCategory(category.id);
     if (!result.success) {
@@ -36,6 +41,7 @@ export function AdminCategoryPage() {
     refreshCategories();
   }
 
+  // 提交分类新增或编辑结果。
   async function handleSubmit(values) {
     const result = modalMode === 'edit'
       ? await categoryService.updateCategory(currentCategory.id, values)

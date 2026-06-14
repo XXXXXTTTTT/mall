@@ -1,3 +1,4 @@
+// 前台购物车页。
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
@@ -7,6 +8,7 @@ import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { authService, cartService, productService } from '../../mock/mockService.js';
 
+// 渲染购物车并维护选中、数量和结算状态。
 export function Cart() {
   const user = authService.getUserSession();
   const [items, setItems] = useState(() => (user ? cartService.listCartSync(user.id) : []));
@@ -14,6 +16,7 @@ export function Cart() {
     user ? cartService.calculateSelectedTotal(user.id) : { totalQuantity: 0, totalAmount: 0 },
   );
 
+  // 重新同步购物车条目与结算摘要。
   function refreshCart() {
     if (!user) return;
     setItems(cartService.listCartSync(user.id));
@@ -31,22 +34,26 @@ export function Cart() {
   );
   const allSelected = items.length > 0 && items.every((item) => item.selected);
 
+  // 更新购物车中单个商品的数量。
   async function updateQuantity(cartItemId, quantity) {
     await cartService.updateItemQuantity(cartItemId, quantity);
     refreshCart();
   }
 
+  // 切换单个购物车条目的选中状态。
   async function toggleSelected(cartItemId, selected) {
     await cartService.toggleItemSelected(cartItemId, selected);
     refreshCart();
   }
 
+  // 切换当前用户购物车的全选状态。
   async function toggleAll(selected) {
     if (!user) return;
     await cartService.toggleAllSelected(user.id, selected);
     refreshCart();
   }
 
+  // 删除购物车中的指定条目。
   async function removeItem(cartItemId) {
     await cartService.removeItem(cartItemId);
     refreshCart();

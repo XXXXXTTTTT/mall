@@ -1,6 +1,8 @@
+// 后台页面头部卡片。
 import { Space, Typography } from 'antd';
 import { AdminSurfaceCard } from './AdminSurfaceCard.jsx';
 
+// 渲染后台页面标题区和辅助说明。
 export function PageHeaderCard({ title, description, extra }) {
   return (
     <AdminSurfaceCard

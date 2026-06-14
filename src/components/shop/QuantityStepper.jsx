@@ -1,10 +1,13 @@
+// 前台数量步进器。
 import { ShopIcon } from './ShopIcon.jsx';
 
+// 渲染受控数量步进器。
 export function QuantityStepper({ value, onChange, min = 1, max = 999, disabled = false }) {
   const safeValue = Math.min(max, Math.max(min, value));
   const canDecrease = !disabled && safeValue > min;
   const canIncrease = !disabled && safeValue < max;
 
+  // 按上下限约束后提交新的数量值。
   function updateQuantity(nextValue) {
     if (disabled) {
       return;

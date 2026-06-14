@@ -1,3 +1,4 @@
+// 基础数据与服务层测试。
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   ADMIN_ROLE_CODES,

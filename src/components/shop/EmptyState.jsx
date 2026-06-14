@@ -1,6 +1,8 @@
+// 前台空状态组件。
 import { Link } from 'react-router-dom';
 import { ShopIcon } from './ShopIcon.jsx';
 
+// 渲染前台空状态及可选操作入口。
 export function EmptyState({ icon = 'bag', title, description = '', actionText = '', actionTo = '' }) {
   return (
     <section className="rounded-[2rem] border border-white/75 bg-[#fbfcfa] px-6 py-10 text-center shadow-[0_22px_58px_rgba(24,36,51,0.1)]">

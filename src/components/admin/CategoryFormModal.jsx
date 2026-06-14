@@ -1,6 +1,8 @@
+// 后台分类表单弹窗。
 import { Button, Form, Input, InputNumber, Modal, Switch } from 'antd';
 import { useEffect } from 'react';
 
+// 渲染后台分类新增与编辑弹窗。
 export function CategoryFormModal({ open, mode, category, parentCategory, onClose, onSubmit }) {
   const [form] = Form.useForm();
 

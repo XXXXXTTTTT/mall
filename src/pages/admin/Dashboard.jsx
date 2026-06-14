@@ -1,3 +1,4 @@
+// 后台数据看板页。
 import { List, Space, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
@@ -5,6 +6,7 @@ import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { StatisticCardGrid } from '../../components/admin/StatisticCardGrid.jsx';
 import { dashboardService } from '../../mock/mockService.js';
 
+// 渲染后台数据看板并汇总核心经营指标。
 export function Dashboard() {
   const [summary, setSummary] = useState({
     productTotal: 0,
@@ -18,6 +20,7 @@ export function Dashboard() {
   useEffect(() => {
     let active = true;
 
+    // 从数据服务读取看板摘要。
     async function loadSummary() {
       const result = await dashboardService.getSummary();
       if (active && result.success) {

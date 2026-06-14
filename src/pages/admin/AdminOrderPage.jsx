@@ -1,9 +1,11 @@
+// 后台订单管理页。
 import { Alert, Button, Card, Descriptions, Drawer, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { OrderShipModal } from '../../components/admin/OrderShipModal.jsx';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { ORDER_STATUS, orderService } from '../../mock/mockService.js';
 
+// 渲染后台订单管理页并处理详情、筛选和发货。
 export function AdminOrderPage() {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
@@ -15,6 +17,7 @@ export function AdminOrderPage() {
   const [shipOrderId, setShipOrderId] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // 按当前筛选条件加载分页订单列表。
   async function loadOrders(nextPage = page, nextPageSize = pageSize) {
     const result = await orderService.listPagedOrders({
       page: nextPage,
@@ -36,6 +39,7 @@ export function AdminOrderPage() {
   useEffect(() => {
     let isCurrent = true;
 
+    // 在筛选条件变化时刷新第一页订单数据。
     async function refreshOrders() {
       const result = await orderService.listPagedOrders({
         page: 1,
@@ -64,6 +68,7 @@ export function AdminOrderPage() {
 
   const detailOrder = detailOrderId ? orderService.getOrderByIdSync(detailOrderId) : null;
 
+  // 提交发货信息并刷新当前页。
   async function handleShip(payload) {
     const result = await orderService.shipOrder(shipOrderId, payload);
     if (result.success) {

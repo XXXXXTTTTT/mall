@@ -1,7 +1,9 @@
+// 后台操作日志页。
 import { Space, Table } from 'antd';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { logService } from '../../mock/mockService.js';
 
+// 渲染后台操作日志只读列表。
 export function AdminLogPage() {
   const logs = logService.listLogsSync();
 

@@ -1,15 +1,18 @@
+// 后台登录页。
 import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Typography } from 'antd';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../../mock/mockService.js';
 
+// 渲染后台登录页并处理认证跳转。
 export function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || '/admin/dashboard';
   const [errorMessage, setErrorMessage] = useState('');
 
+  // 提交后台账号密码并写入登录态。
   async function handleFinish(values) {
     const result = await authService.loginAdmin(values.username, values.password);
     if (!result.success) {

@@ -1,3 +1,4 @@
+// 前台商品标签。
 import { ShopIcon } from './ShopIcon.jsx';
 
 const TAG_STYLES = {
@@ -7,6 +8,7 @@ const TAG_STYLES = {
   精选: { icon: 'star', className: 'border-teal-200/70 bg-teal-50 text-teal-700' },
 };
 
+// 按标签类型渲染商品标签样式。
 export function ProductTag({ tag }) {
   const tagStyle = TAG_STYLES[tag] || { icon: 'spark', className: 'border-slate-200 bg-slate-50 text-slate-600' };
 

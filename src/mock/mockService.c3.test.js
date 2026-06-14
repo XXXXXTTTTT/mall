@@ -1,3 +1,4 @@
+// 业务链路测试。
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   ORDER_STATUS,

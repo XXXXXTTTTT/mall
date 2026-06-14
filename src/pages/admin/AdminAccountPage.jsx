@@ -1,14 +1,17 @@
+// 后台账号设置页。
 import { Button, Descriptions, Space, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { authService, roleService } from '../../mock/mockService.js';
 
+// 渲染后台账号设置页并提供退出登录操作。
 export function AdminAccountPage() {
   const navigate = useNavigate();
   const session = authService.getAdminSession();
   const roleName = session ? roleService.getRoleByCodeSync(session.roleCode)?.name || session.roleCode : '-';
 
+  // 清除后台登录态并返回登录页。
   function handleLogout() {
     authService.logoutAdmin();
     navigate('/admin/login', { replace: true });

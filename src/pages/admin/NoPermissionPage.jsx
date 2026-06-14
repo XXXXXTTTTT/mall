@@ -1,7 +1,9 @@
+// 后台无权限提示页。
 import { Button, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
 
+// 渲染后台无权限提示页。
 export function NoPermissionPage() {
   return (
     <AdminSurfaceCard className="min-h-[480px]">

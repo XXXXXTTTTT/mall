@@ -1,8 +1,11 @@
+// 前台固定顶部导航。
 import { useNavigate } from 'react-router-dom';
 import { ShopIcon } from './ShopIcon.jsx';
 
+// 渲染前台固定顶部导航栏。
 export function ShopNavigationBar({ title, onBack }) {
   const navigate = useNavigate();
+  // 优先使用外部返回逻辑，否则返回上一页。
   const handleBack = onBack || (() => navigate(-1));
 
   return (

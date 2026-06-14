@@ -1,3 +1,4 @@
+// 前台浏览链路测试。
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,6 +14,7 @@ import { LoginPage } from './LoginPage.jsx';
 import { SearchPage } from './SearchPage.jsx';
 import { ShopLayout } from './ShopLayout.jsx';
 
+// 按指定路由渲染前台浏览链路页面。
 function renderShop(initialEntries) {
   const router = createMemoryRouter(
     [
@@ -39,6 +41,7 @@ function renderShop(initialEntries) {
   );
 }
 
+// 渲染前台布局壳，用于验证主导航显隐。
 function renderShopShell(initialEntries) {
   const router = createMemoryRouter(
     [
@@ -69,6 +72,7 @@ function renderShopShell(initialEntries) {
   return render(<RouterProvider router={router} />);
 }
 
+// 断言最后一个顶部导航栏标题内容。
 function expectLatestNavigationTitle(title) {
   const bars = screen.getAllByTestId('shop-navigation-bar');
   expect(bars[bars.length - 1]).toHaveTextContent(title);

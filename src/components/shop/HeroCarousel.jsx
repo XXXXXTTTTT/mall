@@ -1,3 +1,4 @@
+// 前台首页轮播组件。
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProductTag } from './ProductTag.jsx';
@@ -6,6 +7,7 @@ import { ShopIcon } from './ShopIcon.jsx';
 const AUTO_ADVANCE_MS = 3600;
 const SWIPE_THRESHOLD = 36;
 
+// 渲染首页轮播并支持自动播放与手势切换。
 export function HeroCarousel({ products }) {
   const carouselProducts = products.slice(0, 3);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -25,14 +27,17 @@ export function HeroCarousel({ products }) {
   const product = carouselProducts[safeActiveIndex];
   const tags = Array.isArray(product.tags) ? product.tags.slice(0, 2) : [];
 
+  // 切换到指定轮播项。
   function goTo(index) {
     setActiveIndex(index);
   }
 
+  // 记录滑动起点。
   function handleTouchStart(event) {
     touchStartXRef.current = event.touches[0]?.clientX ?? null;
   }
 
+  // 根据手势距离切换上一张或下一张。
   function handleTouchEnd(event) {
     if (touchStartXRef.current === null || carouselProducts.length <= 1) return;
     const endX = event.changedTouches[0]?.clientX ?? touchStartXRef.current;

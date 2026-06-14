@@ -1,3 +1,4 @@
+// 前台设置项列表行。
 import { Link } from 'react-router-dom';
 import { ShopIcon } from './ShopIcon.jsx';
 
@@ -8,6 +9,7 @@ const TONE_STYLES = {
   rose: 'bg-rose-50 text-rose-700',
 };
 
+// 渲染个人中心中的设置入口行。
 export function SettingRow({ icon, title, description = '', to, onClick, tone = 'default' }) {
   const Component = to ? Link : onClick ? 'button' : 'div';
   const actionProps = to ? { to } : onClick ? { type: 'button', onClick } : {};

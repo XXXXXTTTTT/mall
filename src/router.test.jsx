@@ -1,3 +1,4 @@
+// 路由守卫测试。
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

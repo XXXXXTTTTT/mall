@@ -1,6 +1,8 @@
+// 后台数据统计卡片组。
 import { Statistic, Typography } from 'antd';
 import { AdminSurfaceCard } from './AdminSurfaceCard.jsx';
 
+// 渲染后台统计指标卡片组。
 export function StatisticCardGrid({ items }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">

@@ -1,3 +1,4 @@
+// 后台角色管理页。
 import { Alert, Button, Space, Table, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
@@ -6,10 +7,12 @@ import { RolePermissionModal } from '../../components/admin/RolePermissionModal.
 import { adminUserService, roleService } from '../../mock/mockService.js';
 import { ADMIN_NAV_ITEMS } from './adminConfig.js';
 
+// 将权限标识映射为后台模块名称。
 function mapPermissionLabel(permission) {
   return ADMIN_NAV_ITEMS.find((item) => item.permission === permission)?.label || permission;
 }
 
+// 渲染后台角色管理页并维护权限包。
 export function AdminRolePage() {
   const [roles, setRoles] = useState(roleService.listRolesSync());
   const [modalOpen, setModalOpen] = useState(false);
@@ -17,10 +20,12 @@ export function AdminRolePage() {
   const [currentRole, setCurrentRole] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // 重新读取角色列表。
   function refreshRoles() {
     setRoles(roleService.listRolesSync());
   }
 
+  // 提交角色新增或编辑结果。
   async function handleSubmit(payload) {
     const result = modalMode === 'create'
       ? await roleService.createRole(payload)
@@ -37,6 +42,7 @@ export function AdminRolePage() {
     refreshRoles();
   }
 
+  // 删除指定角色。
   async function handleDelete(role) {
     const result = await roleService.deleteRole(role.code);
     if (!result.success) {

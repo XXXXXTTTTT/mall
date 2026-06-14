@@ -1,3 +1,4 @@
+// 业务服务层，统一处理数据读写、权限与订单流转。
 import {
   ADMIN_PERMISSIONS,
   ADMIN_ROLE_CODES,
@@ -24,6 +25,7 @@ export const STORAGE_KEYS = {
   schemaVersion: 'mall_schema_version',
 };
 
+// 所有业务数据统一落在固定 key 下，避免页面直接拼写 localStorage 键名。
 const SCHEMA_VERSION = '2026-06-13-admin-rbac-v2';
 const NETWORK_DELAY_MS = 200;
 const SYSTEM_PROTECTION_MESSAGE = '超级管理员角色与账号属于系统核心底座，严禁编辑或删除！';
@@ -106,6 +108,7 @@ function migrateProductImages() {
   let hasChanged = false;
   const nextProducts = products.map((product) => {
     if (typeof product.image === 'string' && product.image.includes('dummyimage.com')) {
+      // 兼容旧版本占位图地址，首次加载时自动迁移为代码生成图。
       hasChanged = true;
       return { ...product, image: createProductImage(product.id, product.name) };
     }
@@ -954,6 +957,7 @@ export const orderService = {
     const address = addressService.getByIdSync(addressId);
     if (!address) return delay(fail('收货地址不存在'));
 
+    // 下单时先完成快照校验与金额汇总，避免后续商品改动影响已创建订单。
     const orderItems = [];
     let totalAmount = 0;
     for (const item of items) {

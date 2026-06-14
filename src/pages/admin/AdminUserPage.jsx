@@ -1,3 +1,4 @@
+// 后台账号管理页。
 import { Alert, Avatar, Button, Input, Select, Space, Switch, Table, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { AdminSurfaceCard } from '../../components/admin/AdminSurfaceCard.jsx';
@@ -5,10 +6,12 @@ import { AdminUserFormModal } from '../../components/admin/AdminUserFormModal.js
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { adminUserService, roleService } from '../../mock/mockService.js';
 
+// 格式化后台账号创建时间展示。
 function formatDateTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : '-';
 }
 
+// 渲染后台账号管理页并分配角色权限包。
 export function AdminUserPage() {
   const [admins, setAdmins] = useState([]);
   const [keyword, setKeyword] = useState('');
@@ -23,6 +26,7 @@ export function AdminUserPage() {
   useEffect(() => {
     let active = true;
 
+    // 在筛选条件变化时刷新后台账号列表。
     async function loadAdmins() {
       const result = await adminUserService.listPagedAdmins({
         page: 1,
@@ -50,6 +54,7 @@ export function AdminUserPage() {
     };
   }, [isEnabled, keyword, roleCode]);
 
+  // 主动重新加载后台账号列表。
   async function loadAdmins() {
     const result = await adminUserService.listPagedAdmins({
       page: 1,
@@ -81,6 +86,7 @@ export function AdminUserPage() {
     }, {});
   }, [roles]);
 
+  // 提交后台账号新增或编辑结果。
   async function handleSubmit(payload) {
     const result = modalMode === 'create'
       ? await adminUserService.createAdmin(payload)
@@ -97,6 +103,7 @@ export function AdminUserPage() {
     await loadAdmins();
   }
 
+  // 切换指定后台账号的启用状态。
   async function handleToggle(admin, checked) {
     const result = await adminUserService.toggleAdminStatus(admin.id, checked);
     if (!result.success) {
@@ -108,6 +115,7 @@ export function AdminUserPage() {
     await loadAdmins();
   }
 
+  // 将指定后台账号密码重置为系统默认值。
   async function handleResetPassword(admin) {
     const result = await adminUserService.resetAdminPassword(admin.id);
     if (!result.success) {
@@ -119,6 +127,7 @@ export function AdminUserPage() {
     await loadAdmins();
   }
 
+  // 删除指定后台账号。
   async function handleDelete(admin) {
     const result = await adminUserService.deleteAdmin(admin.id);
     if (!result.success) {

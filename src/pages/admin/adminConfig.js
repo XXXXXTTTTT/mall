@@ -1,3 +1,4 @@
+// 后台模块配置与权限映射。
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -31,10 +32,12 @@ export const ADMIN_PERMISSION_TREE = [
   },
 ];
 
+// 根据当前路径定位后台菜单选中项。
 export function getAdminSelectedKey(pathname) {
   return ADMIN_NAV_ITEMS.find((item) => pathname.startsWith(item.key))?.key || '/admin/dashboard';
 }
 
+// 根据当前路径获取后台导航配置项。
 export function getAdminNavItem(pathname) {
   return ADMIN_NAV_ITEMS.find((item) => pathname.startsWith(item.key)) || ADMIN_NAV_ITEMS[0];
 }

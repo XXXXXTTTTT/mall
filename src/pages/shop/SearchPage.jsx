@@ -1,3 +1,4 @@
+// 前台搜索页。
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
@@ -6,6 +7,7 @@ import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { categoryService, productService } from '../../mock/mockService.js';
 
+// 渲染商品搜索页并按关键词过滤结果。
 export function SearchPage() {
   const [searchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');

@@ -1,3 +1,4 @@
+// 后台商品表单抽屉。
 import { useEffect } from 'react';
 import { Button, Drawer, Form, Input, InputNumber, Select, Space } from 'antd';
 
@@ -6,6 +7,7 @@ const statusOptions = [
   { label: '下架', value: 'offline' },
 ];
 
+// 将商品对象映射为抽屉表单初始值。
 function buildInitialValues(product) {
   return {
     id: product?.id,
@@ -20,6 +22,7 @@ function buildInitialValues(product) {
   };
 }
 
+// 依据当前表单值整理 SKU 选项。
 function buildSkuOptions({ id, mode, price, product, stock }) {
   if (mode === 'create' || !product?.skuOptions?.length) {
     return [
@@ -39,6 +42,7 @@ function buildSkuOptions({ id, mode, price, product, stock }) {
   }));
 }
 
+// 渲染后台商品新增与编辑抽屉。
 export function ProductFormDrawer({ open, mode, product, categories, onClose, onSubmit }) {
   const [form] = Form.useForm();
   const title = mode === 'edit' ? '编辑商品' : '新增商品';
@@ -49,6 +53,7 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
     form.setFieldsValue(buildInitialValues(product));
   }, [form, mode, open, product]);
 
+  // 组装商品表单结果并提交。
   function handleFinish(values) {
     const id = product?.id || values.id;
     const payload = {

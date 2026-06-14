@@ -1,9 +1,11 @@
+// 后台商品管理页。
 import { Alert, Button, Image, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeaderCard } from '../../components/admin/PageHeaderCard.jsx';
 import { ProductFormDrawer } from '../../components/admin/ProductFormDrawer.jsx';
 import { categoryService, productService } from '../../mock/mockService.js';
 
+// 构建分类编号到展示名称的映射表。
 function buildCategoryMap(categories) {
   return categories.reduce((map, category) => {
     const parent = categories.find((item) => item.id === category.parentId);
@@ -12,6 +14,7 @@ function buildCategoryMap(categories) {
   }, {});
 }
 
+// 渲染后台商品管理页并处理分页、筛选和编辑。
 export function AdminProductPage() {
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
@@ -27,6 +30,7 @@ export function AdminProductPage() {
   const categories = categoryService.listCategoriesSync();
   const categoryMap = useMemo(() => buildCategoryMap(categories), [categories]);
 
+  // 按当前筛选条件加载商品分页数据。
   async function loadProducts(nextPage = page, nextPageSize = pageSize) {
     const result = await productService.listPagedProducts({
       page: nextPage,
@@ -49,6 +53,7 @@ export function AdminProductPage() {
   useEffect(() => {
     let isCurrent = true;
 
+    // 在筛选变化后刷新第一页商品列表。
     async function refreshProducts() {
       const result = await productService.listPagedProducts({
         page: 1,
@@ -76,18 +81,21 @@ export function AdminProductPage() {
     };
   }, [categoryId, keyword, pageSize, status]);
 
+  // 以新增模式打开商品抽屉。
   function openCreateDrawer() {
     setDrawerMode('create');
     setCurrentProduct(null);
     setDrawerOpen(true);
   }
 
+  // 载入商品数据并打开编辑抽屉。
   function openEditDrawer(product) {
     setDrawerMode('edit');
     setCurrentProduct(product);
     setDrawerOpen(true);
   }
 
+  // 提交商品新增或编辑结果。
   async function handleSubmit(payload) {
     const result =
       drawerMode === 'edit'
@@ -103,6 +111,7 @@ export function AdminProductPage() {
     setErrorMessage(result.message);
   }
 
+  // 删除指定商品并刷新列表。
   async function handleDelete(productId) {
     const result = await productService.deleteProduct(productId);
     if (result.success) {
@@ -113,6 +122,7 @@ export function AdminProductPage() {
     setErrorMessage(result.message);
   }
 
+  // 切换商品上下架状态。
   async function handleToggle(product, nextStatus) {
     const result = await productService.toggleProductStatus(product.id, nextStatus);
     if (result.success) {

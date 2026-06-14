@@ -1,3 +1,4 @@
+// 前台分类页。
 import { useState } from 'react';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
 import { ProductCard } from '../../components/shop/ProductCard.jsx';
@@ -5,6 +6,7 @@ import { categoryService, productService } from '../../mock/mockService.js';
 
 const sortOptions = ['综合', '价格升序', '价格降序', '销量优先'];
 
+// 渲染分类索引页并按分类、排序筛选商品。
 export function Category() {
   const [activeCategoryId, setActiveCategoryId] = useState('all');
   const [activeSort, setActiveSort] = useState('综合');

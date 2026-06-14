@@ -1,3 +1,4 @@
+// 前台商品详情页。
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../../components/shop/EmptyState.jsx';
@@ -11,6 +12,7 @@ import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { useAppContext } from '../../contexts/AppContext.jsx';
 import { authService, cartService, favoriteService, productService } from '../../mock/mockService.js';
 
+// 渲染商品详情并提供收藏、加购和立即购买能力。
 export function Detail() {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ export function Detail() {
   const unavailableMessage = !selectedSku ? '商品规格不存在' : selectedSku.stock < 1 ? '库存不足' : '';
   const canPurchase = isOnline && !unavailableMessage;
 
+  // 确保当前操作拥有可用的会员身份。
   async function resolveUserId() {
     if (state.user) return state.user.id;
 
@@ -51,6 +54,7 @@ export function Detail() {
     return loginResult.data.id;
   }
 
+  // 将当前商品加入购物车。
   async function handleAddToCart() {
     if (!canPurchase || isSubmitting) return;
 
@@ -71,6 +75,7 @@ export function Detail() {
     setIsSubmitting(false);
   }
 
+  // 切换当前商品的收藏状态。
   async function handleToggleFavorite() {
     if (!(await resolveUserId())) return;
 
@@ -82,6 +87,7 @@ export function Detail() {
     }
   }
 
+  // 仅保留当前商品后跳转到确认订单页。
   async function handleBuyNow() {
     if (!canPurchase || isSubmitting) return;
 

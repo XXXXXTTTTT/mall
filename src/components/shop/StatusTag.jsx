@@ -1,3 +1,4 @@
+// 前台状态标签。
 import { ShopIcon } from './ShopIcon.jsx';
 
 const STATUS_LABELS = {
@@ -30,6 +31,7 @@ const STATUS_ICONS = {
   canceled: 'alert',
 };
 
+// 根据订单或商品状态渲染统一标签。
 export function StatusTag({ status }) {
   return (
     <span

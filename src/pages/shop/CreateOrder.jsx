@@ -1,3 +1,4 @@
+// 前台确认订单页。
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlassBar } from '../../components/shop/GlassBar.jsx';
@@ -6,6 +7,7 @@ import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { addressService, authService, cartService, orderService, productService } from '../../mock/mockService.js';
 
+// 渲染确认订单页并生成待支付订单。
 export function CreateOrder() {
   const navigate = useNavigate();
   const user = authService.getUserSession();
@@ -30,6 +32,7 @@ export function CreateOrder() {
   );
   const totalAmount = enrichedItems.reduce((sum, item) => sum + (item.sku?.price || 0) * item.quantity, 0);
 
+  // 校验结算信息并提交新订单。
   async function submitOrder(event) {
     event.preventDefault();
     if (items.length === 0) {

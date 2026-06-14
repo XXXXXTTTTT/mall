@@ -1,5 +1,7 @@
+// 后台通用卡片容器。
 import { Card } from 'antd';
 
+// 统一后台卡片的圆角、阴影和内边距。
 export function AdminSurfaceCard({ children, className = '', styles, ...props }) {
   return (
     <Card

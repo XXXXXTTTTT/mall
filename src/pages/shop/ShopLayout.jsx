@@ -1,3 +1,4 @@
+// 前台页面布局。
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 
@@ -10,11 +11,13 @@ const navItems = [
 
 const primaryShopPaths = new Set(['/shop', '/shop/category', '/shop/cart', '/shop/user']);
 
+// 统一处理路由末尾斜杠，便于导航匹配。
 function normalizePathname(pathname) {
   if (pathname === '/shop/') return '/shop';
   return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 }
 
+// 渲染前台主布局和底部导航。
 export function ShopLayout() {
   const location = useLocation();
   const showBottomDock = primaryShopPaths.has(normalizePathname(location.pathname));

@@ -1,3 +1,4 @@
+// 前台地址管理页。
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IconButton } from '../../components/shop/IconButton.jsx';
@@ -14,6 +15,7 @@ const EMPTY_FORM = {
   detail: '',
 };
 
+// 渲染前台地址管理页并处理地址增删改。
 export function AddressPage() {
   const user = authService.getUserSession();
   const [addresses, setAddresses] = useState(() => (user ? addressService.listByUserSync(user.id) : []));
@@ -22,15 +24,18 @@ export function AddressPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [message, setMessage] = useState('');
 
+  // 重新读取当前用户的地址列表。
   function refreshAddresses() {
     if (!user) return;
     setAddresses(addressService.listByUserSync(user.id));
   }
 
+  // 更新地址表单中的单个字段。
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  // 打开新增地址表单。
   function openCreateForm() {
     setEditingAddressId('');
     setForm(EMPTY_FORM);
@@ -38,6 +43,7 @@ export function AddressPage() {
     setMessage('');
   }
 
+  // 载入指定地址并打开编辑表单。
   function openEditForm(address) {
     setEditingAddressId(address.id);
     setForm({
@@ -51,6 +57,7 @@ export function AddressPage() {
     setMessage('');
   }
 
+  // 提交新增或编辑后的地址数据。
   async function saveAddress(event) {
     event.preventDefault();
     if (!user) {
@@ -84,6 +91,7 @@ export function AddressPage() {
     refreshAddresses();
   }
 
+  // 将指定地址设为默认地址。
   async function setDefault(addressId) {
     if (!user) {
       setMessage('请先登录后管理收货地址');
@@ -97,6 +105,7 @@ export function AddressPage() {
     refreshAddresses();
   }
 
+  // 删除指定的收货地址。
   async function deleteAddress(addressId) {
     if (!user) {
       setMessage('请先登录后管理收货地址');

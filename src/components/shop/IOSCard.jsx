@@ -1,3 +1,5 @@
+// 前台卡片基础容器。
+// 渲染前台圆角卡片容器。
 export function IOSCard({ as: Component = 'div', children, className = '', ...props }) {
   return (
     <Component

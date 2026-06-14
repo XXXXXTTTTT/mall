@@ -1,3 +1,4 @@
+// 前台订单列表页。
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
@@ -13,6 +14,7 @@ const FILTERS = [
   { label: '已取消', value: ORDER_STATUS.canceled, icon: 'alert' },
 ];
 
+// 渲染订单列表并按状态筛选。
 export function OrderListPage() {
   const user = authService.getUserSession();
   const orders = useMemo(() => (user ? orderService.listOrdersSync(user.id) : []), [user]);

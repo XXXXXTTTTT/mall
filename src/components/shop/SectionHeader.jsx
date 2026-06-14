@@ -1,6 +1,8 @@
+// 前台分区标题。
 import { Link } from 'react-router-dom';
 import { ShopIcon } from './ShopIcon.jsx';
 
+// 渲染前台分区标题和右侧跳转入口。
 export function SectionHeader({ eyebrow, title, actionText, actionTo }) {
   return (
     <div className="flex items-end justify-between gap-4">

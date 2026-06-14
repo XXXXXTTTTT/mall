@@ -1,3 +1,4 @@
+// 前台支付页。
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
@@ -11,6 +12,7 @@ const PAID_STATUS_MESSAGES = {
   [ORDER_STATUS.canceled]: '订单已取消，无法继续支付',
 };
 
+// 渲染模拟支付页并更新订单支付状态。
 export function Pay() {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export function Pay() {
     return () => window.clearTimeout(timer);
   }, [isPayable, secondsLeft]);
 
+  // 确认支付并跳转到支付成功页。
   async function confirmPaid() {
     const result = await orderService.payOrder(orderId);
     if (!result.success) {

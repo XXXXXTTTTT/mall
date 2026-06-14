@@ -1,7 +1,9 @@
+// 前台支付成功页。
 import { Link, useParams } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 
+// 渲染支付完成后的结果页。
 export function PaySuccess() {
   const { orderId } = useParams();
   return (

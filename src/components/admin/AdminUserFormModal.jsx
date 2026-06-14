@@ -1,6 +1,8 @@
+// 后台账号表单弹窗。
 import { Button, Form, Input, Modal, Select } from 'antd';
 import { useEffect } from 'react';
 
+// 渲染后台账号新增与编辑弹窗。
 export function AdminUserFormModal({ open, mode, admin, roles, onClose, onSubmit }) {
   const [form] = Form.useForm();
 
@@ -16,6 +18,7 @@ export function AdminUserFormModal({ open, mode, admin, roles, onClose, onSubmit
     });
   }, [admin, form, open]);
 
+  // 校验账号表单后提交到外层。
   function handleSave() {
     form
       .validateFields()

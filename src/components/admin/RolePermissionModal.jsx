@@ -1,11 +1,14 @@
+// 后台角色权限弹窗。
 import { Button, Form, Input, Modal, Tree, Typography } from 'antd';
 import { useState } from 'react';
 import { ADMIN_PERMISSION_TREE } from '../../pages/admin/adminConfig.js';
 
+// 统一 Tree 勾选结果的数据结构。
 function normalizeCheckedKeys(keys) {
   return Array.isArray(keys) ? keys : keys.checked;
 }
 
+// 切换单个权限节点的勾选状态。
 function toggleCheckedKeys(checkedKeys, targetKey) {
   if (targetKey === 'system') {
     return checkedKeys;
@@ -15,11 +18,13 @@ function toggleCheckedKeys(checkedKeys, targetKey) {
     : [...checkedKeys, targetKey];
 }
 
+// 渲染角色权限编辑弹窗主体。
 function RolePermissionModalDialog({ open, mode = 'edit', role, onClose, onSubmit }) {
   const [form] = Form.useForm();
   const [checkedKeys, setCheckedKeys] = useState(role?.permissions || []);
   const [treeError, setTreeError] = useState('');
 
+  // 校验角色名称和权限后提交。
   function handleSave() {
     if (checkedKeys.filter((item) => item !== 'system').length === 0) {
       setTreeError('请至少选择一个权限模块');
@@ -114,6 +119,7 @@ function RolePermissionModalDialog({ open, mode = 'edit', role, onClose, onSubmi
   );
 }
 
+// 通过 key 重建弹窗实例，避免表单和勾选状态残留。
 export function RolePermissionModal({ open, mode = 'edit', role, onClose, onSubmit }) {
   const modalInstanceKey = `${mode}-${role?.code || 'create'}-${open ? 'open' : 'closed'}`;
 

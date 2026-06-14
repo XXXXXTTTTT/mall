@@ -1,3 +1,4 @@
+// 前台首页。
 import { Link } from 'react-router-dom';
 import { HeroCarousel } from '../../components/shop/HeroCarousel.jsx';
 import { IconButton } from '../../components/shop/IconButton.jsx';
@@ -6,6 +7,7 @@ import { SectionHeader } from '../../components/shop/SectionHeader.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { productService } from '../../mock/mockService.js';
 
+// 渲染商城首页的搜索入口、轮播图和商品分区。
 export function Home() {
   const onlineProducts = productService.listProductsSync().filter((product) => product.status === 'online');
   const hotProducts = onlineProducts.filter((product) => product.tags?.includes('热门')).slice(0, 4);

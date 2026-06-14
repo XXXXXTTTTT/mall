@@ -1,3 +1,4 @@
+// 后台业务链路测试。
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -37,11 +38,13 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// 使用单页路由渲染后台页面。
 function renderAdmin(initialEntries, element) {
   const router = createMemoryRouter([{ path: initialEntries[0], element }], { initialEntries });
   return render(<RouterProvider router={router} />);
 }
 
+// 渲染后台登录链路并返回路由实例。
 function renderLoginWithRoutes(initialEntries) {
   const router = createMemoryRouter(
     [

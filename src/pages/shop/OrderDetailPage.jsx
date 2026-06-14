@@ -1,3 +1,4 @@
+// 前台订单详情页。
 import { Link, useParams } from 'react-router-dom';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
@@ -5,6 +6,7 @@ import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
 import { ORDER_STATUS, orderService } from '../../mock/mockService.js';
 
+// 渲染订单详情、支付信息与物流轨迹。
 export function OrderDetailPage() {
   const { orderId } = useParams();
   const order = orderService.getOrderByIdSync(orderId);

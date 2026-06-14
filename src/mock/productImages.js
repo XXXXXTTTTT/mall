@@ -1,3 +1,4 @@
+// 商品图片生成器，生成无静态资源依赖的 SVG 图片。
 export const PRODUCT_IMAGE_THEMES = {
   'p-001': { kind: 'headphones', primary: '#111827', accent: '#67E8F9', glow: '#E0F2FE' },
   'p-002': { kind: 'dock', primary: '#334155', accent: '#94A3B8', glow: '#E2E8F0' },
@@ -88,6 +89,7 @@ const SHAPES = {
     '<rect x="176" y="166" width="288" height="228" rx="36" fill="var(--primary)"/><path d="M210 214h220M210 318h220" stroke="var(--accent)" stroke-width="18" stroke-linecap="round"/><rect x="240" y="252" width="160" height="32" rx="16" fill="var(--accent)"/>',
 };
 
+// 根据商品编号匹配主题色与图形模板，生成可直接用于 <img> 的 data URL。
 export function createProductImage(productId, productName) {
   const theme = PRODUCT_IMAGE_THEMES[productId] || PRODUCT_IMAGE_THEMES['p-001'];
   const shape = SHAPES[theme.kind] || SHAPES.headphones;

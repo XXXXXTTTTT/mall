@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+// 前台全局状态与动作封装。
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import {
   addressService,
@@ -46,6 +47,7 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
+    // 首次挂载时恢复本地数据，并同步当前前台会话。
     databaseService.initializeDatabase();
     dispatch({ type: 'SET_USER', payload: authService.getUserSession() });
   }, []);
@@ -129,6 +131,7 @@ export function AppProvider({ children }) {
     [state.user],
   );
 
+  // 对外只暴露统一动作集合，页面不直接处理底层存储细节。
   const value = useMemo(() => ({ state, ...actions }), [state, actions]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,3 +1,4 @@
+// 前台个人中心页。
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
@@ -6,6 +7,7 @@ import { SettingRow } from '../../components/shop/SettingRow.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { authService, favoriteService, orderService } from '../../mock/mockService.js';
 
+// 渲染个人中心并汇总用户常用入口。
 export function UserPage() {
   const navigate = useNavigate();
   const [metricStatus, setMetricStatus] = useState('');
@@ -14,15 +16,18 @@ export function UserPage() {
   const favorites = user ? favoriteService.listFavoritesSync(user.id) : [];
   const recentOrders = orders.slice(0, 2);
 
+  // 退出当前会员会话并返回登录页。
   function logout() {
     authService.logoutUser();
     navigate('/shop/login');
   }
 
+  // 打开积分入口反馈信息。
   function openPoints() {
     setMetricStatus('积分明细已打开');
   }
 
+  // 打开优惠券入口反馈信息。
   function openCoupons() {
     setMetricStatus('优惠券中心已打开');
   }
