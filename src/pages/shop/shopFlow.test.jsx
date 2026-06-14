@@ -240,6 +240,36 @@ describe('shop transaction flow pages', () => {
     expect(paidFilter).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('shows a pay action for pending payment orders in order list', async () => {
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-001',
+      remark: '待支付按钮测试',
+    });
+
+    renderRoutes(['/shop/orders']);
+
+    expect(await screen.findByText(created.data.id)).toBeInTheDocument();
+    const payLink = screen.getByRole('link', { name: '去支付' });
+    expect(payLink).toHaveAttribute('href', `/shop/pay/${created.data.id}`);
+  });
+
+  it('shows a pay action for pending payment orders in order detail', async () => {
+    const created = await orderService.createOrder({
+      userId: 'user-001',
+      items: [{ productId: 'p-001', skuId: 'p-001-standard', quantity: 1 }],
+      addressId: 'addr-001',
+      remark: '详情页待支付按钮测试',
+    });
+
+    renderRoutes([`/shop/orders/${created.data.id}`]);
+
+    expect(await screen.findByText(created.data.id)).toBeInTheDocument();
+    const payLink = screen.getByRole('link', { name: '去支付' });
+    expect(payLink).toHaveAttribute('href', `/shop/pay/${created.data.id}`);
+  });
+
   it('renders top navigation on standalone login page', async () => {
     const user = userEvent.setup();
     authService.logoutUser();

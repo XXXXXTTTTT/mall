@@ -1,9 +1,9 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { IOSCard } from '../../components/shop/IOSCard.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
-import { orderService } from '../../mock/mockService.js';
+import { ORDER_STATUS, orderService } from '../../mock/mockService.js';
 
 export function OrderDetailPage() {
   const { orderId } = useParams();
@@ -69,6 +69,16 @@ export function OrderDetailPage() {
           <span className="text-2xl font-bold tracking-wide text-slate-950">¥{order.totalAmount}</span>
         </div>
         {order.paidAt ? <p className="mt-2 text-sm leading-relaxed tracking-wide text-slate-500">支付时间 {order.paidAt}</p> : null}
+        {order.status === ORDER_STATUS.pendingPayment ? (
+          <div className="mt-4 flex justify-end">
+            <Link
+              to={`/shop/pay/${order.id}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_14px_30px_rgba(24,36,51,0.18)] transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+            >
+              去支付
+            </Link>
+          </div>
+        ) : null}
         </IOSCard>
 
         <IOSCard as="section" className="mt-5 p-5">

@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
-import { authService, orderService } from '../../mock/mockService.js';
+import { ORDER_STATUS, authService, orderService } from '../../mock/mockService.js';
 
 const FILTERS = [
-  { label: '待支付', value: 'pending_payment', icon: 'clock' },
-  { label: '已支付', value: 'paid', icon: 'check' },
-  { label: '已发货', value: 'shipped', icon: 'truck' },
-  { label: '已完成', value: 'completed', icon: 'star' },
-  { label: '已取消', value: 'canceled', icon: 'alert' },
+  { label: '待支付', value: ORDER_STATUS.pendingPayment, icon: 'clock' },
+  { label: '已支付', value: ORDER_STATUS.paid, icon: 'check' },
+  { label: '已发货', value: ORDER_STATUS.shipped, icon: 'truck' },
+  { label: '已完成', value: ORDER_STATUS.completed, icon: 'star' },
+  { label: '已取消', value: ORDER_STATUS.canceled, icon: 'alert' },
 ];
 
 export function OrderListPage() {
@@ -50,21 +50,41 @@ export function OrderListPage() {
         </section>
         <section className="mt-5 space-y-4">
           {visibleOrders.map((order) => (
-            <Link
+            <article
               key={order.id}
-              to={`/shop/orders/${order.id}`}
-              className="flex items-center gap-4 rounded-[2rem] border border-slate-200/80 bg-[#fbfcfa] p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)] transition hover:border-teal-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="rounded-[2rem] border border-slate-200/80 bg-[#fbfcfa] p-5 shadow-[0_18px_48px_rgba(24,36,51,0.08)]"
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="truncate font-bold text-slate-950">{order.id}</p>
-                  <StatusTag status={order.status} />
+              <Link
+                to={`/shop/orders/${order.id}`}
+                className="flex items-center gap-4 transition hover:border-teal-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="truncate font-bold text-slate-950">{order.id}</p>
+                    <StatusTag status={order.status} />
+                  </div>
+                  <p className="mt-3 truncate text-sm text-slate-500">{order.items.map((item) => item.productName).join('、')}</p>
+                  <p className="mt-4 text-2xl font-bold text-slate-950">¥{order.totalAmount}</p>
                 </div>
-                <p className="mt-3 truncate text-sm text-slate-500">{order.items.map((item) => item.productName).join('、')}</p>
-                <p className="mt-4 text-2xl font-bold text-slate-950">¥{order.totalAmount}</p>
+                <ShopIcon name="chevronRight" className="h-5 w-5 shrink-0 text-slate-400" />
+              </Link>
+              <div className="mt-4 flex items-center justify-end gap-3">
+                <Link
+                  to={`/shop/orders/${order.id}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
+                  查看详情
+                </Link>
+                {order.status === ORDER_STATUS.pendingPayment ? (
+                  <Link
+                    to={`/shop/pay/${order.id}`}
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_14px_30px_rgba(24,36,51,0.18)] transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                  >
+                    去支付
+                  </Link>
+                ) : null}
               </div>
-              <ShopIcon name="chevronRight" className="h-5 w-5 shrink-0 text-slate-400" />
-            </Link>
+            </article>
           ))}
         </section>
       </main>
