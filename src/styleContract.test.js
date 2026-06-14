@@ -32,6 +32,13 @@ describe('global style contract', () => {
     expect(mockData).toContain('createProductImage');
   });
 
+  it('keeps context files under src/contexts', () => {
+    const context = readFileSync(resolve('src/contexts/AppContext.jsx'), 'utf-8');
+
+    expect(context).toContain('createContext');
+    expect(context).toContain('useAppContext');
+  });
+
   it('locks mobile app shell fixed headers and hidden scrollbars', () => {
     const css = readFileSync(resolve('src/index.css'), 'utf-8');
     const layout = readFileSync(resolve('src/pages/shop/ShopLayout.jsx'), 'utf-8');

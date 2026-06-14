@@ -8,7 +8,7 @@ import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { StatusTag } from '../../components/shop/StatusTag.jsx';
-import { useAppContext } from '../../context/AppContext.jsx';
+import { useAppContext } from '../../contexts/AppContext.jsx';
 import { authService, cartService, favoriteService, productService } from '../../mock/mockService.js';
 
 export function Detail() {

@@ -2,7 +2,7 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AppProvider } from '../../context/AppContext.jsx';
+import { AppProvider } from '../../contexts/AppContext.jsx';
 import { addressService, authService, cartService, databaseService, favoriteService, orderService } from '../../mock/mockService.js';
 import { AddressPage } from './AddressPage.jsx';
 import { Cart } from './Cart.jsx';

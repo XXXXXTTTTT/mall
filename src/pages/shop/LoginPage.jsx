@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
-import { useAppContext } from '../../context/AppContext.jsx';
+import { useAppContext } from '../../contexts/AppContext.jsx';
 
 const EMPTY_FORM = {
   username: '',

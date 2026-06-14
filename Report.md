@@ -34,7 +34,7 @@
 ```text
 项目主结构
 ├── src/router.jsx                 路由入口与前后台路由守卫
-├── src/context/AppContext.jsx     前台全局状态
+├── src/contexts/AppContext.jsx     前台全局状态
 ├── src/mock/mockData.js           种子数据
 ├── src/mock/mockService.js        业务服务层
 ├── src/pages/shop                 前台页面

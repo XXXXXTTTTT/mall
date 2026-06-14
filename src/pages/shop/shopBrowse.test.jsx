@@ -2,7 +2,7 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AppProvider } from '../../context/AppContext.jsx';
+import { AppProvider } from '../../contexts/AppContext.jsx';
 import { categories } from '../../mock/mockData.js';
 import { authService, databaseService, favoriteService, productService } from '../../mock/mockService.js';
 import { Category } from './Category.jsx';

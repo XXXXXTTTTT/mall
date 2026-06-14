@@ -1,7 +1,7 @@
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppProvider } from './context/AppContext.jsx';
+import { AppProvider } from './contexts/AppContext.jsx';
 import { authService, databaseService } from './mock/mockService.js';
 import { Cart } from './pages/shop/Cart.jsx';
 import { LoginPage } from './pages/shop/LoginPage.jsx';
