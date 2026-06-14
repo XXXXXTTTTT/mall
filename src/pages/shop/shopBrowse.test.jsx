@@ -201,6 +201,33 @@ describe('shop browse pages', () => {
     expect(priceSortButton).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('removes offline product from home after navigating back', async () => {
+    const user = userEvent.setup();
+    renderShop(['/shop']);
+
+    const productLinks = await screen.findAllByRole('link', { name: /曜石无线降噪耳机/ });
+    await user.click(productLinks[0]);
+
+    expect(await screen.findByText('商品详情')).toBeInTheDocument();
+    await productService.toggleProductStatus('p-001', 'offline');
+    await user.click(screen.getByTestId('shop-back-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('曜石无线降噪耳机')).not.toBeInTheDocument();
+    });
+  });
+
+  it('keeps category scroll contract on the old mock branch fix', async () => {
+    renderShop(['/shop/category']);
+
+    const categoryRail = await screen.findByTestId('category-rail');
+    const productScroll = screen.getByTestId('category-product-scroll');
+
+    expect(categoryRail).toBeInTheDocument();
+    expect(productScroll.className).toContain('overflow-y-auto');
+    expect(productScroll.className).not.toContain('pb-8');
+  });
+
   it('blocks add cart for offline product detail', async () => {
     renderShop(['/shop/detail/p-008']);
 

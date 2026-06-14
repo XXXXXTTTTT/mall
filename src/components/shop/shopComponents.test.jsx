@@ -243,6 +243,21 @@ describe('shop shared components', () => {
     expect(screen.getByText('库存 32')).toBeInTheDocument();
   });
 
+  it('keeps product card link transition classes aligned with the old mock branch fix', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard product={product} />
+      </MemoryRouter>,
+    );
+
+    const productLink = screen.getByRole('link', { name: /曜石无线降噪耳机/ });
+
+    expect(productLink.className).toContain('transition');
+    expect(productLink.className).toContain('duration-300');
+    expect(productLink.className).toContain('ease-out');
+    expect(productLink.className).toContain('motion-safe:hover:-translate-y-1');
+  });
+
   it('keeps quantity at minimum 1 and emits changes', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

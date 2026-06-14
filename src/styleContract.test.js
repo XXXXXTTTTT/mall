@@ -80,6 +80,20 @@ describe('global style contract', () => {
     expect(orderList).toContain('scrollbar-none');
   });
 
+  it('locks the old mock branch fixes for shop scroll and product card details', () => {
+    const css = readFileSync(resolve('src/index.css'), 'utf-8');
+    const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');
+    const productCard = readFileSync(resolve('src/components/shop/ProductCard.jsx'), 'utf-8');
+
+    expect(css).toContain('scrollbar-width: none');
+    expect(css).toContain('::-webkit-scrollbar');
+    expect(category).toContain('overflow-hidden');
+    expect(category).toContain('scrollbar-none');
+    expect(category).not.toContain('pb-8');
+    expect(productCard).toContain('duration-300');
+    expect(productCard).toContain('ease-out');
+  });
+
   it('locks final shop prompt viewport and narrow-card layout fixes', () => {
     const home = readFileSync(resolve('src/pages/shop/Home.jsx'), 'utf-8');
     const category = readFileSync(resolve('src/pages/shop/Category.jsx'), 'utf-8');

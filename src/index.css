@@ -20,6 +20,13 @@ body,
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+  display: none;
 }
 
 body {

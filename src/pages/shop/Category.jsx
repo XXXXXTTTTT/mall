@@ -73,7 +73,7 @@ export function Category() {
 
         <section
           data-testid="category-product-scroll"
-          className="h-full overflow-y-auto min-w-0 flex-1 px-3 pb-8 pt-4"
+          className="scrollbar-none h-full overflow-y-auto min-w-0 flex-1 px-3 pt-4"
         >
           <div className="scrollbar-none flex gap-2 overflow-x-auto pb-3">
             {sortOptions.map((label) => (

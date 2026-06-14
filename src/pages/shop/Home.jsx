@@ -1,5 +1,5 @@
 // 前台首页。
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { HeroCarousel } from '../../components/shop/HeroCarousel.jsx';
 import { IconButton } from '../../components/shop/IconButton.jsx';
 import { ProductCard } from '../../components/shop/ProductCard.jsx';
@@ -9,6 +9,7 @@ import { productService } from '../../mock/mockService.js';
 
 // 渲染商城首页的搜索入口、轮播图和商品分区。
 export function Home() {
+  const location = useLocation();
   const onlineProducts = productService.listProductsSync().filter((product) => product.status === 'online');
   const hotProducts = onlineProducts.filter((product) => product.tags?.includes('热门')).slice(0, 4);
   const newProducts = onlineProducts.filter((product) => product.tags?.includes('新品')).slice(0, 4);
@@ -30,7 +31,7 @@ export function Home() {
         </div>
       </header>
 
-      <HeroCarousel products={onlineProducts} />
+      <HeroCarousel key={location.key} products={onlineProducts} />
 
       <section className="space-y-4">
         <SectionHeader eyebrow="HOT" title="热门商品" actionText="查看全部" actionTo="/shop/category" />
