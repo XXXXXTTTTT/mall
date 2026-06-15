@@ -54,6 +54,26 @@ describe('shop shared components', () => {
     expect(screen.getAllByRole('button', { name: /切换到第/ })).toHaveLength(3);
   });
 
+  it('keeps hero carousel card hover motion smooth and touch-safe', () => {
+    render(
+      <MemoryRouter>
+        <HeroCarousel products={carouselProducts} />
+      </MemoryRouter>,
+    );
+
+    const heroLink = screen.getByRole('link', { name: /曜石无线降噪耳机/ });
+    const heroImage = screen.getByAltText('曜石无线降噪耳机');
+
+    expect(heroLink.className).toContain('duration-300');
+    expect(heroLink.className).toContain('ease-out');
+    expect(heroLink.className).toContain('motion-safe:hover:-translate-y-0.5');
+    expect(heroLink.className).not.toMatch(/(^|\s)hover:-translate-y/);
+    expect(heroImage.className).toContain('duration-500');
+    expect(heroImage.className).toContain('ease-out');
+    expect(heroImage.className).toContain('motion-safe:group-hover:scale-[1.03]');
+    expect(heroImage.className).not.toMatch(/(^|\s)group-hover:scale/);
+  });
+
   it('auto advances and loops hero carousel slides', async () => {
     vi.useFakeTimers();
     render(
@@ -251,12 +271,15 @@ describe('shop shared components', () => {
     );
 
     const productLink = screen.getByRole('link', { name: /曜石无线降噪耳机/ });
+    const productImage = screen.getByAltText('曜石无线降噪耳机');
 
     expect(productLink.className).toContain('transition');
     expect(productLink.className).toContain('duration-300');
     expect(productLink.className).toContain('ease-out');
     expect(productLink.className).toContain('motion-safe:hover:-translate-y-1');
     expect(productLink.className).not.toContain('hover:bg-');
+    expect(productImage.className).toContain('motion-safe:group-hover:scale-[1.02]');
+    expect(productImage.className).not.toMatch(/(^|\s)group-hover:scale/);
   });
 
   it('keeps quantity at minimum 1 and emits changes', async () => {

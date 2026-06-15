@@ -16,7 +16,7 @@ export function ProductCard({ product }) {
         <img
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
+          className="h-full w-full object-cover transition duration-500 ease-out motion-safe:group-hover:scale-[1.02]"
         />
         <div className="absolute left-3 top-3">
           <StatusTag status={product.status} />
