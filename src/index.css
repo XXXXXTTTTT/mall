@@ -55,3 +55,49 @@ a {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+.shop-card-interactive {
+  transition:
+    transform 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
+}
+
+.shop-card-media {
+  transition:
+    transform 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
+}
+
+@media (hover: hover) {
+  .shop-card-interactive:hover {
+    transform: translateY(-0.25rem);
+    border-color: rgba(20, 184, 166, 0.3);
+    box-shadow: 0 28px 68px rgba(24, 36, 51, 0.14);
+  }
+
+  .shop-card-hero:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: 0 24px 54px rgba(15, 23, 42, 0.24);
+  }
+
+  .shop-card-interactive:hover .shop-card-media {
+    transform: scale(1.02);
+  }
+
+  .shop-card-hero:hover .shop-card-media {
+    transform: scale(1.03);
+  }
+}
+
+@media (hover: none) {
+  .shop-card-interactive:active {
+    transform: scale(0.98);
+    opacity: 0.96;
+  }
+
+  .shop-card-interactive:active .shop-card-media {
+    transform: scale(1);
+  }
+}

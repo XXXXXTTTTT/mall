@@ -64,14 +64,13 @@ describe('shop shared components', () => {
     const heroLink = screen.getByRole('link', { name: /曜石无线降噪耳机/ });
     const heroImage = screen.getByAltText('曜石无线降噪耳机');
 
-    expect(heroLink.className).toContain('duration-300');
-    expect(heroLink.className).toContain('ease-out');
-    expect(heroLink.className).toContain('motion-safe:hover:-translate-y-0.5');
-    expect(heroLink.className).not.toMatch(/(^|\s)hover:-translate-y/);
-    expect(heroImage.className).toContain('duration-500');
-    expect(heroImage.className).toContain('ease-out');
-    expect(heroImage.className).toContain('motion-safe:group-hover:scale-[1.03]');
-    expect(heroImage.className).not.toMatch(/(^|\s)group-hover:scale/);
+    expect(heroLink.className).toContain('shop-card-interactive');
+    expect(heroLink.className).toContain('shop-card-hero');
+    expect(heroLink.className).not.toContain('hover:');
+    expect(heroLink.className).not.toContain('motion-safe:');
+    expect(heroImage.className).toContain('shop-card-media');
+    expect(heroImage.className).not.toContain('group-hover:');
+    expect(heroImage.className).not.toContain('motion-safe:');
   });
 
   it('auto advances and loops hero carousel slides', async () => {
@@ -273,13 +272,13 @@ describe('shop shared components', () => {
     const productLink = screen.getByRole('link', { name: /曜石无线降噪耳机/ });
     const productImage = screen.getByAltText('曜石无线降噪耳机');
 
-    expect(productLink.className).toContain('transition');
-    expect(productLink.className).toContain('duration-300');
-    expect(productLink.className).toContain('ease-out');
-    expect(productLink.className).toContain('motion-safe:hover:-translate-y-1');
+    expect(productLink.className).toContain('shop-card-interactive');
+    expect(productLink.className).not.toContain('hover:');
+    expect(productLink.className).not.toContain('motion-safe:');
     expect(productLink.className).not.toContain('hover:bg-');
-    expect(productImage.className).toContain('motion-safe:group-hover:scale-[1.02]');
-    expect(productImage.className).not.toMatch(/(^|\s)group-hover:scale/);
+    expect(productImage.className).toContain('shop-card-media');
+    expect(productImage.className).not.toContain('group-hover:');
+    expect(productImage.className).not.toContain('motion-safe:');
   });
 
   it('keeps quantity at minimum 1 and emits changes', async () => {

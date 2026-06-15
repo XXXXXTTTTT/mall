@@ -61,12 +61,12 @@ export function HeroCarousel({ products }) {
       <Link
         key={product.id}
         to={`/shop/detail/${product.id}`}
-        className="group relative block overflow-hidden rounded-[1.75rem] bg-slate-950 text-white shadow-[0_20px_44px_rgba(15,23,42,0.2)] transition duration-300 ease-out motion-safe:hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
+        className="shop-card-interactive shop-card-hero group relative block overflow-hidden rounded-[1.75rem] bg-slate-950 text-white shadow-[0_20px_44px_rgba(15,23,42,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
       >
         <img
           src={product.image}
           alt={product.name}
-          className="h-56 w-full object-cover opacity-90 transition duration-500 ease-out motion-safe:group-hover:scale-[1.03]"
+          className="shop-card-media h-56 w-full object-cover opacity-90"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 space-y-3 p-5">

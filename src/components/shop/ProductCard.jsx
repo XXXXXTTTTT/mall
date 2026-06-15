@@ -10,13 +10,13 @@ export function ProductCard({ product }) {
   return (
     <Link
       to={`/shop/detail/${product.id}`}
-      className="group block overflow-hidden rounded-[2rem] border border-white/75 bg-[#fbfcfa] shadow-[0_20px_54px_rgba(24,36,51,0.1)] transition duration-300 ease-out motion-safe:hover:-translate-y-1 motion-safe:hover:border-teal-500/30 motion-safe:hover:shadow-[0_28px_68px_rgba(24,36,51,0.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
+      className="shop-card-interactive group block overflow-hidden rounded-[2rem] border border-white/75 bg-[#fbfcfa] shadow-[0_20px_54px_rgba(24,36,51,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-100 to-teal-50">
         <img
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-500 ease-out motion-safe:group-hover:scale-[1.02]"
+          className="shop-card-media h-full w-full object-cover"
         />
         <div className="absolute left-3 top-3">
           <StatusTag status={product.status} />

@@ -93,8 +93,27 @@ describe('global style contract', () => {
     expect(category).toContain('overflow-hidden');
     expect(category).toContain('scrollbar-none');
     expect(category).not.toContain('pb-8');
-    expect(productCard).toContain('duration-300');
-    expect(productCard).toContain('ease-out');
+    expect(productCard).toContain('shop-card-interactive');
+    expect(css).toContain('0.2s ease-in-out');
+  });
+
+  it('isolates shop card hover and touch feedback by input capability', () => {
+    const css = readFileSync(resolve('src/index.css'), 'utf-8');
+    const heroCarousel = readFileSync(resolve('src/components/shop/HeroCarousel.jsx'), 'utf-8');
+    const productCard = readFileSync(resolve('src/components/shop/ProductCard.jsx'), 'utf-8');
+
+    expect(css).toContain('@media (hover: hover)');
+    expect(css).toContain('@media (hover: none)');
+    expect(css).toContain('.shop-card-interactive:hover');
+    expect(css).toContain('.shop-card-interactive:active');
+    expect(css).toContain('::-webkit-scrollbar');
+    expect(css).not.toContain('touch-action: none');
+    expect(heroCarousel).toContain('shop-card-interactive');
+    expect(heroCarousel).not.toContain('hover:');
+    expect(heroCarousel).not.toContain('group-hover:');
+    expect(productCard).toContain('shop-card-interactive');
+    expect(productCard).not.toContain('hover:');
+    expect(productCard).not.toContain('group-hover:');
   });
 
   it('locks final shop prompt viewport and narrow-card layout fixes', () => {
