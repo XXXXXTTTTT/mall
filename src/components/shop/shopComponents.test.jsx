@@ -21,6 +21,7 @@ const product = {
   name: '曜石无线降噪耳机',
   price: 699,
   stock: 98,
+  sales: 320,
   image: 'https://dummyimage.com/640x480/e8eef3/203244&text=test',
   tags: ['热门', '精选'],
   status: 'online',
@@ -236,8 +237,9 @@ describe('shop shared components', () => {
     expect(screen.getByRole('link', { name: /曜石无线降噪耳机/ })).toHaveAttribute('href', '/shop/detail/p-001');
     expect(screen.getByText('¥699')).toBeInTheDocument();
     expect(screen.getByText('曜石无线降噪耳机').className).toContain('line-clamp-1');
-    expect(screen.getByText('库存 98')).toBeInTheDocument();
-    expect(screen.getByText('库存 98').className).toContain('text-[10px]');
+    expect(screen.getByText('销量 320')).toBeInTheDocument();
+    expect(screen.getByText('销量 320').className).toContain('text-[10px]');
+    expect(screen.queryByText('库存 98')).not.toBeInTheDocument();
     expect(screen.getByTestId('product-card-tags').className).toContain('flex flex-wrap gap-1 items-center');
     expect(screen.getByText('热门')).toBeInTheDocument();
   });
@@ -248,6 +250,7 @@ describe('shop shared components', () => {
       name: '云纹便携保温杯',
       price: 129,
       stock: 32,
+      sales: 18,
       image: 'https://dummyimage.com/640x480/e8eef3/203244&text=cup',
       status: 'online',
     };
@@ -260,7 +263,7 @@ describe('shop shared components', () => {
 
     expect(screen.getByRole('link', { name: /云纹便携保温杯/ })).toHaveAttribute('href', '/shop/detail/p-002');
     expect(screen.getByText('¥129')).toBeInTheDocument();
-    expect(screen.getByText('库存 32')).toBeInTheDocument();
+    expect(screen.getByText('销量 18')).toBeInTheDocument();
   });
 
   it('keeps product card link transition classes aligned with the old mock branch fix', () => {

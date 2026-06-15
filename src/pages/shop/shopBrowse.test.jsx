@@ -283,7 +283,7 @@ describe('shop browse pages', () => {
     expect(screen.getByText('曜石无线降噪耳机')).toBeInTheDocument();
   });
 
-  it('keeps empty-sku product detail stable and disables purchase actions', async () => {
+  it('uses standard version from main product stock when legacy sku options are empty', async () => {
     const created = await productService.createProduct({
       name: '空规格商品',
       categoryId: 'cat-digital-office',
@@ -297,9 +297,11 @@ describe('shop browse pages', () => {
     renderShop([`/shop/detail/${created.data.id}`]);
 
     expect(await screen.findByText('空规格商品')).toBeInTheDocument();
-    expect(screen.getByText('商品规格不存在')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '加入购物车' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '立即购买' })).toBeDisabled();
+    expect(screen.getByText('标准版')).toBeInTheDocument();
+    expect(screen.getByText('8')).toBeInTheDocument();
+    expect(screen.queryByText('商品规格不存在')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '加入购物车' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '立即购买' })).toBeEnabled();
   });
 
   it('initializes and syncs favorite status for logged-in user', async () => {

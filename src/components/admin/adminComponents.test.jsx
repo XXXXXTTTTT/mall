@@ -35,10 +35,6 @@ const firstProduct = {
   image: 'https://dummyimage.com/640x480/e8eef3/203244&text=first',
   status: 'online',
   tags: ['热门'],
-  skuOptions: [
-    { id: 'p-001-standard', name: '标准版', stock: 93, price: 699 },
-    { id: 'p-001-pro', name: '进阶版', stock: 49, price: 759 },
-  ],
   description: '第一件商品描述',
 };
 
@@ -51,7 +47,6 @@ const secondProduct = {
   image: 'https://dummyimage.com/640x480/e8eef3/203244&text=second',
   status: 'offline',
   tags: ['新品'],
-  skuOptions: [{ id: 'p-002-standard', name: '标准版', stock: 51, price: 329 }],
   description: '第二件商品描述',
 };
 
@@ -85,7 +80,7 @@ describe('admin shared components', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('submits create product payload with standard sku option', async () => {
+  it('submits create product payload without sku options', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(
@@ -117,19 +112,12 @@ describe('admin shared components', () => {
       image: 'https://dummyimage.com/640x480/e8eef3/203244&text=C3',
       status: 'online',
       tags: [],
-      skuOptions: [
-        {
-          id: 'new-standard',
-          name: '标准版',
-          stock: 12,
-          price: 288,
-        },
-      ],
       description: '',
     });
+    expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('skuOptions');
   });
 
-  it('syncs edited price and stock into existing sku options', async () => {
+  it('submits edited product payload with main product stock only', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(
@@ -150,10 +138,12 @@ describe('admin shared components', () => {
     await user.click(screen.getByRole('button', { name: '保存商品' }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
-    expect(onSubmit.mock.calls[0][0].skuOptions).toEqual([
-      { id: 'p-001-standard', name: '标准版', stock: 66, price: 688 },
-      { id: 'p-001-pro', name: '进阶版', stock: 66, price: 688 },
-    ]);
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+      id: 'p-001',
+      price: 688,
+      stock: 66,
+    });
+    expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('skuOptions');
   });
 
   it('refreshes form values when product changes while drawer remains open', async () => {

@@ -8,6 +8,17 @@ import { QuantityStepper } from '../../components/shop/QuantityStepper.jsx';
 import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { authService, cartService, productService } from '../../mock/mockService.js';
 
+// 商品规格已降维为固定标准版，库存与价格直接读取主商品对象。
+function buildStandardSku(product) {
+  if (!product) return null;
+  return {
+    id: `${product.id}-standard`,
+    name: '标准版',
+    price: product.price,
+    stock: product.stock,
+  };
+}
+
 // 渲染购物车并维护选中、数量和结算状态。
 export function Cart() {
   const user = authService.getUserSession();
@@ -27,7 +38,7 @@ export function Cart() {
     () =>
       items.map((item) => {
         const product = productService.getProductByIdSync(item.productId);
-        const sku = product?.skuOptions.find((skuItem) => skuItem.id === item.skuId) || null;
+        const sku = buildStandardSku(product);
         return { ...item, product, sku };
       }),
     [items],
@@ -119,7 +130,11 @@ export function Cart() {
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <QuantityStepper value={item.quantity} onChange={(quantity) => updateQuantity(item.id, quantity)} />
+                <QuantityStepper
+                  value={item.quantity}
+                  onChange={(quantity) => updateQuantity(item.id, quantity)}
+                  max={item.sku?.stock || 1}
+                />
                 <IconButton
                   ariaLabel={`删除 ${item.product?.name || item.productId} ${item.sku?.name || item.skuId}`}
                   icon="trash"

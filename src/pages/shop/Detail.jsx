@@ -38,8 +38,13 @@ export function Detail() {
   }
 
   const isOnline = product.status === 'online';
-  const selectedSku = product.skuOptions?.[0] || null;
-  const unavailableMessage = !selectedSku ? '商品规格不存在' : selectedSku.stock < 1 ? '库存不足' : '';
+  const standardSku = {
+    id: `${product.id}-standard`,
+    name: '标准版',
+    stock: product.stock,
+    price: product.price,
+  };
+  const unavailableMessage = standardSku.stock < 1 ? '库存不足' : '';
   const canPurchase = isOnline && !unavailableMessage;
 
   // 确保当前操作拥有可用的会员身份。
@@ -68,7 +73,7 @@ export function Detail() {
 
     const result = await addToCart({
       productId: product.id,
-      skuId: selectedSku.id,
+      skuId: standardSku.id,
       quantity,
     });
     setMessage(result.success ? '已加入购物车' : result.message);
@@ -102,7 +107,7 @@ export function Detail() {
     await cartService.toggleAllSelected(userId, false);
     const result = await addToCart({
       productId: product.id,
-      skuId: selectedSku.id,
+      skuId: standardSku.id,
       quantity,
     });
     setIsSubmitting(false);
@@ -156,11 +161,11 @@ export function Detail() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-3xl bg-slate-50 px-4 py-3">
                   <p className="text-xs font-semibold text-slate-400">规格</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-950">{selectedSku?.name || '暂无规格'}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-950">{standardSku.name}</p>
                 </div>
                 <div className="rounded-3xl bg-slate-50 px-4 py-3">
                   <p className="text-xs font-semibold text-slate-400">库存</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-950">{selectedSku?.stock ?? 0}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-950">{standardSku.stock}</p>
                 </div>
               </div>
               {unavailableMessage ? (
@@ -173,7 +178,7 @@ export function Detail() {
                 <QuantityStepper
                   value={quantity}
                   onChange={setQuantity}
-                  max={selectedSku?.stock || 1}
+                  max={standardSku.stock || 1}
                   disabled={!canPurchase}
                 />
               </div>

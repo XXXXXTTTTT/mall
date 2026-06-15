@@ -29,7 +29,7 @@ export function ProductCard({ product }) {
           <div className="flex flex-wrap items-end justify-between gap-1.5">
             <p className="text-lg font-bold tracking-tight text-slate-950">¥{product.price}</p>
             <p className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-500 shadow-sm">
-              库存 {product.stock}
+              销量 {product.sales}
             </p>
           </div>
         </div>
