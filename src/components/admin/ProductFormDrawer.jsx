@@ -22,26 +22,6 @@ function buildInitialValues(product) {
   };
 }
 
-// 依据当前表单值整理 SKU 选项。
-function buildSkuOptions({ id, mode, price, product, stock }) {
-  if (mode === 'create' || !product?.skuOptions?.length) {
-    return [
-      {
-        id: `${id || 'new'}-standard`,
-        name: '标准版',
-        stock,
-        price,
-      },
-    ];
-  }
-
-  return product.skuOptions.map((skuOption) => ({
-    ...skuOption,
-    stock,
-    price,
-  }));
-}
-
 // 渲染后台商品新增与编辑抽屉。
 export function ProductFormDrawer({ open, mode, product, categories, onClose, onSubmit }) {
   const [form] = Form.useForm();
@@ -65,13 +45,6 @@ export function ProductFormDrawer({ open, mode, product, categories, onClose, on
       image: values.image,
       status: values.status,
       tags: values.tags || [],
-      skuOptions: buildSkuOptions({
-        id,
-        mode,
-        price: values.price,
-        product,
-        stock: values.stock,
-      }),
       description: values.description || '',
     };
 

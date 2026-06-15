@@ -7,6 +7,17 @@ import { ShopIcon } from '../../components/shop/ShopIcon.jsx';
 import { ShopNavigationBar } from '../../components/shop/ShopNavigationBar.jsx';
 import { addressService, authService, cartService, orderService, productService } from '../../mock/mockService.js';
 
+// 商品规格已统一为标准版，订单金额以主商品价格为准。
+function buildStandardSku(product) {
+  if (!product) return null;
+  return {
+    id: `${product.id}-standard`,
+    name: '标准版',
+    price: product.price,
+    stock: product.stock,
+  };
+}
+
 // 渲染确认订单页并生成待支付订单。
 export function CreateOrder() {
   const navigate = useNavigate();
@@ -25,7 +36,7 @@ export function CreateOrder() {
     () =>
       items.map((item) => {
         const product = productService.getProductByIdSync(item.productId);
-        const sku = product?.skuOptions.find((skuItem) => skuItem.id === item.skuId) || null;
+        const sku = buildStandardSku(product);
         return { ...item, product, sku };
       }),
     [items],

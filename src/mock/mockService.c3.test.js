@@ -32,12 +32,12 @@ describe('C3 mock service chain', () => {
       image: 'https://dummyimage.com/640x480/e8eef3/203244&text=C3',
       status: 'online',
       tags: ['新品'],
-      skuOptions: [{ id: 'sku-c3-standard', name: '标准版', stock: 12, price: 288 }],
       description: 'C3 演示商品描述',
     });
 
     expect(created.success).toBe(true);
     expect(created.data.id).toMatch(/^p-/);
+    expect(created.data).not.toHaveProperty('skuOptions');
     expect(productService.listProductsSync().some((product) => product.id === created.data.id)).toBe(true);
 
     const updated = await productService.updateProduct({
@@ -97,7 +97,7 @@ describe('C3 mock service chain', () => {
     });
   });
 
-  it('normalizes generated product sku ids after product creation', async () => {
+  it('ignores legacy sku option payloads after product creation', async () => {
     const first = await productService.createProduct({
       name: '后台新增商品一号',
       categoryId: 'cat-digital-office',
@@ -119,9 +119,16 @@ describe('C3 mock service chain', () => {
 
     expect(first.success).toBe(true);
     expect(second.success).toBe(true);
-    expect(first.data.skuOptions[0].id).toBe(`${first.data.id}-standard`);
-    expect(second.data.skuOptions[0].id).toBe(`${second.data.id}-standard`);
-    expect(first.data.skuOptions[0].id).not.toBe(second.data.skuOptions[0].id);
+    expect(first.data).not.toHaveProperty('skuOptions');
+    expect(second.data).not.toHaveProperty('skuOptions');
+    expect(productService.getProductByIdSync(first.data.id)).toMatchObject({
+      price: 128,
+      stock: 8,
+    });
+    expect(productService.getProductByIdSync(second.data.id)).toMatchObject({
+      price: 168,
+      stock: 6,
+    });
   });
 
   it('updates cart selection, preserves cart after order creation, and clears selected items explicitly', async () => {
@@ -296,13 +303,13 @@ describe('C3 mock service chain', () => {
       success: false,
       message: '商品数量必须大于 0',
     });
-    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 94 })).resolves.toMatchObject({
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 99 })).resolves.toMatchObject({
       success: false,
       message: '库存不足',
     });
 
     await cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 90 });
-    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 4 })).resolves.toMatchObject({
+    await expect(cartService.addItem({ userId: 'user-001', productId: 'p-001', skuId: 'p-001-standard', quantity: 9 })).resolves.toMatchObject({
       success: false,
       message: '库存不足',
     });

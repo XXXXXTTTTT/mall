@@ -40,6 +40,14 @@ describe('mockService database foundation', () => {
     expect(products.find((product) => product.id === 'p-004').image).toContain('projector');
   });
 
+  it('uses products as the single stock and sales source without sku options', () => {
+    const product = productService.getProductByIdSync('p-001');
+
+    expect(product.stock).toBe(98);
+    expect(product.sales).toBe(320);
+    expect(product).not.toHaveProperty('skuOptions');
+  });
+
   it('migrates legacy dummy product images without resetting edited fields', () => {
     const legacyProducts = productService.listProductsSync().map((product) =>
       product.id === 'p-001'
@@ -90,6 +98,7 @@ describe('mockService database foundation', () => {
   });
 
   it('moves order from pending payment to paid', async () => {
+    const beforeProduct = productService.getProductByIdSync('p-001');
     const created = await orderService.createOrder({
       userId: 'user-001',
       items: [
@@ -110,6 +119,10 @@ describe('mockService database foundation', () => {
 
     expect(paid.success).toBe(true);
     expect(paid.data.status).toBe(ORDER_STATUS.paid);
+
+    const afterProduct = productService.getProductByIdSync('p-001');
+    expect(afterProduct.stock).toBe(beforeProduct.stock - 1);
+    expect(afterProduct.sales).toBe(beforeProduct.sales + 1);
   });
 
   it('logs in frontend and admin users separately', async () => {
